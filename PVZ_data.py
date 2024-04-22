@@ -1,4 +1,4 @@
-from editer import PVZ_memory
+from editor import PVZ_memory
 
 base=0x006A9EC0
 class plant:

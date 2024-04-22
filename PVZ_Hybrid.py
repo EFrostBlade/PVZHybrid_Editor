@@ -1,5 +1,5 @@
 import ctypes
-from editer import PVZ_memory
+from editor import PVZ_memory
 from PVZ_data import *
 
 column1addr=None
