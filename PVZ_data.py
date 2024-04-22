@@ -1,10 +1,15 @@
-from editor import PVZ_memory
+from pymem import Pymem
 
-base=0x006A9EC0
+PVZ_memory=Pymem()
+def update_PVZ_memory(memory):
+    global PVZ_memory
+    PVZ_memory=memory
+    
+baseAddress=0x006A9EC0
 class plant:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(base)+0x768)+0xac)))/0x14c)
+        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0xac)))/0x14c)
         self.exist=PVZ_memory.read_bytes(self.addr+0x141,1)
         self.row=PVZ_memory.read_int(self.addr+0x1c)
         self.col=PVZ_memory.read_int(self.addr+0x28)
@@ -26,7 +31,7 @@ class plant:
 class zombie:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(base)+0x768)+0x90)))/0x15c)
+        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x90)))/0x15c)
         self.exist=PVZ_memory.read_bytes(self.addr+0xec,1)
         self.row=PVZ_memory.read_int(self.addr+0x1c)
         self.type=PVZ_memory.read_int(self.addr+0x24)
@@ -60,7 +65,7 @@ class zombie:
 class item:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(base)+0x768)+0x11c)))/0xec)
+        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x11c)))/0xec)
         self.exist=PVZ_memory.read_bytes(self.addr+0x20,1)
         self.Row = PVZ_memory.read_int(self.addr + 0x14)
         self.Col = PVZ_memory.read_int(self.addr + 0x10)

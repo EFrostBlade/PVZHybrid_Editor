@@ -7,15 +7,16 @@ import time
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import *
+import PVZ_data as data
+import PVZ_Hybrid as pvz
 
-PVZ_memory=1
+data.update_PVZ_memory(1)
+
 
 def chooseGame():
-    global PVZ_memory
     def openPVZ_memory(process1):
-        global PVZ_memory
         try:
-            PVZ_memory=Pymem(int(re.search(r'(\d+)',process1).group(1)))
+            data.update_PVZ_memory(Pymem(int(re.search(r'(\d+)',process1).group(1))))
         except:
             Messagebox.show_error("没有足够的权限，请确保游戏未以管理员身份运行",title="注入进程失败",parent=choose_process_window)
             choose_process_window.quit()
@@ -25,11 +26,10 @@ def chooseGame():
             choose_process_window.destroy()   
 
     def tryFindGame():
-        global PVZ_memory
         try:
             hwnd=win32gui.FindWindow("MainWindow",None)
             pid=win32process.GetWindowThreadProcessId(hwnd)
-            PVZ_memory= Pymem(pid[1])
+            data.update_PVZ_memory( Pymem(pid[1]))
             choose_process_window.quit()
             choose_process_window.destroy()
         except:
@@ -40,16 +40,14 @@ def chooseGame():
     #     global PVZ_memory
     #     choose_process_window.quit()
     #     choose_process_window.destroy()
-    #     PVZ_memory=1
+    #     data.update_PVZ_memory(1
     #     # choosegame()
     #     return PVZ_memory
 
     def close():
-        global PVZ_memory
         choose_process_window.quit()
         choose_process_window.destroy()
-        PVZ_memory=0
-        return PVZ_memory
+        data.update_PVZ_memory(0)
      
     def getSelecthwnd():
         hwnd_title = dict() 
@@ -110,25 +108,52 @@ def mainWindow():
     process_label.pack(side=LEFT)
     def updateGame():
         chooseGame()
-        if(type(PVZ_memory)!= Pymem):
+        if(type(data.PVZ_memory)!= Pymem):
             process_label["text"]="未找到游戏"
             process_label.config(bootstyle=DANGER)
         else:
-            process_label["text"]="找到进程："+str(PVZ_memory.process_id)+str(psutil.Process(PVZ_memory.process_id).name())
+            process_label["text"]="找到进程："+str(data.PVZ_memory.process_id)+str(psutil.Process(data.PVZ_memory.process_id).name())
             process_label.config(bootstyle=DANGER)
     def tryFindGame():
-        global PVZ_memory
         try:
             hwnd=win32gui.FindWindow("MainWindow",None)
             pid=win32process.GetWindowThreadProcessId(hwnd)
-            PVZ_memory= Pymem(pid[1])
-            process_label["text"]="找到进程："+str(PVZ_memory.process_id)+str(psutil.Process(PVZ_memory.process_id).name())
+            data.update_PVZ_memory( Pymem(pid[1]))
+            process_label["text"]="找到进程："+str(data.PVZ_memory.process_id)+str(psutil.Process(data.PVZ_memory.process_id).name())
             process_label.config(bootstyle=DANGER)
         except:
             updateGame()
     tryFindGame()
     choose_process_button=ttk.Button(process_frame,text="选择游戏",bootstyle=PRIMARY,command=lambda:updateGame())
     choose_process_button.pack(side=LEFT)
+    
+    page_tab=ttk.Notebook(main_window)
+    page_tab.pack(padx=10, pady=(5,30), fill=BOTH,expand=True)
+    common_page=ttk.Frame(page_tab)
+    common_page.pack()
+    page_tab.add(common_page,text="常用功能")
+    resource_modify_frame=ttk.Labelframe(common_page,text="资源修改",bootstyle=WARNING)
+    resource_modify_frame.place(x=0,y=0,anchor=NW)
+    ttk.Label(resource_modify_frame,text="阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=0,column=0)
+    sun=ttk.IntVar(main_window)
+    sun_value=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING,textvariable=sun)
+    sun_value.grid(row=0,column=1)
+    ttk.Button(resource_modify_frame,text="修改",bootstyle=(WARNING,OUTLINE),command=lambda:pvz.setSun(sun.get())).grid(row=0,column=2,padx=(5,0))
+    ttk.Label(resource_modify_frame,text="增加阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=1,column=0)
+    add_sun_value=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING)
+    add_sun_value.grid(row=1,column=1)
+    ttk.Button(resource_modify_frame,text="增加",bootstyle=(WARNING,OUTLINE),command=lambda:pvz.addSun(int(add_sun_value.get()))).grid(row=1,column=2,padx=(5,0))
+    
+    
+    
+    
+    def refreshData():        
+        if(main_window.focus_get()!=sun_value):
+            sun.set(pvz.getSun())
+            
+        main_window.after(500,refreshData)
+        
+    main_window.after(500,refreshData)
     main_window.mainloop()
 
 if __name__ == '__main__':
