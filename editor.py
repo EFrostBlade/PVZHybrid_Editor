@@ -4,6 +4,8 @@ import win32process
 import psutil
 import re
 import time
+import os
+import sys
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -13,6 +15,15 @@ import PVZ_Hybrid as pvz
 
 data.update_PVZ_memory(1)
 
+def resource_path(relative_path):
+    """ 获取资源的绝对路径，适用于开发环境和PyInstaller环境 """
+    try:
+        # PyInstaller创建的临时文件夹的路径存储在_MEIPASS中
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
 
 def chooseGame():
     def openPVZ_memory(process1):
@@ -67,7 +78,7 @@ def chooseGame():
     choose_process_window = ttk.Toplevel(topmost=True)
     choose_process_window.title("选择进程")
     choose_process_window.geometry("500x500")
-    choose_process_window.iconphoto(False,ttk.PhotoImage(file=r"src\icon\choose.png"))
+    choose_process_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"src\icon\choose.png")))
     label = ttk.Label(choose_process_window,text="如果未开启游戏请开启游戏后点击寻找游戏按钮",bootstyle=WARNING, font=("黑体", 16))
     label.pack(pady=20)
     frame1 = ttk.Frame(choose_process_window)
@@ -102,7 +113,7 @@ def mainWindow():
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
-    main_window.iconphoto(False,ttk.PhotoImage(file=r"src\icon\editor.png"))
+    main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"src\icon\editor.png")))
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -179,16 +190,16 @@ def mainWindow():
     ToolTip(shovel_pro_check,text="铲掉植物返还其阳光消耗并触发亡语效果",bootstyle=(INFO,INVERSE))
     never_fail_status=ttk.IntVar(quick_start_frame)
     never_fail_check=ttk.Checkbutton(quick_start_frame,text="永不失败",variable=never_fail_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreZombies(never_fail_status.get()))
-    never_fail_check.grid(row=5,column=0,sticky=W)
+    never_fail_check.grid(row=6,column=0,sticky=W)
     ToolTip(never_fail_check,text="僵尸进家不判定游戏失败",bootstyle=(INFO,INVERSE))
     win_button=ttk.Button(quick_start_frame,text="当前关卡胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win())
-    win_button.grid(row=6,column=0,sticky=W,pady=(2,2))
+    win_button.grid(row=7,column=0,sticky=W,pady=(2,2))
     ToolTip(win_button,text="当前的游戏关卡直接进行胜利结算",bootstyle=(INFO,INVERSE))
     kill_all_button=ttk.Button(quick_start_frame,text="秒杀所有僵尸",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies())
-    kill_all_button.grid(row=7,column=0,sticky=W,pady=(2,2))
+    kill_all_button.grid(row=8,column=0,sticky=W,pady=(2,2))
     ToolTip(kill_all_button,text="秒杀当前场上的所有僵尸",bootstyle=(INFO,INVERSE))
     unlock_button=ttk.Button(quick_start_frame,text="解锁全部植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock())
-    unlock_button.grid(row=8,column=0,sticky=W,pady=(2,2))
+    unlock_button.grid(row=9,column=0,sticky=W,pady=(2,2))
     ToolTip(unlock_button,text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",bootstyle=(INFO,INVERSE))
     
     game_speed_frame=ttk.LabelFrame(common_page,text="游戏速度",bootstyle=PRIMARY)
