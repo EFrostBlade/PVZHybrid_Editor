@@ -6,6 +6,13 @@ def update_PVZ_memory(memory):
     PVZ_memory=memory
     
 baseAddress=0x006A9EC0
+
+zombiesType=["普僵","旗帜","路障","撑杆","铁桶","冰车二爷","铁门","黑橄榄","武装舞王",
+                 "舞伴","泳圈普僵","潜水","冰车巨人","雪橇","海豚机枪","小丑","气球舞王","矿工",
+                 "跳跳","冰车雪人","飞贼","扶梯","篮球","巨人","小鬼","僵王","豌豆僵尸",
+                 "坚果僵尸","辣椒僵尸","机枪僵尸","冰窝瓜僵尸","高冰果僵尸","红眼","迪斯科",
+                 "舞者","骷髅"]
+
 class plant:
     def __init__(self,addr):
         self.addr=addr
@@ -40,28 +47,58 @@ class zombie:
         self.size=PVZ_memory.read_float(self.addr+0x11c)
         self.state=PVZ_memory.read_int(self.addr+0x28)
         self.hp=PVZ_memory.read_int(self.addr+0xc8)
-        self.maxhp=PVZ_memory.read_int(self.addr+0xcc)
-        self.hathp=PVZ_memory.read_int(self.addr+0xd0)
-        self.maxhathp=PVZ_memory.read_int(self.addr+0xd4)
-        self.doorhp=PVZ_memory.read_int(self.addr+0xdc)
-        self.maxdoorhp=PVZ_memory.read_int(self.addr+0xe0)
+        self.maxHP=PVZ_memory.read_int(self.addr+0xcc)
+        self.hatType=PVZ_memory.read_int(self.addr+0xc4)
+        self.hatHP=PVZ_memory.read_int(self.addr+0xd0)
+        self.maxHatHP=PVZ_memory.read_int(self.addr+0xd4)
+        self.doorHP=PVZ_memory.read_int(self.addr+0xdc)
+        self.maxDoorHP=PVZ_memory.read_int(self.addr+0xe0)
         self.slow=PVZ_memory.read_int(self.addr+0xac)
         self.butter=PVZ_memory.read_int(self.addr+0xb0)
         self.frozen=PVZ_memory.read_int(self.addr+0xb4)
-    def modify(self,row,x,y,state,hp,hathp,doorhp,slow,butter,frozen):
-        PVZ_memory.write_int(self.addr+0x1c,row-1)
+        self.isVisible=PVZ_memory.read_bool(self.addr+0x18)
+        self.isEating=PVZ_memory.read_bool(self.addr+0x51)
+        self.isHPynotized=PVZ_memory.read_bool(self.addr+0xb8)
+        self.isEBlow=PVZ_memory.read_bool(self.addr+0xb9)
+        self.isDying=PVZ_memory.read_bool(self.addr+0xba)
+
+    def setRow(self,row):
+        PVZ_memory.write_int(self.addr+0x1c,row)
+    def setX(self,x):
         PVZ_memory.write_float(self.addr+0x2c,x)
+    def setY(self,y):
         PVZ_memory.write_float(self.addr+0x30,y)
+    def setSize(self,size):
+        PVZ_memory.write_float(self.addr+0x11c,size)
+    def setState(self,state):
         PVZ_memory.write_int(self.addr+0x28,state)
+    def setHP(self,hp):
         PVZ_memory.write_int(self.addr+0xc8,hp)
         PVZ_memory.write_int(self.addr+0xcc,hp)
-        PVZ_memory.write_int(self.addr+0xd0,hathp)
-        PVZ_memory.write_int(self.addr+0xd4,hathp)
-        PVZ_memory.write_int(self.addr+0xdc,doorhp)
-        PVZ_memory.write_int(self.addr+0xe0,doorhp)
+    def setHatHP(self,hatHP):
+        PVZ_memory.write_int(self.addr+0xd0,hatHP)
+        PVZ_memory.write_int(self.addr+0xd4,hatHP)
+    def setDoorHP(self,doorHP):
+        PVZ_memory.write_int(self.addr+0xdc,doorHP)
+        PVZ_memory.write_int(self.addr+0xe0,doorHP)
+    def setSlow(self,slow):
         PVZ_memory.write_int(self.addr+0xac,slow)
+    def setButter(self,butter):
         PVZ_memory.write_int(self.addr+0xb0,butter)
+    def setFrozen(self,frozen):
         PVZ_memory.write_int(self.addr+0xb4,frozen)
+    def setIsVisible(self,isVisible):
+        PVZ_memory.write_bool(self.addr+0x18,isVisible)
+    def setIsEating(self,isEating):
+        PVZ_memory.write_bool(self.addr+0x51,isEating)
+    def setIsHPynotized(self,isHPynotized):
+        PVZ_memory.write_bool(self.addr+0xb8,isHPynotized)
+    def setIsEBlow(self,isEBlow):
+        PVZ_memory.write_bool(self.addr+0xb9,isEBlow)
+    def setIsDying(self,isDying):
+        PVZ_memory.write_bool(self.addr+0xba,isDying)
+
+
 class item:
     def __init__(self,addr):
         self.addr=addr

@@ -14,6 +14,7 @@ import PVZ_data as data
 import PVZ_Hybrid as pvz
 
 data.update_PVZ_memory(1)
+zombie_select=None
 
 def resource_path(relative_path):
     """ 获取资源的绝对路径，适用于开发环境和PyInstaller环境 """
@@ -231,16 +232,143 @@ def mainWindow():
     game_speed_scale=ttk.Scale(game_speed_frame,from_=0,to=6,orient=HORIZONTAL,variable=game_speed_value,command=changeSpeedValue)
     game_speed_scale.grid(row=0,column=1)
     
+    global zombie_select
+    zombie_page=ttk.Frame(page_tab)
+    zombie_page.pack()
+    page_tab.add(zombie_page,text="僵尸修改")    
+    zombie_list_frame=ttk.LabelFrame(zombie_page,text="僵尸列表",bootstyle=DANGER)
+    zombie_list_frame.place(x=0,y=0,anchor=NW,height=430,width=400)
+    zombie_list_box_scrollbar=ttk.Scrollbar(zombie_list_frame,bootstyle=DANGER)
+    zombie_list_box=ttk.Treeview(zombie_list_frame,show=TREE,selectmode=BROWSE,padding=0,columns=("zombie_list"),yscrollcommand=zombie_list_box_scrollbar.set,bootstyle=DANGER)
+    zombie_list_box_scrollbar.configure(command=zombie_list_box.yview)
+    zombie_list_box.place(x=0,y=0,anchor=NW,height=410,width=50)
+    zombie_list_box_scrollbar.place(x=50,y=0,height=410,anchor=NW)
+    zombie_list=list()
+    def refresh_zombie_list():
+        zombie_list.clear()
+        zombie_list_box.delete(*zombie_list_box.get_children())
+        try:
+            zombie_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xa0)
+        except:
+            return
+        i=0
+        j=0
+        while i<zombie_num:
+            zombie_addresss=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x90)+0x15c*j
+            zombie_exist=data.PVZ_memory.read_bytes(zombie_addresss+0xec,1)
+            if(zombie_exist==b'\x00'):
+                zombie_list.append(data.zombie(zombie_addresss))
+                i=i+1
+            j=j+1
+        n=0
+        for k in range(zombie_num):
+            zombie_list_box.insert("",END,iid=n,text=str(zombie_list[k].no))
+            if(zombie_select!=None):
+                if(zombie_select.exist==b'\x00'):
+                    if(zombie_select.no==zombie_list[k].no):
+                        zombie_list_box.selection_set((str(n),))
+            n=n+1
+
+    refresh_zombie_list()
+    zombie_attribute_frame=ttk.Frame(zombie_list_frame)
+    zombie_attribute_frame.place(x=80,y=0,height=430,width=300)
+    ttk.Label(zombie_attribute_frame,text="僵尸类型:").grid(row=0,column=0,sticky=W)
+    zombie_type_value=ttk.IntVar(zombie_attribute_frame)
+    zombie_type_entry=ttk.Entry(zombie_attribute_frame,textvariable=zombie_type_value,width=10,state=READONLY,bootstyle=SECONDARY)
+    zombie_type_entry.grid(row=0,column=1,sticky=W)
+    zombie_hp_frame=ttk.LabelFrame(zombie_attribute_frame,text="血量",bootstyle=DANGER)
+    zombie_hp_frame.grid(row=2,column=0,columnspan=4)
+    ttk.Label(zombie_hp_frame,text="本体:").grid(row=0,column=0)
+    zombie_hp_value=ttk.IntVar(zombie_hp_frame)
+    zombie_hp_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_hp_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    zombie_hp_entry.grid(row=0,column=1,ipady=0)
+    def setHP(event):
+        zombie_select.setHP(zombie_hp_value.get())
+        zombie_hp_frame.focus_set()
+    zombie_hp_entry.bind("<Return>",setHP)
+    zombie_hatHP_label=ttk.Label(zombie_hp_frame,text="帽子:")
+    zombie_hatHP_label.grid(row=0,column=2)
+    zombie_hatHP_value=ttk.IntVar(zombie_hp_frame)
+    zombie_hatHP_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_hatHP_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    zombie_hatHP_entry.grid(row=0,column=3,ipady=0)
+    def setHatHP(event):
+        zombie_select.setHatHP(zombie_hatHP_value.get())
+        zombie_hp_frame.focus_set()
+    zombie_hatHP_entry.bind("<Return>",setHatHP)
+    ttk.Label(zombie_hp_frame,text="铁门:").grid(row=0,column=4)
+    zombie_doorHP_value=ttk.IntVar(zombie_hp_frame)
+    zombie_doorHP_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_doorHP_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    zombie_doorHP_entry.grid(row=0,column=5,ipady=0)
+    def setDoorHP(event):
+        zombie_select.setDoorHP(zombie_doorHP_value.get())
+        zombie_hp_frame.focus_set()
+    zombie_doorHP_entry.bind("<Return>",setDoorHP)
+
+    def get_zombie_select(event):
+        global zombie_select
+        try:
+            index=int(zombie_list_box.selection()[0])
+            zombie_select=zombie_list[index]
+        except:
+            return
+
+    def get_zombie_attribute():
+        global zombie_select
+        if zombie_select!=None:
+            zombie_type_value.set(str(zombie_select.type)+":"+data.zombiesType[zombie_select.type])
+            if(zombie_attribute_frame.focus_get()!=zombie_hp_entry):
+                zombie_hp_value.set(zombie_select.hp)
+            if(zombie_select.hatType==0):
+                zombie_hatHP_label["text"]="无:"
+            elif(zombie_select.hatType==1):
+                zombie_hatHP_label["text"]="路障:"
+            elif(zombie_select.hatType==2):
+                zombie_hatHP_label["text"]="铁桶:"
+            elif(zombie_select.hatType==3):
+                zombie_hatHP_label["text"]="橄榄帽:"
+            elif(zombie_select.hatType==4):
+                zombie_hatHP_label["text"]="矿工帽:"
+            elif(zombie_select.hatType==7):
+                zombie_hatHP_label["text"]="雪橇车:"
+            elif(zombie_select.hatType==8):
+                zombie_hatHP_label["text"]="坚果:"
+            elif(zombie_select.hatType==9):
+                zombie_hatHP_label["text"]="高冰果:"
+            elif(zombie_select.hatType==10):
+                zombie_hatHP_label["text"]="钢盔:"
+            elif(zombie_select.hatType==11):
+                zombie_hatHP_label["text"]="绿帽:"
+            else:
+                zombie_hatHP_label["text"]=str(zombie_select.hatType)+"未知:"
+            if(zombie_attribute_frame.focus_get()!=zombie_hatHP_entry):
+                zombie_hatHP_value.set(zombie_select.hatHP)
+            if(zombie_attribute_frame.focus_get()!=zombie_doorHP_entry):
+                zombie_doorHP_value.set(zombie_select.doorHP)
+
+    zombie_list_box.bind("<<TreeviewSelect>>",get_zombie_select)
+
+
+    plant_page=ttk.Frame(page_tab)
+    plant_page.pack()
+    page_tab.add(plant_page,text="植物修改")    
     
+    grid_page=ttk.Frame(page_tab)
+    grid_page.pack()
+    page_tab.add(grid_page,text="场地修改")
+
+
     def refreshData():
         if(page_tab.index('current')==0):
             if(pvz.getMap()!=False):        
                 if(main_window.focus_get()!=sun_value):
                     sun.set(pvz.getSun())
-
-        main_window.after(500,refreshData)
+        if(page_tab.index('current')==1):
+            if(pvz.getMap()!=False):       
+                refresh_zombie_list()
+                get_zombie_attribute()
+        main_window.after(100,refreshData)
         
-    main_window.after(500,refreshData)
+    main_window.after(100,refreshData)
     main_window.mainloop()
 
 if __name__ == '__main__':
