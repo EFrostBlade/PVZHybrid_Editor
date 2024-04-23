@@ -101,10 +101,12 @@ def mainWindow():
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
-    main_window.iconphoto(False,ttk.PhotoImage(file=r"src\icon\editer.png"))
+    main_window.iconphoto(False,ttk.PhotoImage(file=r"src\icon\editor.png"))
+    # style=ttk.Style()
+    # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
     process_frame.place(x=0,y=0,relx=1,rely=1,anchor=SE)
-    process_label=ttk.Label(process_frame,text="", font=("黑体", 12))
+    process_label=ttk.Label(process_frame,text="", font=("黑体", 8))
     process_label.pack(side=LEFT)
     def updateGame():
         chooseGame()
@@ -124,8 +126,12 @@ def mainWindow():
         except:
             updateGame()
     tryFindGame()
-    choose_process_button=ttk.Button(process_frame,text="选择游戏",bootstyle=PRIMARY,command=lambda:updateGame())
+    choose_process_button=ttk.Button(process_frame,text="选择游戏",padding=0,bootstyle=(PRIMARY,LINK),command=lambda:updateGame())
     choose_process_button.pack(side=LEFT)
+    back_ground_status=ttk.IntVar(main_window)
+    back_ground_check=ttk.Checkbutton(main_window,text="后台运行",variable=back_ground_status,bootstyle="round-toggle",command=lambda:pvz.backGround(back_ground_status.get()))
+    back_ground_check.place(x=3,y=-3,relx=0,rely=1,anchor=SW)
+    
     
     page_tab=ttk.Notebook(main_window)
     page_tab.pack(padx=10, pady=(5,30), fill=BOTH,expand=True)
@@ -134,23 +140,45 @@ def mainWindow():
     page_tab.add(common_page,text="常用功能")
     resource_modify_frame=ttk.Labelframe(common_page,text="资源修改",bootstyle=WARNING)
     resource_modify_frame.place(x=0,y=0,anchor=NW)
-    ttk.Label(resource_modify_frame,text="阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=0,column=0)
+    ttk.Label(resource_modify_frame,text="阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=0,column=0,sticky=E)
     sun=ttk.IntVar(main_window)
     sun_value=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING,textvariable=sun)
     sun_value.grid(row=0,column=1)
     ttk.Button(resource_modify_frame,text="修改",bootstyle=(WARNING,OUTLINE),command=lambda:pvz.setSun(sun.get())).grid(row=0,column=2,padx=(5,0))
-    ttk.Label(resource_modify_frame,text="增加阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=1,column=0)
+    ttk.Label(resource_modify_frame,text="增加阳光：",bootstyle=WARNING,font=("宋体",14)).grid(row=1,column=0,sticky=E)
     add_sun_value=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING)
     add_sun_value.grid(row=1,column=1)
     ttk.Button(resource_modify_frame,text="增加",bootstyle=(WARNING,OUTLINE),command=lambda:pvz.addSun(int(add_sun_value.get()))).grid(row=1,column=2,padx=(5,0))
     
+    quick_start_frame=ttk.LabelFrame(common_page,text="快速使用",bootstyle=SUCCESS)
+    quick_start_frame.place(x=0,y=0,relx=1,rely=0,anchor=NE)
+    over_plant_status=ttk.IntVar(quick_start_frame)
+    over_plant_check=ttk.Checkbutton(quick_start_frame,text="自由放置(重叠种植)",variable=over_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.overPlant(over_plant_status.get()))
+    over_plant_check.grid(row=0,column=0,sticky=W)
+    free_plant_status=ttk.IntVar(quick_start_frame)
+    free_plant_check=ttk.Checkbutton(quick_start_frame,text="无视阳光(免费种植)",variable=free_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreSun(free_plant_status.get()))
+    free_plant_check.grid(row=1,column=0,sticky=W)
+    cancel_cd_status=ttk.IntVar(quick_start_frame)
+    cancel_cd_check=ttk.Checkbutton(quick_start_frame,text="取消种植冷却",variable=cancel_cd_status,bootstyle="success-round-toggle",command=lambda:pvz.cancelCd(cancel_cd_status.get()))
+    cancel_cd_check.grid(row=2,column=0,sticky=W)
+    auto_colect_status=ttk.IntVar(quick_start_frame)
+    auto_colect_check=ttk.Checkbutton(quick_start_frame,text="自动收集",variable=auto_colect_status,bootstyle="success-round-toggle",command=lambda:pvz.autoCollect(auto_colect_status.get()))
+    auto_colect_check.grid(row=3,column=0,sticky=W)
+    column_like_status=ttk.IntVar(quick_start_frame)
+    column_like_check=ttk.Checkbutton(quick_start_frame,text="柱子模式(种一个送一排)",variable=column_like_status,bootstyle="success-round-toggle",command=lambda:pvz.column(column_like_status.get()))
+    column_like_check.grid(row=4,column=0,sticky=W)
+    ttk.Button(quick_start_frame,text="当前关卡直接胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win()).grid(row=5,column=0,sticky=W,pady=(5,0))
+    ttk.Button(quick_start_frame,text="秒杀所有僵尸 ",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies()).grid(row=6,column=0,sticky=W,pady=(5,0))
+    ttk.Button(quick_start_frame,text="解锁所有植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock()).grid(row=7,column=0,sticky=W,pady=(5,0))
     
     
     
-    def refreshData():        
-        if(main_window.focus_get()!=sun_value):
-            sun.set(pvz.getSun())
-            
+    def refreshData():
+        if(page_tab.index('current')==0):
+            if(pvz.getMap()!=False):        
+                if(main_window.focus_get()!=sun_value):
+                    sun.set(pvz.getSun())
+
         main_window.after(500,refreshData)
         
     main_window.after(500,refreshData)
