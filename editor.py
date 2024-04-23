@@ -6,7 +6,8 @@ import re
 import time
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from ttkbootstrap.dialogs.dialogs import *
+from ttkbootstrap.dialogs.dialogs import Messagebox
+from ttkbootstrap.tooltip import ToolTip
 import PVZ_data as data
 import PVZ_Hybrid as pvz
 
@@ -153,24 +154,71 @@ def mainWindow():
     quick_start_frame=ttk.LabelFrame(common_page,text="快速使用",bootstyle=SUCCESS)
     quick_start_frame.place(x=0,y=0,relx=1,rely=0,anchor=NE)
     over_plant_status=ttk.IntVar(quick_start_frame)
-    over_plant_check=ttk.Checkbutton(quick_start_frame,text="自由放置(重叠种植)",variable=over_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.overPlant(over_plant_status.get()))
+    over_plant_check=ttk.Checkbutton(quick_start_frame,text="自由放置",variable=over_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.overPlant(over_plant_status.get()))
     over_plant_check.grid(row=0,column=0,sticky=W)
+    ToolTip(over_plant_check,text="植物可以重叠放置并无视地形",bootstyle=(INFO,INVERSE))
     free_plant_status=ttk.IntVar(quick_start_frame)
-    free_plant_check=ttk.Checkbutton(quick_start_frame,text="无视阳光(免费种植)",variable=free_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreSun(free_plant_status.get()))
+    free_plant_check=ttk.Checkbutton(quick_start_frame,text="免费种植",variable=free_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreSun(free_plant_status.get()))
     free_plant_check.grid(row=1,column=0,sticky=W)
+    ToolTip(free_plant_check,text="植物可以不消耗阳光种植",bootstyle=(INFO,INVERSE))
     cancel_cd_status=ttk.IntVar(quick_start_frame)
-    cancel_cd_check=ttk.Checkbutton(quick_start_frame,text="取消种植冷却",variable=cancel_cd_status,bootstyle="success-round-toggle",command=lambda:pvz.cancelCd(cancel_cd_status.get()))
+    cancel_cd_check=ttk.Checkbutton(quick_start_frame,text="取消冷却",variable=cancel_cd_status,bootstyle="success-round-toggle",command=lambda:pvz.cancelCd(cancel_cd_status.get()))
     cancel_cd_check.grid(row=2,column=0,sticky=W)
+    ToolTip(cancel_cd_check,text="植物种植后不进入冷却时间",bootstyle=(INFO,INVERSE))
     auto_colect_status=ttk.IntVar(quick_start_frame)
     auto_colect_check=ttk.Checkbutton(quick_start_frame,text="自动收集",variable=auto_colect_status,bootstyle="success-round-toggle",command=lambda:pvz.autoCollect(auto_colect_status.get()))
     auto_colect_check.grid(row=3,column=0,sticky=W)
+    ToolTip(auto_colect_check,text="自动收集自然掉落的阳光和僵尸掉落的金币",bootstyle=(INFO,INVERSE))
     column_like_status=ttk.IntVar(quick_start_frame)
-    column_like_check=ttk.Checkbutton(quick_start_frame,text="柱子模式(种一个送一排)",variable=column_like_status,bootstyle="success-round-toggle",command=lambda:pvz.column(column_like_status.get()))
+    column_like_check=ttk.Checkbutton(quick_start_frame,text="柱子模式",variable=column_like_status,bootstyle="success-round-toggle",command=lambda:pvz.column(column_like_status.get()))
     column_like_check.grid(row=4,column=0,sticky=W)
-    ttk.Button(quick_start_frame,text="当前关卡直接胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win()).grid(row=5,column=0,sticky=W,pady=(5,0))
-    ttk.Button(quick_start_frame,text="秒杀所有僵尸 ",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies()).grid(row=6,column=0,sticky=W,pady=(5,0))
-    ttk.Button(quick_start_frame,text="解锁所有植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock()).grid(row=7,column=0,sticky=W,pady=(5,0))
+    ToolTip(column_like_check,text="种植一个植物后在同一列的其他行种植相同的植物(可与自由放置配合使用)",bootstyle=(INFO,INVERSE))
+    shovel_pro_status=ttk.IntVar(quick_start_frame)
+    shovel_pro_check=ttk.Checkbutton(quick_start_frame,text="超级铲子",variable=shovel_pro_status,bootstyle="success-round-toggle",command=lambda:pvz.shovelpro(shovel_pro_status.get()))
+    shovel_pro_check.grid(row=5,column=0,sticky=W)
+    ToolTip(shovel_pro_check,text="铲掉植物返还其阳光消耗并触发亡语效果",bootstyle=(INFO,INVERSE))
+    never_fail_status=ttk.IntVar(quick_start_frame)
+    never_fail_check=ttk.Checkbutton(quick_start_frame,text="永不失败",variable=never_fail_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreZombies(never_fail_status.get()))
+    never_fail_check.grid(row=5,column=0,sticky=W)
+    ToolTip(never_fail_check,text="僵尸进家不判定游戏失败",bootstyle=(INFO,INVERSE))
+    win_button=ttk.Button(quick_start_frame,text="当前关卡胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win())
+    win_button.grid(row=6,column=0,sticky=W,pady=(2,2))
+    ToolTip(win_button,text="当前的游戏关卡直接进行胜利结算",bootstyle=(INFO,INVERSE))
+    kill_all_button=ttk.Button(quick_start_frame,text="秒杀所有僵尸",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies())
+    kill_all_button.grid(row=7,column=0,sticky=W,pady=(2,2))
+    ToolTip(kill_all_button,text="秒杀当前场上的所有僵尸",bootstyle=(INFO,INVERSE))
+    unlock_button=ttk.Button(quick_start_frame,text="解锁全部植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock())
+    unlock_button.grid(row=8,column=0,sticky=W,pady=(2,2))
+    ToolTip(unlock_button,text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",bootstyle=(INFO,INVERSE))
     
+    game_speed_frame=ttk.LabelFrame(common_page,text="游戏速度",bootstyle=PRIMARY)
+    game_speed_frame.place(x=0,y=100,anchor=NW)
+    game_speed_label=ttk.Label(game_speed_frame,text="1",bootstyle=PRIMARY)
+    game_speed_label.grid(row=0,column=0)
+    game_speed_frame.columnconfigure(0,minsize=30)
+    game_speed_value=ttk.DoubleVar(game_speed_frame)
+    game_speed_value.set(2)
+    def changeSpeedValue(value):
+        step=1
+        adjusted_value = round(float(value) / step) * step
+        game_speed_value.set(adjusted_value)
+        if(game_speed_value.get()==0):
+            game_speed_label.config(text="0.25")
+        elif(game_speed_value.get()==1):
+            game_speed_label.config(text="0.5")
+        elif(game_speed_value.get()==2):
+            game_speed_label.config(text="1")
+        elif(game_speed_value.get()==3):
+            game_speed_label.config(text="2")
+        elif(game_speed_value.get()==4):
+            game_speed_label.config(text="5")
+        elif(game_speed_value.get()==5):
+            game_speed_label.config(text="10")
+        elif(game_speed_value.get()==6):
+            game_speed_label.config(text="20")
+        pvz.changeGameSpeed(game_speed_value.get())
+    game_speed_scale=ttk.Scale(game_speed_frame,from_=0,to=6,orient=HORIZONTAL,variable=game_speed_value,command=changeSpeedValue)
+    game_speed_scale.grid(row=0,column=1)
     
     
     def refreshData():

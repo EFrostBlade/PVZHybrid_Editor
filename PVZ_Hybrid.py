@@ -1,8 +1,13 @@
 import ctypes
 import PVZ_data as data
+import pymem.ressources.kernel32
+import pymem.ressources.structure
+import pymem.thread
+import pymem.memory
 
 column1addr=None
 column2addr=None
+newmem1=None
 
 def calculate_call_address(ctypes_obj):
     """S
@@ -128,3 +133,71 @@ def column(f):
 
 def unlock():
     data.PVZ_memory.write_bytes(0x00453b20,b'\x56\x8b\xb7\x2c\x08\x00\x00',7)
+
+def shovelpro(f):
+    global newmem1
+    addr=int.from_bytes(data.PVZ_memory.read_bytes(0x411141,1)+data.PVZ_memory.read_bytes(0x411140,1)+data.PVZ_memory.read_bytes(0x41113f,1)+data.PVZ_memory.read_bytes(0x41113e,1))+0x411142+0x3
+    print(hex(addr))
+    if f:
+        data.PVZ_memory.write_bytes(addr,b'\x90\x90\x90\xeb\x77\x90\x90\x90\x90',9)
+        newmem1=pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 100) 
+        print(newmem1)
+        byte_data=(
+                b'\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8'
+                +calculate_call_address(0x0041dae0-newmem1-0x11)+
+                b'\x01\x85\x2c\x01\x00\x00\x61\x83\xbd\x2c\x01\x00\x00\x32\x7c\x1d\x83\xad\x2c\x01\x00\x00\x32'
+                b'\x60\x8b\x4d\x04\x6a\x02\x6a\x06\xff\x75\x0c\xff\x75\x08\xe8'
+                +calculate_call_address(0x0040cb10-newmem1-0x3b)+
+                b'\x61\xeb\xda\x83\xbd\x2c\x01\x00\x00\x19\x7c\x1d\x83\xad\x2c\x01\x00\x00\x19\x60\x8b\x4d\x04'
+                b'\x6a\x02\x6a\x04\xff\x75\x0c\xff\x75\x08\xe8'
+                +calculate_call_address(0x0040cb10-newmem1-0x61)+
+                b'\x61\xeb\xb4\x83\xbd\x2c\x01\x00\x00\x0f\x7c\x1d\x83\xad\x2c\x01\x00\x00\x0f\x60\x8b\x4d\x04'
+                b'\x6a\x02\x6a\x05\xff\x75\x0c\xff\x75\x08\xe8'
+                +calculate_call_address(0x0040cb10-newmem1-0x87)+
+                b'\x61\xeb\x8e\x01\x9f\x9c\x57\x00\x00\xe9'
+                +calculate_call_address(0x004111de-newmem1-0x95)
+        )
+        data.PVZ_memory.write_bytes(newmem1,byte_data,149)
+        data.PVZ_memory.write_bytes(0x004111d8,b'\xe9'+calculate_call_address(newmem1-0x004111dd)+b'\x90',6)
+    else:
+        data.PVZ_memory.write_bytes(addr,b'\x83\xf8\x36\x0f\x84\x64\x00\x00\x00',9)
+        data.PVZ_memory.write_bytes(0x004111d8,b'\x01\x9f\x9c\x57\x00\x00',6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem1)
+
+def ignoreZombies(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x413431,b'\xe9\x7f\x04\x00\x00\x90',6)
+    else:        
+        data.PVZ_memory.write_bytes(0x413431,b'\x0f\x84\x7f\x04\x00\x00',6)
+
+
+def changeGameSpeed(s):
+    FrameDurationAddr=data.PVZ_memory.read_int(data.baseAddress)+0x454
+    if(s==0):
+        data.PVZ_memory.write_int(FrameDurationAddr,10)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x01',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==1):
+        data.PVZ_memory.write_int(FrameDurationAddr,20)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==2):
+        data.PVZ_memory.write_int(FrameDurationAddr,10)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==3):
+        data.PVZ_memory.write_int(FrameDurationAddr,5)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==4):
+        data.PVZ_memory.write_int(FrameDurationAddr,2)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==5):
+        data.PVZ_memory.write_int(FrameDurationAddr,1)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x00',1)
+    elif(s==6):
+        data.PVZ_memory.write_int(FrameDurationAddr,10)
+        data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
+        data.PVZ_memory.write_bytes(0x6A9EAB,b'\x01',1)
