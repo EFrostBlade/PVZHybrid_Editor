@@ -79,7 +79,7 @@ def chooseGame():
     choose_process_window = ttk.Toplevel(topmost=True)
     choose_process_window.title("选择进程")
     choose_process_window.geometry("500x500")
-    choose_process_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"src\icon\choose.png")))
+    choose_process_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\choose.png")))
     label = ttk.Label(choose_process_window,text="如果未开启游戏请开启游戏后点击寻找游戏按钮",bootstyle=WARNING, font=("黑体", 16))
     label.pack(pady=20)
     frame1 = ttk.Frame(choose_process_window)
@@ -114,7 +114,7 @@ def mainWindow():
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
-    main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"src\icon\editor.png")))
+    main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -237,7 +237,7 @@ def mainWindow():
     zombie_page.pack()
     page_tab.add(zombie_page,text="僵尸修改")    
     zombie_list_frame=ttk.LabelFrame(zombie_page,text="僵尸列表",bootstyle=DANGER)
-    zombie_list_frame.place(x=0,y=0,anchor=NW,height=430,width=400)
+    zombie_list_frame.place(x=0,y=0,anchor=NW,height=430,width=350)
     zombie_list_box_scrollbar=ttk.Scrollbar(zombie_list_frame,bootstyle=DANGER)
     zombie_list_box=ttk.Treeview(zombie_list_frame,show=TREE,selectmode=BROWSE,padding=0,columns=("zombie_list"),yscrollcommand=zombie_list_box_scrollbar.set,bootstyle=DANGER)
     zombie_list_box_scrollbar.configure(command=zombie_list_box.yview)
@@ -271,11 +271,45 @@ def mainWindow():
 
     refresh_zombie_list()
     zombie_attribute_frame=ttk.Frame(zombie_list_frame)
-    zombie_attribute_frame.place(x=80,y=0,height=430,width=300)
-    ttk.Label(zombie_attribute_frame,text="僵尸类型:").grid(row=0,column=0,sticky=W)
-    zombie_type_value=ttk.IntVar(zombie_attribute_frame)
-    zombie_type_entry=ttk.Entry(zombie_attribute_frame,textvariable=zombie_type_value,width=10,state=READONLY,bootstyle=SECONDARY)
+    zombie_attribute_frame.place(x=80,y=0,height=430,width=250)
+    zombie_state_frame=ttk.Frame(zombie_attribute_frame)
+    zombie_state_frame.grid(row=0,column=0,sticky=W)
+    ttk.Label(zombie_state_frame,text="僵尸类型:").grid(row=0,column=0,sticky=W)
+    zombie_type_value=ttk.IntVar(zombie_state_frame)
+    zombie_type_entry=ttk.Entry(zombie_state_frame,textvariable=zombie_type_value,width=15,state=READONLY,bootstyle=SECONDARY)
     zombie_type_entry.grid(row=0,column=1,sticky=W)
+    ttk.Label(zombie_state_frame,text="状态:").grid(row=0,column=2,sticky=W)
+    zombie_state_value=ttk.IntVar(zombie_state_frame)
+    zombie_state_entry=ttk.Entry(zombie_state_frame,textvariable=zombie_state_value,width=3,bootstyle=SECONDARY)
+    zombie_state_entry.grid(row=0,column=3,sticky=W)
+    def setState(event):
+        zombie_select.setState(zombie_state_value.get())
+        zombie_state_frame.focus_set()
+    zombie_position_frame=ttk.LabelFrame(zombie_attribute_frame,text="位置",bootstyle=DANGER)
+    zombie_position_frame.grid(row=1,column=0,columnspan=4)
+    ttk.Label(zombie_position_frame,text="x坐标:").grid(row=0,column=0,sticky=W)
+    zombie_x_value=ttk.IntVar(zombie_position_frame)
+    zombie_x_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_x_value,width=3,bootstyle=SECONDARY)
+    zombie_x_entry.grid(row=0,column=1,sticky=W)
+    def setX(event):
+        zombie_select.setState(zombie_state_value.get())
+        zombie_position_frame.focus_set()
+    ttk.Label(zombie_position_frame,text="y坐标:").grid(row=0,column=2,sticky=W)
+    zombie_y_value=ttk.IntVar(zombie_position_frame)
+    zombie_y_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_y_value,width=3,bootstyle=SECONDARY)
+    zombie_y_entry.grid(row=0,column=3,sticky=W)
+    def setY(event):
+        zombie_select.setState(zombie_y_value.get())
+        zombie_position_frame.focus_set()
+    ttk.Label(zombie_position_frame,text="第").grid(row=0,column=4,sticky=W)
+    zombie_state_value=ttk.IntVar(zombie_position_frame)
+    zombie_state_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_state_value,width=3,bootstyle=SECONDARY)
+    zombie_state_entry.grid(row=0,column=5,sticky=W)
+    ttk.Label(zombie_position_frame,text="行").grid(row=0,column=6,sticky=W)
+    def setState(event):
+        zombie_select.setState(zombie_state_value.get())
+        zombie_position_frame.focus_set()
+    
     zombie_hp_frame=ttk.LabelFrame(zombie_attribute_frame,text="血量",bootstyle=DANGER)
     zombie_hp_frame.grid(row=2,column=0,columnspan=4)
     ttk.Label(zombie_hp_frame,text="本体:").grid(row=0,column=0)
@@ -286,6 +320,7 @@ def mainWindow():
         zombie_select.setHP(zombie_hp_value.get())
         zombie_hp_frame.focus_set()
     zombie_hp_entry.bind("<Return>",setHP)
+    zombie_hp_frame.grid_columnconfigure(2,minsize=50)
     zombie_hatHP_label=ttk.Label(zombie_hp_frame,text="帽子:")
     zombie_hatHP_label.grid(row=0,column=2)
     zombie_hatHP_value=ttk.IntVar(zombie_hp_frame)
@@ -304,6 +339,7 @@ def mainWindow():
         zombie_hp_frame.focus_set()
     zombie_doorHP_entry.bind("<Return>",setDoorHP)
 
+
     def get_zombie_select(event):
         global zombie_select
         try:
@@ -316,6 +352,8 @@ def mainWindow():
         global zombie_select
         if zombie_select!=None:
             zombie_type_value.set(str(zombie_select.type)+":"+data.zombiesType[zombie_select.type])
+            if(zombie_attribute_frame.focus_get()!=zombie_state_entry):
+                zombie_state_value.set(zombie_select.state)
             if(zombie_attribute_frame.focus_get()!=zombie_hp_entry):
                 zombie_hp_value.set(zombie_select.hp)
             if(zombie_select.hatType==0):
