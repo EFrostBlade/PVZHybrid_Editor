@@ -39,7 +39,7 @@ class zombie:
     def __init__(self,addr):
         self.addr=addr
         self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x90)))/0x15c)
-        self.exist=PVZ_memory.read_bytes(self.addr+0xec,1)
+        self.exist=PVZ_memory.read_int(self.addr+0xec)
         self.row=PVZ_memory.read_int(self.addr+0x1c)
         self.type=PVZ_memory.read_int(self.addr+0x24)
         self.x=PVZ_memory.read_float(self.addr+0x2c)
@@ -58,8 +58,8 @@ class zombie:
         self.frozen=PVZ_memory.read_int(self.addr+0xb4)
         self.isVisible=PVZ_memory.read_bool(self.addr+0x18)
         self.isEating=PVZ_memory.read_bool(self.addr+0x51)
-        self.isHPynotized=PVZ_memory.read_bool(self.addr+0xb8)
-        self.isEBlow=PVZ_memory.read_bool(self.addr+0xb9)
+        self.isHpynotized=PVZ_memory.read_bool(self.addr+0xb8)
+        self.isBlow=PVZ_memory.read_bool(self.addr+0xb9)
         self.isDying=PVZ_memory.read_bool(self.addr+0xba)
 
     def setRow(self,row):
@@ -87,14 +87,16 @@ class zombie:
         PVZ_memory.write_int(self.addr+0xb0,butter)
     def setFrozen(self,frozen):
         PVZ_memory.write_int(self.addr+0xb4,frozen)
+    def setExist(self,exist):
+        PVZ_memory.write_int(self.addr+0xec,exist)
     def setIsVisible(self,isVisible):
         PVZ_memory.write_bool(self.addr+0x18,isVisible)
     def setIsEating(self,isEating):
         PVZ_memory.write_bool(self.addr+0x51,isEating)
     def setIsHPynotized(self,isHPynotized):
         PVZ_memory.write_bool(self.addr+0xb8,isHPynotized)
-    def setIsEBlow(self,isEBlow):
-        PVZ_memory.write_bool(self.addr+0xb9,isEBlow)
+    def setIsBlow(self,isBlow):
+        PVZ_memory.write_bool(self.addr+0xb9,isBlow)
     def setIsDying(self,isDying):
         PVZ_memory.write_bool(self.addr+0xba,isDying)
 
