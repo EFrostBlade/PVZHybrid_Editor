@@ -1,9 +1,13 @@
 from pymem import Pymem
 
 PVZ_memory=Pymem()
+PVZ_pid=0
 def update_PVZ_memory(memory):
     global PVZ_memory
     PVZ_memory=memory
+def update_PVZ_pid(pid):
+    global PVZ_pid
+    PVZ_pid=pid
     
 baseAddress=0x006A9EC0
 
@@ -12,6 +16,9 @@ zombiesType=["普僵","旗帜","路障","撑杆","铁桶","冰车二爷","铁门
                  "跳跳","冰车雪人","飞贼","扶梯","篮球","巨人","小鬼","僵王","豌豆僵尸",
                  "坚果僵尸","辣椒僵尸","机枪僵尸","冰窝瓜僵尸","高冰果僵尸","红眼","迪斯科",
                  "舞者","骷髅"]
+
+itemType=["未知0","墓碑","坑洞","梯子","蓝色传送门","白色传送门","未知6","罐子","未知8",
+          "未知9","蜗牛","钉耙","脑子"]
 
 class plant:
     def __init__(self,addr):
@@ -40,7 +47,7 @@ class zombie:
         self.addr=addr
         self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x90)))/0x15c)
         self.exist=PVZ_memory.read_int(self.addr+0xec)
-        self.row=PVZ_memory.read_int(self.addr+0x1c)
+        self.row=PVZ_memory.read_int(self.addr+0x1c)+1
         self.type=PVZ_memory.read_int(self.addr+0x24)
         self.x=PVZ_memory.read_float(self.addr+0x2c)
         self.y=PVZ_memory.read_float(self.addr+0x30)
@@ -63,7 +70,7 @@ class zombie:
         self.isDying=PVZ_memory.read_bool(self.addr+0xba)
 
     def setRow(self,row):
-        PVZ_memory.write_int(self.addr+0x1c,row)
+        PVZ_memory.write_int(self.addr+0x1c,row-1)
     def setX(self,x):
         PVZ_memory.write_float(self.addr+0x2c,x)
     def setY(self,y):
@@ -105,7 +112,17 @@ class item:
     def __init__(self,addr):
         self.addr=addr
         self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x11c)))/0xec)
-        self.exist=PVZ_memory.read_bytes(self.addr+0x20,1)
-        self.Row = PVZ_memory.read_int(self.addr + 0x14)
-        self.Col = PVZ_memory.read_int(self.addr + 0x10)
-        self.Type = PVZ_memory.read_int(self.addr + 8)
+        self.exist=PVZ_memory.read_bool(self.addr+0x20)
+        self.row = PVZ_memory.read_int(self.addr + 0x14)+1
+        self.col = PVZ_memory.read_int(self.addr + 0x10)+1
+        self.type = PVZ_memory.read_int(self.addr + 0x8)
+        self.time= PVZ_memory.read_int(self.addr + 0x18)
+
+    def setExist(self,exist):
+        PVZ_memory.write_bool(self.addr+0x20,exist)
+    def setRow(self,row):
+        PVZ_memory.write_int(self.addr+0x14,row-1)
+    def setCol(self,col):
+        PVZ_memory.write_int(self.addr+0x10,col-1)
+    def setTime(self,time):
+        PVZ_memory.write_int(self.addr+0x18,time)

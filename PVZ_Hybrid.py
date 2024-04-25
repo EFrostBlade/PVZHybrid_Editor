@@ -4,6 +4,7 @@ import pymem.ressources.kernel32
 import pymem.ressources.structure
 import pymem.thread
 import pymem.memory
+import PVZ_asm as asm
 
 column1addr=None
 column2addr=None
@@ -211,3 +212,20 @@ def changeGameSpeed(s):
         data.PVZ_memory.write_int(FrameDurationAddr,10)
         data.PVZ_memory.write_bytes(0x6A9EAA,b'\x00',1)
         data.PVZ_memory.write_bytes(0x6A9EAB,b'\x01',1)
+
+def putLadder(row,col):
+    class ladder:
+        def __init__(self,row,col):
+            self.row=row
+            self.col=col   
+
+        def creat_asm(self,startAddress):
+            ladder_asm=asm.Asm(startAddress)
+            ladder_asm.mov_exx_dword_ptr(asm.EAX, 0x006a9ec0)
+            ladder_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX,asm.EAX, 0x768)
+            ladder_asm.mov_exx(asm.EDI, self.row)
+            ladder_asm.push_byte(self.col)
+            ladder_asm.call(0x00408f40)
+            return ladder_asm
+
+    asm.runThread(ladder(row,col))

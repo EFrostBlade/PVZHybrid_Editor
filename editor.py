@@ -1,3 +1,5 @@
+from PIL import Image
+Image.CUBIC = Image.BICUBIC
 from pymem import Pymem
 import win32gui
 import win32process
@@ -12,9 +14,11 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from ttkbootstrap.tooltip import ToolTip
 import PVZ_data as data
 import PVZ_Hybrid as pvz
+import PVZ_asm
 
 data.update_PVZ_memory(1)
 zombie_select=None
+item_select=None
 
 def resource_path(relative_path):
     """ 获取资源的绝对路径，适用于开发环境和PyInstaller环境 """
@@ -30,6 +34,7 @@ def chooseGame():
     def openPVZ_memory(process1):
         try:
             data.update_PVZ_memory(Pymem(int(re.search(r'(\d+)',process1).group(1))))
+            data.update_PVZ_pid(int(re.search(r'(\d+)',process1).group(1)))
         except:
             Messagebox.show_error("没有足够的权限，请确保游戏未以管理员身份运行",title="注入进程失败",parent=choose_process_window)
             choose_process_window.quit()
@@ -43,6 +48,7 @@ def chooseGame():
             hwnd=win32gui.FindWindow("MainWindow",None)
             pid=win32process.GetWindowThreadProcessId(hwnd)
             data.update_PVZ_memory( Pymem(pid[1]))
+            data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
             choose_process_window.destroy()
         except:
@@ -61,6 +67,7 @@ def chooseGame():
         choose_process_window.quit()
         choose_process_window.destroy()
         data.update_PVZ_memory(0)
+        data.update_PVZ_pid(0)
      
     def getSelecthwnd():
         hwnd_title = dict() 
@@ -134,6 +141,7 @@ def mainWindow():
             hwnd=win32gui.FindWindow("MainWindow",None)
             pid=win32process.GetWindowThreadProcessId(hwnd)
             data.update_PVZ_memory( Pymem(pid[1]))
+            data.update_PVZ_pid(pid[1])
             process_label["text"]="找到进程："+str(data.PVZ_memory.process_id)+str(psutil.Process(data.PVZ_memory.process_id).name())
             process_label.config(bootstyle=DANGER)
         except:
@@ -291,46 +299,46 @@ def mainWindow():
     zombie_state_value=ttk.IntVar(zombie_state_frame)
     zombie_state_entry=ttk.Entry(zombie_state_frame,textvariable=zombie_state_value,width=3,font=("黑体",8),bootstyle=SECONDARY)
     zombie_state_entry.grid(row=1,column=1,sticky=W)
-    def setState(event):
+    def setZombieState(event):
         zombie_select.setState(zombie_state_value.get())
         zombie_state_frame.focus_set()
-    zombie_state_entry.bind("<Return>",setState)
+    zombie_state_entry.bind("<Return>",setZombieState)
     ttk.Label(zombie_state_frame,text="大小:").grid(row=1,column=3,sticky=W)
     zombie_size_value=ttk.DoubleVar(zombie_state_frame)
     zombie_size_entry=ttk.Entry(zombie_state_frame,textvariable=zombie_size_value,width=6,font=("黑体",8),bootstyle=SECONDARY)
     zombie_size_entry.grid(row=1,column=4,sticky=W)
-    def setSize(event):
+    def setZombieSize(event):
         zombie_select.setSize(zombie_size_value.get())
         zombie_state_frame.focus_set()
-    zombie_size_entry.bind("<Return>",setSize)
+    zombie_size_entry.bind("<Return>",setZombieSize)
     zombie_position_frame=ttk.LabelFrame(zombie_attribute_frame,text="位置",bootstyle=DANGER)
     zombie_position_frame.grid(row=2,column=0,columnspan=4,sticky=W)
     ttk.Label(zombie_position_frame,text="x坐标:").grid(row=0,column=0,columnspan=3,sticky=W)
     zombie_x_value=ttk.DoubleVar(zombie_position_frame)
     zombie_x_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_x_value,width=6,font=("黑体",8),bootstyle=SECONDARY)
     zombie_x_entry.grid(row=0,column=3,columnspan=3,sticky=W)
-    def setX(event):
+    def setZombieX(event):
         print(zombie_x_value.get())
         zombie_select.setX(zombie_x_value.get())
         zombie_position_frame.focus_set()
-    zombie_x_entry.bind("<Return>",setX)
+    zombie_x_entry.bind("<Return>",setZombieX)
     ttk.Label(zombie_position_frame,text="y坐标:").grid(row=1,column=0,columnspan=3,sticky=W)
     zombie_y_value=ttk.DoubleVar(zombie_position_frame)
     zombie_y_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_y_value,width=6,font=("黑体",8),bootstyle=SECONDARY)
     zombie_y_entry.grid(row=1,column=3,columnspan=3,sticky=W)
-    def setY(event):
+    def setZombieY(event):
         zombie_select.setY(zombie_y_value.get())
         zombie_position_frame.focus_set()
-    zombie_y_entry.bind("<Return>",setY)
+    zombie_y_entry.bind("<Return>",setZombieY)
     ttk.Label(zombie_position_frame,text="第").grid(row=2,column=0,sticky=W)
     zombie_row_value=ttk.IntVar(zombie_position_frame)
     zombie_row_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_row_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
     zombie_row_entry.grid(row=2,column=1,columnspan=3,sticky=W)
     ttk.Label(zombie_position_frame,text="行").grid(row=2,column=4,sticky=W)
-    def setRow(event):
+    def setZombieRow(event):
         zombie_select.setRow(zombie_row_value.get())
         zombie_position_frame.focus_set()
-    zombie_row_entry.bind("<Return>",setRow)
+    zombie_row_entry.bind("<Return>",setZombieRow)
     zombie_hp_frame=ttk.LabelFrame(zombie_attribute_frame,text="血量",bootstyle=DANGER)
     zombie_hp_frame.grid(row=2,column=4,columnspan=8,sticky=W)
     zombie_hp_frame.grid_columnconfigure(0,minsize=50)
@@ -338,54 +346,54 @@ def mainWindow():
     zombie_hp_value=ttk.IntVar(zombie_hp_frame)
     zombie_hp_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_hp_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_hp_entry.grid(row=0,column=1,ipady=0)
-    def setHP(event):
+    def setZombieHP(event):
         zombie_select.setHP(zombie_hp_value.get())
         zombie_hp_frame.focus_set()
-    zombie_hp_entry.bind("<Return>",setHP)
+    zombie_hp_entry.bind("<Return>",setZombieHP)
     zombie_hatHP_label=ttk.Label(zombie_hp_frame,text="帽子:")
     zombie_hatHP_label.grid(row=1,column=0)
     zombie_hatHP_value=ttk.IntVar(zombie_hp_frame)
     zombie_hatHP_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_hatHP_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_hatHP_entry.grid(row=1,column=1,ipady=0)
-    def setHatHP(event):
+    def setZombieHatHP(event):
         zombie_select.setHatHP(zombie_hatHP_value.get())
         zombie_hp_frame.focus_set()
-    zombie_hatHP_entry.bind("<Return>",setHatHP)
+    zombie_hatHP_entry.bind("<Return>",setZombieHatHP)
     ttk.Label(zombie_hp_frame,text="铁门:").grid(row=2,column=0,padx=(2,0))
     zombie_doorHP_value=ttk.IntVar(zombie_hp_frame)
     zombie_doorHP_entry=ttk.Entry(zombie_hp_frame,textvariable=zombie_doorHP_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_doorHP_entry.grid(row=2,column=1,ipady=0)
-    def setDoorHP(event):
+    def setZombieDoorHP(event):
         zombie_select.setDoorHP(zombie_doorHP_value.get())
         zombie_hp_frame.focus_set()
-    zombie_doorHP_entry.bind("<Return>",setDoorHP)
+    zombie_doorHP_entry.bind("<Return>",setZombieDoorHP)
     zombie_control_frame=ttk.LabelFrame(zombie_attribute_frame,text="控制时间",bootstyle=DANGER)
     zombie_control_frame.grid(row=3,column=0,columnspan=3,sticky=W)
     ttk.Label(zombie_control_frame,text="减速:").grid(row=0,column=0)
     zombie_slow_value=ttk.IntVar(zombie_control_frame)
     zombie_slow_entry=ttk.Entry(zombie_control_frame,textvariable=zombie_slow_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_slow_entry.grid(row=0,column=1,ipady=0)
-    def setSlow(event):
+    def setZombieSlow(event):
         zombie_select.setSlow(zombie_slow_value.get())
         zombie_control_frame.focus_set()
-    zombie_slow_entry.bind("<Return>",setSlow)
+    zombie_slow_entry.bind("<Return>",setZombieSlow)
     zombie_butter_label=ttk.Label(zombie_control_frame,text="黄油:")
     zombie_butter_label.grid(row=1,column=0)
     zombie_butter_value=ttk.IntVar(zombie_control_frame)
     zombie_butter_entry=ttk.Entry(zombie_control_frame,textvariable=zombie_butter_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_butter_entry.grid(row=1,column=1,ipady=0)
-    def setButter(event):
+    def setZombieButter(event):
         zombie_select.setButter(zombie_butter_value.get())
         zombie_control_frame.focus_set()
-    zombie_butter_entry.bind("<Return>",setButter)
+    zombie_butter_entry.bind("<Return>",setZombieButter)
     ttk.Label(zombie_control_frame,text="冻结:").grid(row=2,column=0,padx=(2,0))
     zombie_frozen_value=ttk.IntVar(zombie_control_frame)
     zombie_frozen_entry=ttk.Entry(zombie_control_frame,textvariable=zombie_frozen_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
     zombie_frozen_entry.grid(row=2,column=1,ipady=0)
-    def setFrozen(event):
+    def setZombieFrozen(event):
         zombie_select.setFrozen(zombie_frozen_value.get())
         zombie_control_frame.focus_set()
-    zombie_frozen_entry.bind("<Return>",setFrozen)
+    zombie_frozen_entry.bind("<Return>",setZombieFrozen)
     zombie_flag_frame=ttk.LabelFrame(zombie_attribute_frame,text="状态标志",bootstyle=DANGER)
     zombie_flag_frame.grid(row=3,column=3,columnspan=8,sticky=W)
     zombie_exist_flag=ttk.BooleanVar(zombie_flag_frame)
@@ -491,7 +499,97 @@ def mainWindow():
     
     grid_page=ttk.Frame(page_tab)
     grid_page.pack()
-    page_tab.add(grid_page,text="场地修改")
+    page_tab.add(grid_page,text="场地修改")    
+    item_list_frame=ttk.LabelFrame(grid_page,text="物品列表",bootstyle=DARK)
+    item_list_frame.place(x=0,y=0,anchor=NW,height=140,width=170)
+    item_list_box_scrollbar=ttk.Scrollbar(item_list_frame,bootstyle=DARK)
+    item_list_box=ttk.Treeview(item_list_frame,show=TREE,selectmode=BROWSE,padding=0,columns=("item_list"),yscrollcommand=item_list_box_scrollbar.set,bootstyle=DARK)
+    item_list_box_scrollbar.configure(command=item_list_box.yview)
+    item_list_box.place(x=0,y=0,anchor=NW,height=120,width=70)
+    item_list_box_scrollbar.place(x=65,y=0,height=120,anchor=NW)
+    item_list=list()
+    def refresh_item_list():
+        item_list.clear()
+        item_list_box.delete(*item_list_box.get_children())
+        try:
+            item_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x12c)
+        except:
+            return
+        i=0
+        j=0
+        while i<item_num:
+            item_addresss=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x11c)+0xec*j
+            item_exist=data.PVZ_memory.read_bytes(item_addresss+0x20,1)
+            if(item_exist==b'\x00'):
+                item_list.append(data.item(item_addresss))
+                i=i+1
+            j=j+1
+        n=0
+        for k in range(item_num):
+            item_list_box.insert("",END,iid=n,text=str(item_list[k].no)+data.itemType[item_list[k].type])
+            if(item_select!=None):
+                if(item_select.exist==0):
+                    if(item_select.no==item_list[k].no):
+                        item_list_box.selection_set((str(n),))
+            n=n+1
+    refresh_item_list()
+    item_attribute_frame=ttk.Frame(item_list_frame)
+    item_attribute_frame.place(x=80,y=0,height=125,width=85)
+    item_exist_flag=ttk.BooleanVar(item_attribute_frame)
+    def change_item_exist():
+            item_select.setExist(not item_exist_flag.get())
+    ttk.Checkbutton(item_attribute_frame,text="存在",bootstyle="dark-round-toggle",variable=item_exist_flag,command=lambda:change_item_exist()).grid(row=0,column=0,columnspan=4,sticky=W)
+    item_row_value=ttk.IntVar(item_attribute_frame)
+    item_row_entry=ttk.Entry(item_attribute_frame,textvariable=item_row_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
+    item_row_entry.grid(row=1,column=0)
+    ttk.Label(item_attribute_frame,text="行").grid(row=1,column=1)
+    def setItemRow(event):
+        item_select.setRow(item_row_value.get())
+        item_attribute_frame.focus_set()
+    item_row_entry.bind("<Return>",setItemRow)
+    item_col_value=ttk.IntVar(item_attribute_frame)
+    item_col_entry=ttk.Entry(item_attribute_frame,textvariable=item_col_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
+    item_col_entry.grid(row=1,column=2)
+    ttk.Label(item_attribute_frame,text="列").grid(row=1,column=3)
+    def setItemCol(event):
+        item_select.setCol(item_col_value.get())
+        item_attribute_frame.focus_set()
+    item_col_entry.bind("<Return>",setItemCol)
+    item_time_value=ttk.IntVar(item_attribute_frame)
+    def setItemTime(event):
+        item_select.setTime(item_time_meter.amountusedvar.get())
+        item_attribute_frame.focus_set()
+    item_time_meter=ttk.Meter(item_attribute_frame,metersize=80,bootstyle=DARK,amounttotal=18000,showtext=True,metertype="semi",interactive=True,textfont="-size 7",subtext="剩余时间",subtextfont="-size 7",subtextstyle="dark")
+    def setItemTimeMeterFocus(event):
+        item_time_meter.focus_set()
+    item_time_meter.indicator.bind("<Button-1>", setItemTimeMeterFocus)
+    item_time_meter.indicator.bind("<ButtonRelease-1>", setItemTime)
+
+    def get_item_select(event):
+        global item_select
+        try:
+            index=int(item_list_box.selection()[0])
+            item_select=item_list[index]
+        except:
+            return
+    def get_item_attribute():
+        global item_select
+        if item_select!=None:
+            item_exist_flag.set(not item_select.exist)
+            if(item_attribute_frame.focus_get()!=item_row_entry):
+                item_row_value.set(item_select.row)
+            if(item_attribute_frame.focus_get()!=item_col_entry):
+                item_col_value.set(item_select.col)
+            if(item_select.type==2):
+                if(item_attribute_frame.focus_get()!=item_time_meter):
+                    item_time_value.set(item_select.time)
+                    item_time_meter.grid(row=2,column=0,columnspan=4)
+                    item_time_meter.configure(amountused=item_time_value.get())
+            else:
+                item_time_meter.grid_forget()
+                
+    item_list_box.bind("<<TreeviewSelect>>",get_item_select)
+
 
 
     def refreshData():
@@ -503,6 +601,10 @@ def mainWindow():
             if(pvz.getMap()!=False):       
                 refresh_zombie_list()
                 get_zombie_attribute()
+        if(page_tab.index('current')==3):
+            if(pvz.getMap()!=False):       
+                refresh_item_list()
+                get_item_attribute()
         main_window.after(100,refreshData)
         
     main_window.after(100,refreshData)
