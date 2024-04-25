@@ -229,3 +229,8 @@ def putLadder(row,col):
             return ladder_asm
 
     asm.runThread(ladder(row,col))
+    
+def putZombe(row,col):
+    class zombiePut:
+        def __init__(self) -> None:
+            pass

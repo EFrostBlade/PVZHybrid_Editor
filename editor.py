@@ -8,6 +8,7 @@ import re
 import time
 import os
 import sys
+import ctypes
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -15,6 +16,8 @@ from ttkbootstrap.tooltip import ToolTip
 import PVZ_data as data
 import PVZ_Hybrid as pvz
 import PVZ_asm
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
+ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 
 data.update_PVZ_memory(1)
 zombie_select=None
@@ -122,6 +125,8 @@ def mainWindow():
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
     main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
+    main_window.tk.call('tk', 'scaling', 4/3)
+
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -332,13 +337,13 @@ def mainWindow():
     zombie_y_entry.bind("<Return>",setZombieY)
     ttk.Label(zombie_position_frame,text="第").grid(row=2,column=0,sticky=W)
     zombie_row_value=ttk.IntVar(zombie_position_frame)
-    zombie_row_entry=ttk.Entry(zombie_position_frame,textvariable=zombie_row_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
-    zombie_row_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+    zombie_row_combobox=ttk.Combobox(zombie_position_frame,textvariable=zombie_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombie_row_combobox.grid(row=2,column=1,columnspan=3,sticky=W)
     ttk.Label(zombie_position_frame,text="行").grid(row=2,column=4,sticky=W)
     def setZombieRow(event):
         zombie_select.setRow(zombie_row_value.get())
         zombie_position_frame.focus_set()
-    zombie_row_entry.bind("<Return>",setZombieRow)
+    zombie_row_combobox.bind("<<ComboboxSelected>>",setZombieRow)
     zombie_hp_frame=ttk.LabelFrame(zombie_attribute_frame,text="血量",bootstyle=DANGER)
     zombie_hp_frame.grid(row=2,column=4,columnspan=8,sticky=W)
     zombie_hp_frame.grid_columnconfigure(0,minsize=50)
@@ -435,55 +440,57 @@ def mainWindow():
     def get_zombie_attribute():
         global zombie_select
         if zombie_select!=None:
-            zombie_type_value.set(str(zombie_select.type)+":"+data.zombiesType[zombie_select.type])
-            if(zombie_attribute_frame.focus_get()!=zombie_state_entry):
-                zombie_state_value.set(zombie_select.state)
-            if(zombie_attribute_frame.focus_get()!=zombie_size_entry):
-                zombie_size_value.set(zombie_select.size)
-            if(zombie_attribute_frame.focus_get()!=zombie_x_entry):
-                zombie_x_value.set(round(zombie_select.x,2))
-            if(zombie_attribute_frame.focus_get()!=zombie_y_entry):
-                zombie_y_value.set(round(zombie_select.y,2))
-            if(zombie_attribute_frame.focus_get()!=zombie_row_entry):
+            try:
+                zombie_type_value.set(str(zombie_select.type)+":"+data.zombiesType[zombie_select.type])
+                if(zombie_attribute_frame.focus_get()!=zombie_state_entry):
+                    zombie_state_value.set(zombie_select.state)
+                if(zombie_attribute_frame.focus_get()!=zombie_size_entry):
+                    zombie_size_value.set(zombie_select.size)
+                if(zombie_attribute_frame.focus_get()!=zombie_x_entry):
+                    zombie_x_value.set(round(zombie_select.x,2))
+                if(zombie_attribute_frame.focus_get()!=zombie_y_entry):
+                    zombie_y_value.set(round(zombie_select.y,2))
                 zombie_row_value.set(zombie_select.row)
-            if(zombie_attribute_frame.focus_get()!=zombie_hp_entry):
-                zombie_hp_value.set(zombie_select.hp)
-            if(zombie_select.hatType==0):
-                zombie_hatHP_label["text"]="无:"
-            elif(zombie_select.hatType==1):
-                zombie_hatHP_label["text"]="路障:"
-            elif(zombie_select.hatType==2):
-                zombie_hatHP_label["text"]="铁桶:"
-            elif(zombie_select.hatType==3):
-                zombie_hatHP_label["text"]="橄榄帽:"
-            elif(zombie_select.hatType==4):
-                zombie_hatHP_label["text"]="矿工帽:"
-            elif(zombie_select.hatType==7):
-                zombie_hatHP_label["text"]="雪橇车:"
-            elif(zombie_select.hatType==8):
-                zombie_hatHP_label["text"]="坚果:"
-            elif(zombie_select.hatType==9):
-                zombie_hatHP_label["text"]="高冰果:"
-            elif(zombie_select.hatType==10):
-                zombie_hatHP_label["text"]="钢盔:"
-            elif(zombie_select.hatType==11):
-                zombie_hatHP_label["text"]="绿帽:"
-            else:
-                zombie_hatHP_label["text"]=str(zombie_select.hatType)+"未知:"
-            if(zombie_attribute_frame.focus_get()!=zombie_hatHP_entry):
-                zombie_hatHP_value.set(zombie_select.hatHP)
-            if(zombie_attribute_frame.focus_get()!=zombie_doorHP_entry):
-                zombie_doorHP_value.set(zombie_select.doorHP)
-            if(zombie_attribute_frame.focus_get()!=zombie_slow_entry):
-                zombie_slow_value.set(zombie_select.slow)
-            if(zombie_attribute_frame.focus_get()!=zombie_butter_entry):
-                zombie_butter_value.set(zombie_select.butter)
-            if(zombie_attribute_frame.focus_get()!=zombie_frozen_entry):
-                zombie_frozen_value.set(zombie_select.frozen)
-            if(zombie_select.exist==0):
-                zombie_exist_flag.set(True)
-            else:
-                zombie_exist_flag.set(False)
+                if(zombie_attribute_frame.focus_get()!=zombie_hp_entry):
+                    zombie_hp_value.set(zombie_select.hp)
+                if(zombie_select.hatType==0):
+                    zombie_hatHP_label["text"]="无:"
+                elif(zombie_select.hatType==1):
+                    zombie_hatHP_label["text"]="路障:"
+                elif(zombie_select.hatType==2):
+                    zombie_hatHP_label["text"]="铁桶:"
+                elif(zombie_select.hatType==3):
+                    zombie_hatHP_label["text"]="橄榄帽:"
+                elif(zombie_select.hatType==4):
+                    zombie_hatHP_label["text"]="矿工帽:"
+                elif(zombie_select.hatType==7):
+                    zombie_hatHP_label["text"]="雪橇车:"
+                elif(zombie_select.hatType==8):
+                    zombie_hatHP_label["text"]="坚果:"
+                elif(zombie_select.hatType==9):
+                    zombie_hatHP_label["text"]="高冰果:"
+                elif(zombie_select.hatType==10):
+                    zombie_hatHP_label["text"]="钢盔:"
+                elif(zombie_select.hatType==11):
+                    zombie_hatHP_label["text"]="绿帽:"
+                else:
+                    zombie_hatHP_label["text"]=str(zombie_select.hatType)+"未知:"
+                if(zombie_attribute_frame.focus_get()!=zombie_hatHP_entry):
+                    zombie_hatHP_value.set(zombie_select.hatHP)
+                if(zombie_attribute_frame.focus_get()!=zombie_doorHP_entry):
+                    zombie_doorHP_value.set(zombie_select.doorHP)
+                if(zombie_attribute_frame.focus_get()!=zombie_slow_entry):
+                    zombie_slow_value.set(zombie_select.slow)
+                if(zombie_attribute_frame.focus_get()!=zombie_butter_entry):
+                    zombie_butter_value.set(zombie_select.butter)
+                if(zombie_attribute_frame.focus_get()!=zombie_frozen_entry):
+                    zombie_frozen_value.set(zombie_select.frozen)
+                if(zombie_select.exist==0):
+                    zombie_exist_flag.set(True)
+                else:
+                    zombie_exist_flag.set(False)
+            except:
+                pass
             zombie_isVisible_flag.set(not zombie_select.isVisible)
             zombie_isEating_flag.set(zombie_select.isEating)
             zombie_isHpynotized_flag.set(zombie_select.isHpynotized)
@@ -501,7 +508,7 @@ def mainWindow():
     grid_page.pack()
     page_tab.add(grid_page,text="场地修改")    
     item_list_frame=ttk.LabelFrame(grid_page,text="物品列表",bootstyle=DARK)
-    item_list_frame.place(x=0,y=0,anchor=NW,height=140,width=170)
+    item_list_frame.place(x=0,y=0,anchor=NW,height=140,width=200)
     item_list_box_scrollbar=ttk.Scrollbar(item_list_frame,bootstyle=DARK)
     item_list_box=ttk.Treeview(item_list_frame,show=TREE,selectmode=BROWSE,padding=0,columns=("item_list"),yscrollcommand=item_list_box_scrollbar.set,bootstyle=DARK)
     item_list_box_scrollbar.configure(command=item_list_box.yview)
@@ -534,27 +541,27 @@ def mainWindow():
             n=n+1
     refresh_item_list()
     item_attribute_frame=ttk.Frame(item_list_frame)
-    item_attribute_frame.place(x=80,y=0,height=125,width=85)
+    item_attribute_frame.place(x=80,y=0,height=120,width=115)
     item_exist_flag=ttk.BooleanVar(item_attribute_frame)
     def change_item_exist():
             item_select.setExist(not item_exist_flag.get())
     ttk.Checkbutton(item_attribute_frame,text="存在",bootstyle="dark-round-toggle",variable=item_exist_flag,command=lambda:change_item_exist()).grid(row=0,column=0,columnspan=4,sticky=W)
     item_row_value=ttk.IntVar(item_attribute_frame)
-    item_row_entry=ttk.Entry(item_attribute_frame,textvariable=item_row_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
-    item_row_entry.grid(row=1,column=0)
+    item_row_combobox=ttk.Combobox(item_attribute_frame,textvariable=item_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY)
+    item_row_combobox.grid(row=1,column=0)
     ttk.Label(item_attribute_frame,text="行").grid(row=1,column=1)
     def setItemRow(event):
         item_select.setRow(item_row_value.get())
         item_attribute_frame.focus_set()
-    item_row_entry.bind("<Return>",setItemRow)
+    item_row_combobox.bind("<<ComboboxSelected>>",setItemRow)
     item_col_value=ttk.IntVar(item_attribute_frame)
-    item_col_entry=ttk.Entry(item_attribute_frame,textvariable=item_col_value,width=2,font=("黑体",8),bootstyle=SECONDARY)
-    item_col_entry.grid(row=1,column=2)
+    item_col_combobox=ttk.Combobox(item_attribute_frame,textvariable=item_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY)
+    item_col_combobox.grid(row=1,column=2)
     ttk.Label(item_attribute_frame,text="列").grid(row=1,column=3)
     def setItemCol(event):
         item_select.setCol(item_col_value.get())
         item_attribute_frame.focus_set()
-    item_col_entry.bind("<Return>",setItemCol)
+    item_col_combobox.bind("<<ComboboxSelected>>",setItemCol)
     item_time_value=ttk.IntVar(item_attribute_frame)
     def setItemTime(event):
         item_select.setTime(item_time_meter.amountusedvar.get())
@@ -564,6 +571,49 @@ def mainWindow():
         item_time_meter.focus_set()
     item_time_meter.indicator.bind("<Button-1>", setItemTimeMeterFocus)
     item_time_meter.indicator.bind("<ButtonRelease-1>", setItemTime)
+    ladder_put_frame=ttk.LabelFrame(grid_page,text="搭梯",bootstyle=DARK)
+    ladder_put_frame.place(x=200,y=0,anchor=NW,height=90,width=130)
+    ttk.Label(ladder_put_frame,text="第").grid(row=0,column=0)
+    ladder_start_row_value=ttk.IntVar(ladder_put_frame)
+    item_start_row_combobox=ttk.Combobox(ladder_put_frame,textvariable=ladder_start_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    item_start_row_combobox.grid(row=0,column=1)
+    ladder_start_row_value.set(1)
+    ttk.Label(ladder_put_frame,text="行").grid(row=0,column=2)
+    ladder_start_col_value=ttk.IntVar(ladder_put_frame)
+    item_start_col_combobox=ttk.Combobox(ladder_put_frame,textvariable=ladder_start_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    item_start_col_combobox.grid(row=0,column=3)
+    ladder_start_col_value.set(1)
+    ttk.Label(ladder_put_frame,text="列").grid(row=0,column=4)
+    ttk.Label(ladder_put_frame,text="至").grid(row=1,column=0)
+    ladder_end_row_value=ttk.IntVar(ladder_put_frame)
+    item_end_row_combobox=ttk.Combobox(ladder_put_frame,textvariable=ladder_end_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    item_end_row_combobox.grid(row=1,column=1)
+    ladder_end_row_value.set(1)
+    ttk.Label(ladder_put_frame,text="行").grid(row=1,column=2)
+    ladder_end_col_value=ttk.IntVar(ladder_put_frame)
+    item_end_col_combobox=ttk.Combobox(ladder_put_frame,textvariable=ladder_end_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    item_end_col_combobox.grid(row=1,column=3)
+    ladder_end_col_value.set(1)
+    ttk.Label(ladder_put_frame,text="列").grid(row=1,column=4)
+    def putLadders():
+        startRow=ladder_start_row_value.get()-1
+        startCol=ladder_start_col_value.get()-1
+        endRow=ladder_end_row_value.get()-1
+        endCol=ladder_end_col_value.get()-1
+        print(startRow,startCol,endRow,endCol)
+        if(pvz.getMap!=False):
+            rows=pvz.getMap()-1
+            if startRow>rows:
+                startRow=rows
+            if endRow>rows:
+                endRow=rows
+            if startRow>endRow or startCol>endCol:
+                Messagebox.show_error("起始行列大于终止行列",title="输入错误")
+            else:
+                for i in range(startRow,endRow+1):
+                    for j in range(startCol,endCol+1):
+                        pvz.putLadder(i,j)
+    ttk.Button(ladder_put_frame,text="搭梯",padding=0,bootstyle=(OUTLINE,DARK),command=lambda:putLadders()).grid(row=2,column=0,columnspan=5,sticky=E)
 
     def get_item_select(event):
         global item_select
@@ -576,15 +626,16 @@ def mainWindow():
         global item_select
         if item_select!=None:
             item_exist_flag.set(not item_select.exist)
-            if(item_attribute_frame.focus_get()!=item_row_entry):
-                item_row_value.set(item_select.row)
-            if(item_attribute_frame.focus_get()!=item_col_entry):
-                item_col_value.set(item_select.col)
+            item_row_value.set(item_select.row)
+            item_col_value.set(item_select.col)
             if(item_select.type==2):
-                if(item_attribute_frame.focus_get()!=item_time_meter):
-                    item_time_value.set(item_select.time)
-                    item_time_meter.grid(row=2,column=0,columnspan=4)
-                    item_time_meter.configure(amountused=item_time_value.get())
+                try:
+                    if(item_attribute_frame.focus_get()!=item_time_meter):
+                        item_time_value.set(item_select.time)
+                        item_time_meter.grid(row=2,column=0,columnspan=4)
+                        item_time_meter.configure(amountused=item_time_value.get())
+                except:
+                    pass
             else:
                 item_time_meter.grid_forget()
                 
