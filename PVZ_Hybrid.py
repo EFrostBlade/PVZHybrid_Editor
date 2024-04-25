@@ -67,6 +67,16 @@ def setSun(sun):
     sunAddr=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x5560
     data.PVZ_memory.write_int(sunAddr,int(sun))
 
+def upperLimit(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x00430A23,b'\xeb',1)
+        data.PVZ_memory.write_bytes(0x00430A78,b'\xeb',1)
+        data.PVZ_memory.write_bytes(0x0048CAB0,b'\xeb',1)
+    else:
+        data.PVZ_memory.write_bytes(0x00430A23,b'\x7e',1)
+        data.PVZ_memory.write_bytes(0x00430A78,b'\x7e',1)
+        data.PVZ_memory.write_bytes(0x0048CAB0,b'\x7e',1)
+
 def ignoreSun(f):
     if f:
         data.PVZ_memory.write_bytes(0x0041ba70,b'\x90\x90\x90\x90\x90\x90',6)
