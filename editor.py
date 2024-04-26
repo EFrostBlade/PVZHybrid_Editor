@@ -21,6 +21,7 @@ ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 
 data.update_PVZ_memory(1)
 zombie_select=None
+plant_select=None
 item_select=None
 
 def resource_path(relative_path):
@@ -503,7 +504,306 @@ def mainWindow():
     plant_page=ttk.Frame(page_tab)
     plant_page.pack()
     page_tab.add(plant_page,text="植物修改")    
+    plant_list_frame=ttk.LabelFrame(plant_page,text="植物列表",bootstyle=SUCCESS)
+    plant_list_frame.place(x=0,y=0,anchor=NW,height=390,width=235)
+    plant_list_box_scrollbar=ttk.Scrollbar(plant_list_frame,bootstyle=SUCCESS)
+    plant_list_box=ttk.Treeview(plant_list_frame,show=TREE,selectmode=BROWSE,padding=0,columns=("plant_list"),yscrollcommand=plant_list_box_scrollbar.set,bootstyle=SUCCESS)
+    plant_list_box_scrollbar.configure(command=plant_list_box.yview)
+    plant_list_box.place(x=0,y=0,anchor=NW,height=370,width=50)
+    plant_list_box_scrollbar.place(x=45,y=0,height=370,anchor=NW)
+    plant_list=list()
+    def refresh_plant_list():
+        plant_list.clear()
+        plant_list_box.delete(*plant_list_box.get_children())
+        try:
+            plant_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xbc)
+        except:
+            return
+        i=0
+        j=0
+        while i<plant_num:
+            plant_addresss=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+            plant_exist=data.PVZ_memory.read_bytes(plant_addresss+0x141,1)
+            if(plant_exist==b'\x00'):
+                plant_list.append(data.plant(plant_addresss))
+                i=i+1
+            j=j+1
+        n=0
+        for k in range(plant_num):
+            plant_list_box.insert("",END,iid=n,text=str(plant_list[k].no))
+            if(plant_select!=None):
+                if(plant_select.exist==0):
+                    if(plant_select.no==plant_list[k].no):
+                        plant_list_box.selection_set((str(n),))
+            n=n+1
+
+    refresh_plant_list()
+    plant_attribute_frame=ttk.Frame(plant_list_frame)
+    plant_attribute_frame.place(x=80,y=0,height=370,width=150)
+    plant_state_frame=ttk.Frame(plant_attribute_frame)
+    plant_state_frame.grid(row=0,column=0,columnspan=12,sticky=W)
+    ttk.Label(plant_state_frame,text="植物类型:").grid(row=0,column=0,columnspan=2,sticky=W)
+    plant_type_value=ttk.IntVar(plant_state_frame)
+    plant_type_entry=ttk.Entry(plant_state_frame,textvariable=plant_type_value,width=12,font=("黑体",8),state=READONLY,bootstyle=SECONDARY)
+    plant_type_entry.grid(row=0,column=2,columnspan=5,sticky=W)
+    ttk.Label(plant_state_frame,text="状态:").grid(row=1,column=0,sticky=W)
+    plant_state_value=ttk.IntVar(plant_state_frame)
+    plant_state_entry=ttk.Entry(plant_state_frame,textvariable=plant_state_value,width=3,font=("黑体",8),bootstyle=SECONDARY)
+    plant_state_entry.grid(row=1,column=1,sticky=W)
+    def setPlantState(event):
+        plant_select.setState(plant_state_value.get())
+        plant_state_frame.focus_set()
+    plant_state_entry.bind("<Return>",setPlantState)
+    plant_position_frame=ttk.LabelFrame(plant_attribute_frame,text="位置",bootstyle=SUCCESS)
+    plant_position_frame.grid(row=2,column=0,columnspan=4,sticky=W)
+    ttk.Label(plant_position_frame,text="x坐标:").grid(row=0,column=0,columnspan=3,sticky=W)
+    plant_x_value=ttk.IntVar(plant_position_frame)
+    plant_x_entry=ttk.Entry(plant_position_frame,textvariable=plant_x_value,width=6,font=("黑体",8),bootstyle=SECONDARY)
+    plant_x_entry.grid(row=0,column=3,columnspan=3,sticky=W)
+    def setPlantX(event):
+        print(plant_x_value.get())
+        plant_select.setX(plant_x_value.get())
+        plant_position_frame.focus_set()
+    plant_x_entry.bind("<Return>",setPlantX)
+    ttk.Label(plant_position_frame,text="y坐标:").grid(row=1,column=0,columnspan=3,sticky=W)
+    plant_y_value=ttk.IntVar(plant_position_frame)
+    plant_y_entry=ttk.Entry(plant_position_frame,textvariable=plant_y_value,width=6,font=("黑体",8),bootstyle=SECONDARY)
+    plant_y_entry.grid(row=1,column=3,columnspan=3,sticky=W)
+    def setPlantY(event):
+        plant_select.setY(plant_y_value.get())
+        plant_position_frame.focus_set()
+    plant_y_entry.bind("<Return>",setPlantY)
+    plant_row_value=ttk.IntVar(plant_position_frame)
+    plant_row_combobox=ttk.Combobox(plant_position_frame,textvariable=plant_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plant_row_combobox.grid(row=2,column=1,columnspan=3,sticky=W)
+    ttk.Label(plant_position_frame,text="行").grid(row=2,column=4,sticky=W)
+    plant_col_value=ttk.IntVar(plant_position_frame)
+    plant_col_combobox=ttk.Combobox(plant_position_frame,textvariable=plant_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plant_col_combobox.grid(row=2,column=5,columnspan=3,sticky=W)
+    ttk.Label(plant_position_frame,text="列").grid(row=2,column=8,sticky=W)
+    def setPlantRow(event):
+        plant_select.setRow(plant_row_value.get())
+        plant_position_frame.focus_set()
+    plant_row_combobox.bind("<<ComboboxSelected>>",setPlantRow)
+    ttk.Label(plant_state_frame,text="血量:").grid(row=1,column=3)
+    plant_hp_value=ttk.IntVar(plant_state_frame)
+    plant_hp_entry=ttk.Entry(plant_state_frame,textvariable=plant_hp_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_hp_entry.grid(row=1,column=4,ipady=0)
+    def setPlantHP(event):
+        plant_select.setHP(plant_hp_value.get())
+        plant_state_frame.focus_set()
+    plant_hp_entry.bind("<Return>",setPlantHP)
+    plant_time_frame=ttk.LabelFrame(plant_attribute_frame,text="倒计时",bootstyle=SUCCESS)
+    plant_time_frame.grid(row=3,column=0,columnspan=3,sticky=W)
+    plant_dietime_label=ttk.Label(plant_time_frame,text="死亡:")
+    plant_dietime_label.grid(row=0,column=0)
+    ToolTip(plant_dietime_label,text="部分具有存在时间植物死亡倒计时",bootstyle=(INFO,INVERSE))
+    plant_dietime_value=ttk.IntVar(plant_time_frame)
+    plant_dietime_entry=ttk.Entry(plant_time_frame,textvariable=plant_dietime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_dietime_entry.grid(row=0,column=1,ipady=0)
+    def setPlantDieTime(event):
+        plant_select.setDieTime(plant_dietime_value.get())
+        plant_time_frame.focus_set()
+    plant_dietime_entry.bind("<Return>",setPlantDieTime)
+    plant_cindertime_label=ttk.Label(plant_time_frame,text="灰烬:")
+    plant_cindertime_label.grid(row=1,column=0)
+    ToolTip(plant_cindertime_label,text="部分灰烬生效、女大消失倒计时",bootstyle=(INFO,INVERSE))
+    plant_cindertime_value=ttk.IntVar(plant_time_frame)
+    plant_cindertime_entry=ttk.Entry(plant_time_frame,textvariable=plant_cindertime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_cindertime_entry.grid(row=1,column=1,ipady=0)
+    def setPlantCinderTime(event):
+        plant_select.setCinderTime(plant_cindertime_value.get())
+        plant_time_frame.focus_set()
+    plant_cindertime_entry.bind("<Return>",setPlantCinderTime)
+    plant_effecttime_label=ttk.Label(plant_time_frame,text="效果:")
+    plant_effecttime_label.grid(row=2,column=0,padx=(2,0))
+    ToolTip(plant_effecttime_label,text="部分植物变大、产生效果倒计时",bootstyle=(INFO,INVERSE))
+    plant_effecttime_value=ttk.IntVar(plant_time_frame)
+    plant_effecttime_entry=ttk.Entry(plant_time_frame,textvariable=plant_effecttime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_effecttime_entry.grid(row=2,column=1,ipady=0)
+    def setPlantEffectTime(event):
+        plant_select.setEffectTime(plant_effecttime_value.get())
+        plant_time_frame.focus_set()
+    plant_effecttime_entry.bind("<Return>",setPlantEffectTime)
+    plant_producttime_label=ttk.Label(plant_time_frame,text="攻击:")
+    plant_producttime_label.grid(row=3,column=0,padx=(2,0))
+    ToolTip(plant_producttime_label,text="部分植物攻击倒计时",bootstyle=(INFO,INVERSE))
+    plant_producttime_value=ttk.IntVar(plant_time_frame)
+    plant_producttime_entry=ttk.Entry(plant_time_frame,textvariable=plant_producttime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_producttime_entry.grid(row=3,column=1,ipady=0)
+    def setPlantProductTime(event):
+        plant_select.setProductTime(plant_producttime_value.get())
+        plant_time_frame.focus_set()
+    plant_producttime_entry.bind("<Return>",setPlantProductTime)
+    plant_productinterval_label=ttk.Label(plant_time_frame,text="间隔:")
+    plant_productinterval_label.grid(row=4,column=0,padx=(2,0))
+    ToolTip(plant_productinterval_label,text="上述植物攻击间隔",bootstyle=(INFO,INVERSE))
+    plant_productinterval_value=ttk.IntVar(plant_time_frame)
+    plant_productinterval_entry=ttk.Entry(plant_time_frame,textvariable=plant_productinterval_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_productinterval_entry.grid(row=4,column=1,ipady=0)
+    def setPlantProductInterval(event):
+        plant_select.setProductInterval(plant_productinterval_value.get())
+        plant_time_frame.focus_set()
+    plant_productinterval_entry.bind("<Return>",setPlantProductInterval)
+    plant_attacktime_label=ttk.Label(plant_time_frame,text="射击:")
+    plant_attacktime_label.grid(row=5,column=0,padx=(2,0))
+    ToolTip(plant_attacktime_label,text="部分植物攻击倒计时",bootstyle=(INFO,INVERSE))
+    plant_attacktime_value=ttk.IntVar(plant_time_frame)
+    plant_attacktime_entry=ttk.Entry(plant_time_frame,textvariable=plant_attacktime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_attacktime_entry.grid(row=5,column=1,ipady=0)
+    def setPlantAttackTime(event):
+        plant_select.setAttackTime(plant_attacktime_value.get())
+        plant_time_frame.focus_set()
+    plant_attacktime_entry.bind("<Return>",setPlantAttackTime)
+    plant_suntime_label=ttk.Label(plant_time_frame,text="阳光:")
+    plant_suntime_label.grid(row=6,column=0,padx=(2,0))
+    ToolTip(plant_suntime_label,text="女王产生阳光倒计时",bootstyle=(INFO,INVERSE))
+    plant_suntime_value=ttk.IntVar(plant_time_frame)
+    plant_suntime_entry=ttk.Entry(plant_time_frame,textvariable=plant_suntime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_suntime_entry.grid(row=6,column=1,ipady=0)
+    def setPlantSunTime(event):
+        plant_select.setSunTime(plant_suntime_value.get())
+        plant_time_frame.focus_set()
+    plant_suntime_entry.bind("<Return>",setPlantSunTime)
+    plant_humtime_label=ttk.Label(plant_time_frame,text="阳光:")
+    plant_humtime_label.grid(row=7,column=0,padx=(2,0))
+    ToolTip(plant_humtime_label,text="汉堡王产生阳光倒计时",bootstyle=(INFO,INVERSE))
+    plant_humtime_value=ttk.IntVar(plant_time_frame)
+    plant_humtime_entry=ttk.Entry(plant_time_frame,textvariable=plant_humtime_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_humtime_entry.grid(row=7,column=1,ipady=0)
+    def setPlantHumTime(event):
+        plant_select.setHumTime(plant_humtime_value.get())
+        plant_time_frame.focus_set()
+    plant_humtime_entry.bind("<Return>",setPlantHumTime)
+    plant_flag_frame=ttk.LabelFrame(plant_attribute_frame,text="状态标志",bootstyle=SUCCESS)
+    plant_flag_frame.grid(row=3,column=3,columnspan=8,sticky=W)
+    plant_exist_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_exist():
+        if(plant_exist_flag.get()==False):
+            plant_select.setExist(2)
+    ttk.Checkbutton(plant_flag_frame,text="存在",bootstyle="success-round-toggle",variable=plant_exist_flag,command=lambda:change_plant_exist()).grid(row=0,column=0)
+    plant_isVisible_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_isVisible():
+        plant_select.setIsVisible(not plant_isVisible_flag.get())
+    ttk.Checkbutton(plant_flag_frame,text="隐形",bootstyle="success-round-toggle",variable=plant_isVisible_flag,command=lambda:change_plant_isVisible()).grid(row=1,column=0)
+    plant_isAttack_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_isAttack():
+        plant_select.setIsAttack(plant_isAttack_flag.get())
+    ttk.Checkbutton(plant_flag_frame,text="攻击",bootstyle="success-round-toggle",variable=plant_isAttack_flag,command=lambda:change_plant_isAttack()).grid(row=2,column=0)
+    plant_isSquash_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_isSquash():
+        plant_select.setIsSquash(plant_isSquash_flag.get())
+    ttk.Checkbutton(plant_flag_frame,text="压扁",bootstyle="success-round-toggle",variable=plant_isSquash_flag,command=lambda:change_plant_isSquash()).grid(row=3,column=0)
+    plant_isSleep_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_isSleep():
+        plant_select.setIsSleep(plant_isSleep_flag.get())
+    ttk.Checkbutton(plant_flag_frame,text="睡眠",bootstyle="success-round-toggle",variable=plant_isSleep_flag,command=lambda:change_plant_isSleep()).grid(row=4,column=0)
     
+    plant_put_frame=ttk.LabelFrame(plant_page,text="种植",bootstyle=SUCCESS)
+    plant_put_frame.place(x=240,y=0,anchor=NW,height=100,width=130)
+    ttk.Label(plant_put_frame,text="第").grid(row=0,column=0)
+    plantPut_start_row_value=ttk.IntVar(plant_put_frame)
+    plantPut_start_row_combobox=ttk.Combobox(plant_put_frame,textvariable=plantPut_start_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plantPut_start_row_combobox.grid(row=0,column=1)
+    plantPut_start_row_value.set(1)
+    ttk.Label(plant_put_frame,text="行").grid(row=0,column=2)
+    plantPut_start_col_value=ttk.IntVar(plant_put_frame)
+    plantPut_start_col_combobox=ttk.Combobox(plant_put_frame,textvariable=plantPut_start_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plantPut_start_col_combobox.grid(row=0,column=3)
+    plantPut_start_col_value.set(1)
+    ttk.Label(plant_put_frame,text="列").grid(row=0,column=4)
+    ttk.Label(plant_put_frame,text="至").grid(row=1,column=0)
+    plantPut_end_row_value=ttk.IntVar(plant_put_frame)
+    plantPut_end_row_combobox=ttk.Combobox(plant_put_frame,textvariable=plantPut_end_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plantPut_end_row_combobox.grid(row=1,column=1)
+    plantPut_end_row_value.set(1)
+    ttk.Label(plant_put_frame,text="行").grid(row=1,column=2)
+    plantPut_end_col_value=ttk.IntVar(plant_put_frame)
+    plantPut_end_col_combobox=ttk.Combobox(plant_put_frame,textvariable=plantPut_end_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plantPut_end_col_combobox.grid(row=1,column=3)
+    plantPut_end_col_value.set(1)
+    ttk.Label(plant_put_frame,text="列").grid(row=1,column=4)
+    plantPut_type_combobox=ttk.Combobox(plant_put_frame,width=10,values=data.plantPutType,font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plantPut_type_combobox.grid(row=2,column=0,columnspan=4,sticky=W)
+    plantPut_type_combobox.current(0)
+    def putPlants(type):
+        startRow=plantPut_start_row_value.get()-1
+        startCol=plantPut_start_col_value.get()-1
+        endRow=plantPut_end_row_value.get()-1
+        endCol=plantPut_end_col_value.get()-1
+        if(type>=52):
+            type=type+23
+        print(startRow,startCol,endRow,endCol,type)
+        if(pvz.getMap!=False):
+            rows=pvz.getMap()-1
+            if startRow>rows:
+                startRow=rows
+            if endRow>rows:
+                endRow=rows
+            if startRow>endRow or startCol>endCol:
+                Messagebox.show_error("起始行列大于终止行列",title="输入错误")
+            else:
+                for i in range(startRow,endRow+1):
+                    for j in range(startCol,endCol+1):
+                        pvz.putPlant(i,j,type)
+    ttk.Button(plant_put_frame,text="种植",padding=0,bootstyle=(OUTLINE,SUCCESS),command=lambda:putPlants(plantPut_type_combobox.current())).grid(row=2,column=0,columnspan=5,sticky=E)
+
+    
+
+
+    def get_plant_select(event):
+        global plant_select
+        try:
+            index=int(plant_list_box.selection()[0])
+            plant_select=plant_list[index]
+        except:
+            return
+
+    def get_plant_attribute():
+        global plant_select
+        if plant_select!=None:
+            try:
+                plant_type_value.set(str(plant_select.type)+":"+data.plantsType[plant_select.type])
+                if(plant_attribute_frame.focus_get()!=plant_state_entry):
+                    plant_state_value.set(plant_select.state)
+                if(plant_attribute_frame.focus_get()!=plant_x_entry):
+                    plant_x_value.set(plant_select.x)
+                if(plant_attribute_frame.focus_get()!=plant_y_entry):
+                    plant_y_value.set(plant_select.y)
+                plant_row_value.set(plant_select.row)
+                plant_col_value.set(plant_select.col)
+                if(plant_attribute_frame.focus_get()!=plant_hp_entry):
+                    plant_hp_value.set(plant_select.hp)
+                if(plant_attribute_frame.focus_get()!=plant_dietime_entry):
+                    plant_dietime_value.set(plant_select.dieTime)
+                if(plant_attribute_frame.focus_get()!=plant_cindertime_entry):
+                    plant_cindertime_value.set(plant_select.cinderTime)
+                if(plant_attribute_frame.focus_get()!=plant_effecttime_entry):
+                    plant_effecttime_value.set(plant_select.effectTime)
+                if(plant_attribute_frame.focus_get()!=plant_producttime_entry):
+                    plant_producttime_value.set(plant_select.productTime)
+                if(plant_attribute_frame.focus_get()!=plant_attacktime_entry):
+                    plant_attacktime_value.set(plant_select.attackTime)
+                if(plant_attribute_frame.focus_get()!=plant_productinterval_entry):
+                    plant_productinterval_value.set(plant_select.productInterval)
+                if(plant_attribute_frame.focus_get()!=plant_suntime_entry):
+                    plant_suntime_value.set(plant_select.sunTime)
+                if(plant_attribute_frame.focus_get()!=plant_humtime_entry):
+                    plant_humtime_value.set(plant_select.humTime)
+                if(plant_select.exist==0):
+                    plant_exist_flag.set(True)
+                else:
+                    plant_exist_flag.set(False)
+            except:
+                pass
+            plant_isVisible_flag.set(not plant_select.isVisible)
+            plant_isAttack_flag.set(plant_select.isAttack)
+            plant_isSquash_flag.set(plant_select.isSquash)
+            plant_isSleep_flag.set(plant_select.isSleep)
+
+    plant_list_box.bind("<<TreeviewSelect>>",get_plant_select)
+
+
     grid_page=ttk.Frame(page_tab)
     grid_page.pack()
     page_tab.add(grid_page,text="场地修改")    
@@ -652,6 +952,10 @@ def mainWindow():
             if(pvz.getMap()!=False):       
                 refresh_zombie_list()
                 get_zombie_attribute()
+        if(page_tab.index('current')==2):
+            if(pvz.getMap()!=False):       
+                refresh_plant_list()
+                get_plant_attribute()
         if(page_tab.index('current')==3):
             if(pvz.getMap()!=False):       
                 refresh_item_list()

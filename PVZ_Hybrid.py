@@ -234,3 +234,24 @@ def putZombe(row,col):
     class zombiePut:
         def __init__(self) -> None:
             pass
+
+def putPlant(row,col,type):
+    class plautPut:
+        def __init__(self,row,col,type):
+            self.row=row
+            self.col=col  
+            self.type=type
+
+        def creat_asm(self,startAddress):
+            plantPut_asm=asm.Asm(startAddress)
+            plantPut_asm.push_byte(255)
+            plantPut_asm.push_byte(self.type)
+            plantPut_asm.mov_exx(asm.EAX, self.row)
+            plantPut_asm.push_byte(self.col)
+            plantPut_asm.mov_exx_dword_ptr(asm.EBP, 0x006a9ec0)
+            plantPut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EBP,asm.EBP, 0x768)
+            plantPut_asm.push_exx(asm.EBP)
+            plantPut_asm.call(0x0040d120)
+            return plantPut_asm
+        
+    asm.runThread(plautPut(row,col,type))

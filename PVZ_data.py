@@ -19,33 +19,117 @@ zombiesType=["普僵","旗帜","路障","撑杆","铁桶","冰车二爷","铁门
 
 itemType=["未知0","墓碑","坑洞","梯子","蓝色传送门","白色传送门","未知6","罐子","未知8",
           "未知9","蜗牛","钉耙","脑子"]
+plantsType=['豌豆向日葵','阳光豆','阳光炸弹','火炬坚果','阳光土豆雷','寒冰香蒲','大蒜花',
+       '双发仙人掌','小盆菇','阳光向日葵','冰瓜大喷菇','墓碑埋雷者','红眼菇','阳光胆小菇',
+       '雪花寒冰菇','魅惑毁灭菇','豌豆睡莲','冰菇窝瓜','豌豆许愿池','毁灭海草','樱桃辣椒',
+       '黄油地刺','冰炬树桩','高冰果','海坚果','6号路灯花','豌豆大炮','仙人三叶草','玉米卷香蒲',
+       '地刺杨桃','忧郁南瓜头','磁力坚果','机枪卷心菜投手','阳光花盆','三线玉米投手','随机植物盒子',
+       '魅惑大蒜','咖啡伞','仙人三叶花','西瓜坚果','汉堡射手','阳光南瓜掌','黄油忧郁菇','西瓜香蒲',
+       '阳光菇投手','金盏吸金磁','钢刺坚果王','毁灭加农炮',
+       '模仿者','爆炸坚果','巨大坚果','芽','(反向)双发仙人掌','<null>','拖拽植物 (僵尸迷阵)',
+       '填补土坑','<阳光>','<钻石>','购买潜水僵尸 (僵尸水族馆)','购买奖杯 (僵尸水族馆)',
+       '普通僵尸','路障僵尸','撑杆僵尸','铁桶僵尸','扶梯僵尸','矿工僵尸','蹦极僵尸','橄榄球僵尸','气球僵尸',
+       '铁栅门僵尸','冰车僵尸','跳跳僵尸','舞王僵尸','巨人僵尸','小鬼僵尸',
+       '火爆地雷','火爆坚果墙','豌豆香蒲','冰瓜香蒲','烈火南瓜头','僵尸豌豆射手',
+       '寒冰三叶草','热狗射手','寒冰仙人掌','影流窝瓜王','黄油JOKER','向日葵女王','大蒜辣椒',
+       '至尊VIP坚果','僵尸坚果墙','魅惑菇射手','财神金盏花','猫砂盆','坑洞坚果','QQ弹弹大喷菇',
+       '寒冰地刺','土杨桃','精灵菇','川菜投手','坚果模仿者','窝瓜坚果','冰冻坚果','头脑风暴',
+       '宝藏吞噬者','全息卡牌投影','成长咖啡豆','寒光菇','骄阳豌豆射手','荧光木槌','狂野机枪射手',
+       '生命重塑者','双生樱桃','幸运四叶草','黄金向日葵']
+plantPutType=['豌豆向日葵','阳光豆','阳光炸弹','火炬坚果','阳光土豆雷','寒冰香蒲','大蒜花',
+       '双发仙人掌','小盆菇','阳光向日葵','冰瓜大喷菇','墓碑埋雷者','红眼菇','阳光胆小菇',
+       '雪花寒冰菇','魅惑毁灭菇','豌豆睡莲','冰菇窝瓜','豌豆许愿池','毁灭海草','樱桃辣椒',
+       '黄油地刺','冰炬树桩','高冰果','海坚果','6号路灯花','豌豆大炮','仙人三叶草','玉米卷香蒲',
+       '地刺杨桃','忧郁南瓜头','磁力坚果','机枪卷心菜投手','阳光花盆','三线玉米投手','随机植物盒子',
+       '魅惑大蒜','咖啡伞','仙人三叶花','西瓜坚果','汉堡射手','阳光南瓜掌','黄油忧郁菇','西瓜香蒲',
+       '阳光菇投手','金盏吸金磁','钢刺坚果王','毁灭加农炮','模仿者','爆炸坚果','巨大坚果','芽',
+       '火爆地雷','火爆坚果墙','豌豆香蒲','冰瓜香蒲','烈火南瓜头','僵尸豌豆射手',
+       '寒冰三叶草','热狗射手','寒冰仙人掌','影流窝瓜王','黄油JOKER','向日葵女王','大蒜辣椒',
+       '至尊VIP坚果','僵尸坚果墙','魅惑菇射手','财神金盏花','猫砂盆','坑洞坚果','QQ弹弹大喷菇',
+       '寒冰地刺','土杨桃','精灵菇','川菜投手','坚果模仿者','窝瓜坚果','冰冻坚果','头脑风暴',
+       '宝藏吞噬者','全息卡牌投影','成长咖啡豆','寒光菇','骄阳豌豆射手','荧光木槌','狂野机枪射手',
+       '生命重塑者','双生樱桃','幸运四叶草','黄金向日葵'    
+]
 
 class plant:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0xac)))/0x14c)
-        self.exist=PVZ_memory.read_bytes(self.addr+0x141,1)
+        self.no=PVZ_memory.read_ushort(self.addr+0x148)
+        self.exist=PVZ_memory.read_bool(self.addr+0x141)
+        self.x=PVZ_memory.read_int(self.addr+0x8)
+        self.y=PVZ_memory.read_int(self.addr+0xc)
         self.row=PVZ_memory.read_int(self.addr+0x1c)
         self.col=PVZ_memory.read_int(self.addr+0x28)
         self.type=PVZ_memory.read_int(self.addr+0x24)
-        self.x=PVZ_memory.read_int(self.addr+0x8)
-        self.y=PVZ_memory.read_int(self.addr+0xc)
         self.state=PVZ_memory.read_int(self.addr+0x3c)
         self.hp=PVZ_memory.read_int(self.addr+0x40)
         self.maxhp=PVZ_memory.read_int(self.addr+0x44)
-        self.producttime=PVZ_memory.read_int(self.addr+0x58)
-    def modify(self,row,col,x,y,state,hp):
-        PVZ_memory.write_int(self.addr+0x1c,row-1)
-        PVZ_memory.write_int(self.addr+0x28,col-1)
-        PVZ_memory.write_int(self.addr+0x8,x)
-        PVZ_memory.write_int(self.addr+0xc,y)
-        PVZ_memory.write_int(self.addr+0x3c,state)
-        PVZ_memory.write_int(self.addr+0x40,hp)
-        PVZ_memory.write_int(self.addr+0x44,hp)
+        self.dieTime=PVZ_memory.read_int(self.addr+0x4c)
+        self.cinderTime=PVZ_memory.read_int(self.addr+0x50)
+        self.effectTime=PVZ_memory.read_int(self.addr+0x54)#蘑菇成长
+        self.productTime=PVZ_memory.read_int(self.addr+0x58)#特殊子弹攻击
+        self.attackTime=PVZ_memory.read_int(self.addr+0x90)#常规攻击
+        self.productInterval=PVZ_memory.read_int(self.addr+0x5c)
+        self.sunTime=PVZ_memory.read_int(self.addr+0xdc)
+        self.humTime=PVZ_memory.read_int(self.addr+0x128)
+        self.mushroomTime=PVZ_memory.read_int(self.addr+0x130)        
+        self.isVisible=PVZ_memory.read_bool(self.addr+0x18)
+        self.isSquash=PVZ_memory.read_bool(self.addr+0x142)
+        self.isSleep=PVZ_memory.read_bool(self.addr+0x143)
+        self.isLight=PVZ_memory.read_bool(self.addr+0x145)
+        self.isAttack=PVZ_memory.read_int(self.addr+0x48)
+
+
+    def setExist(self, exist):
+        PVZ_memory.write_bool(self.addr + 0x141, exist)
+    def setX(self, x):
+        PVZ_memory.write_int(self.addr + 0x8, x)
+    def setY(self, y):
+        PVZ_memory.write_int(self.addr + 0xc, y)
+    def setRow(self, row):
+        PVZ_memory.write_int(self.addr + 0x1c, row)
+    def setCol(self, col):
+        PVZ_memory.write_int(self.addr + 0x28, col)
+    def setType(self, type):
+        PVZ_memory.write_int(self.addr + 0x24, type)
+    def setState(self, state):
+        PVZ_memory.write_int(self.addr + 0x3c, state)
+    def setHP(self, hp):
+        PVZ_memory.write_int(self.addr + 0x40, hp)
+        PVZ_memory.write_int(self.addr + 0x44, hp)
+    def setDieTime(self, dieTime):
+        PVZ_memory.write_int(self.addr + 0x4c, dieTime)
+    def setCinderTime(self, cinderTime):
+        PVZ_memory.write_int(self.addr + 0x50, cinderTime)
+    def setEffectTime(self, effectTime):
+        PVZ_memory.write_int(self.addr + 0x54, effectTime)
+    def setProductTime(self, productTime):
+        PVZ_memory.write_int(self.addr + 0x58, productTime)
+    def setAttackTime(self, attackTime):
+        PVZ_memory.write_int(self.addr + 0x90, attackTime)
+    def setProductInterval(self, productInterval):
+        PVZ_memory.write_int(self.addr + 0x5c, productInterval)
+    def setSunTime(self, sunTime):
+        PVZ_memory.write_int(self.addr + 0xdc, sunTime)
+    def setHumTime(self, humTime):
+        PVZ_memory.write_int(self.addr + 0x12c, humTime)
+    def setmushroomTime(self, mushroomTime):
+        PVZ_memory.write_int(self.addr + 0x130, mushroomTime)
+    def setIsVisible(self, isVisible):
+        PVZ_memory.write_bool(self.addr + 0x18, isVisible)
+    def setIsSquash(self, isSquash):
+        PVZ_memory.write_bool(self.addr + 0x142, isSquash)
+    def setIsSleep(self, isSleep):
+        PVZ_memory.write_bool(self.addr + 0x143, isSleep)
+    def setIsLight(self, isLight):
+        PVZ_memory.write_bool(self.addr + 0x145, isLight)
+    def setIsAttack(self, isAttack):
+        PVZ_memory.write_int(self.addr + 0x48, isAttack)
+
 class zombie:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x90)))/0x15c)
+        self.no=PVZ_memory.read_ushort(self.addr+0x158)
         self.exist=PVZ_memory.read_int(self.addr+0xec)
         self.row=PVZ_memory.read_int(self.addr+0x1c)+1
         self.type=PVZ_memory.read_int(self.addr+0x24)
@@ -111,7 +195,7 @@ class zombie:
 class item:
     def __init__(self,addr):
         self.addr=addr
-        self.no=int((addr-(PVZ_memory.read_int(PVZ_memory.read_int(PVZ_memory.read_int(baseAddress)+0x768)+0x11c)))/0xec)
+        self.no=PVZ_memory.read_ushort(self.addr + 0xe8)
         self.exist=PVZ_memory.read_bool(self.addr+0x20)
         self.row = PVZ_memory.read_int(self.addr + 0x14)+1
         self.col = PVZ_memory.read_int(self.addr + 0x10)+1
