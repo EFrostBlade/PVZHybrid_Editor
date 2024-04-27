@@ -9,6 +9,7 @@ import time
 import os
 import sys
 import ctypes
+import webbrowser
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -91,6 +92,7 @@ def chooseGame():
     choose_process_window.title("选择进程")
     choose_process_window.geometry("500x500")
     choose_process_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\choose.png")))
+    choose_process_window.tk.call('tk', 'scaling', 4/3)    
     label = ttk.Label(choose_process_window,text="如果未开启游戏请开启游戏后点击寻找游戏按钮",bootstyle=WARNING, font=("黑体", 16))
     label.pack(pady=20)
     frame1 = ttk.Frame(choose_process_window)
@@ -121,13 +123,45 @@ def chooseGame():
     choose_process_window.protocol('WM_DELETE_WINDOW',lambda:close())
     choose_process_window.mainloop()
 
+def support():
+    support_window=ttk.Toplevel(topmost=True)
+    support_window.title("关于")
+    support_window.geometry("300x300")
+    support_window.iconphoto(False,ttk.PhotoImage(file=resource_path((r"res\icon\info.png"))))
+    support_window.tk.call('tk', 'scaling', 4/3)    
+    ttk.Label(support_window,text="本软件完全免费",font=("黑体",18),bootstyle=SUCCESS).pack(pady=20)
+    github_frame=ttk.Frame(support_window)
+    github_frame.pack()
+    ttk.Label(github_frame,text="所有代码开源于",font=("黑体",12),bootstyle=SUCCESS).pack(side=LEFT)
+    def open_code():
+        webbrowser.open_new("https://github.com/EFrostBlade/PVZHybrid_Editor")
+    ttk.Button(github_frame, text="PVZHybrid_Editor(github.com)",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_code).pack(side=LEFT)
+    ttk.Label(support_window,text="如果您觉得本软件有帮助，欢迎赞助支持开发者",font=("黑体",8),bootstyle=WARNING).pack()
+    def open_qq():
+        webbrowser.open_new("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NXcD3BMkaDeyysTJYZZvJnl7xDZEL7et&authKey=rRxScaHQ7BDXklafDeSFtMLVgXRK8%2Bkd0PdQ2sssDv9AtnJE4HATLSbAjTxJKRGR&noverify=0&group_code=678474090")
+    qq_frame=ttk.Frame(support_window)
+    qq_frame.pack()
+    ttk.Label(qq_frame,text="赞助任意金额后即可加入赞助群：",font=("黑体",8),bootstyle=WARNING).pack(side=LEFT)
+    ttk.Button(qq_frame, text="678474090",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_qq).pack(side=LEFT)
+    ttk.Label(support_window,text="进群可享受功能优先适配、1对1解决问题等服务",font=("黑体",8),bootstyle=WARNING).pack()
+    image_frame=ttk.Frame(support_window)
+    image_frame.pack()
+    AliPay = ttk.PhotoImage(file=resource_path(r"res/support/AliPay.png"))
+    WeChatPay = ttk.PhotoImage(file=resource_path(r"res/support/WeChatPay.png"))
+    AliPay_image=ttk.Label(image_frame,image=AliPay)
+    AliPay_image.grid(row=0,column=0,padx=10)
+    WeChatPay_image=ttk.Label(image_frame,image=WeChatPay)
+    WeChatPay_image.grid(row=0,column=1,padx=10)
+    ttk.Label(image_frame,text="支付宝",bootstyle=PRIMARY,font=("黑体",12)).grid(row=1,column=0,pady=5)
+    ttk.Label(image_frame,text="微信支付",bootstyle=SUCCESS,font=("黑体",12)).grid(row=1,column=1,pady=5)
+    support_window.mainloop()
+
 def mainWindow():
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
     main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
-    main_window.tk.call('tk', 'scaling', 4/3)
-
+    main_window.tk.call('tk', 'scaling', 4/3)    
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -153,7 +187,7 @@ def mainWindow():
         except:
             updateGame()
     tryFindGame()
-    choose_process_button=ttk.Button(process_frame,text="选择游戏",padding=0,bootstyle=(PRIMARY,LINK),command=lambda:updateGame())
+    choose_process_button=ttk.Button(process_frame,text="选择游戏",padding=0,cursor="hand2",bootstyle=(PRIMARY,LINK),command=lambda:updateGame())
     choose_process_button.pack(side=LEFT)
     back_ground_status=ttk.IntVar(main_window)
     back_ground_check=ttk.Checkbutton(main_window,text="后台运行",variable=back_ground_status,bootstyle="round-toggle",command=lambda:pvz.backGround(back_ground_status.get()))
@@ -577,14 +611,18 @@ def mainWindow():
     plant_row_combobox=ttk.Combobox(plant_position_frame,textvariable=plant_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
     plant_row_combobox.grid(row=2,column=1,columnspan=3,sticky=W)
     ttk.Label(plant_position_frame,text="行").grid(row=2,column=4,sticky=W)
-    plant_col_value=ttk.IntVar(plant_position_frame)
-    plant_col_combobox=ttk.Combobox(plant_position_frame,textvariable=plant_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
-    plant_col_combobox.grid(row=2,column=5,columnspan=3,sticky=W)
-    ttk.Label(plant_position_frame,text="列").grid(row=2,column=8,sticky=W)
     def setPlantRow(event):
         plant_select.setRow(plant_row_value.get())
         plant_position_frame.focus_set()
     plant_row_combobox.bind("<<ComboboxSelected>>",setPlantRow)
+    plant_col_value=ttk.IntVar(plant_position_frame)
+    plant_col_combobox=ttk.Combobox(plant_position_frame,textvariable=plant_col_value,width=2,values=[1,2,3,4,5,6,7,8,9],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plant_col_combobox.grid(row=2,column=5,columnspan=3,sticky=W)
+    ttk.Label(plant_position_frame,text="列").grid(row=2,column=8,sticky=W)
+    def setPlantCol(event):
+        plant_select.setCol(plant_col_value.get())
+        plant_position_frame.focus_set()
+    plant_col_combobox.bind("<<ComboboxSelected>>",setPlantCol)
     ttk.Label(plant_state_frame,text="血量:").grid(row=1,column=3)
     plant_hp_value=ttk.IntVar(plant_state_frame)
     plant_hp_entry=ttk.Entry(plant_state_frame,textvariable=plant_hp_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
@@ -942,6 +980,137 @@ def mainWindow():
     item_list_box.bind("<<TreeviewSelect>>",get_item_select)
 
 
+    slot_page=ttk.Frame(page_tab)
+    slot_page.pack()
+    page_tab.add(slot_page,text="卡槽修改")    
+    slot_list=list()
+    def refresh_slot_list():
+        slot_list.clear()
+        try:
+            slot_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24)
+        except:
+            return
+        i=0
+        while i<slot_num:
+            slot_addresss=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x28+0x50*i
+            slot_list.append(data.slot(slot_addresss))
+            i=i+1
+ 
+    slot_type_comboboxes = []
+    slot_elapsed_values = []
+    slot_elapsed_entrys = []
+    slot_cooldown_values = []
+    slot_cooldown_entrys = []
+    slot_cd_progressBars = []
+    slot_isVisible_flags = []
+    # slot_canUse_flags = []
+    def create_slot_ui(slot_number):
+        ttk.Label(slot_page, text=f"{slot_number}").grid(row=slot_number-1, column=0, sticky=W)
+        ttk.Label(slot_page, text="植物:").grid(row=slot_number-1, column=1, sticky=W)
+
+        slot_type_combobox = ttk.Combobox(slot_page, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
+        slot_type_combobox.grid(row=slot_number-1, column=2, sticky=W)
+        slot_type_comboboxes.append(slot_type_combobox)
+
+        def set_slot_type(event, index=slot_number-1):
+            slot_list[index].setType(slot_type_combobox.current())
+            slot_page.focus_set()
+        slot_type_combobox.bind("<<ComboboxSelected>>", set_slot_type)
+
+        slot_elapsed_value = ttk.IntVar()
+        slot_elapsed_values.append(slot_elapsed_value)
+        slot_elapsed_entry = ttk.Entry(slot_page, textvariable=slot_elapsed_value, width=5, font=("黑体", 8), bootstyle='secondary')
+        slot_elapsed_entrys.append(slot_elapsed_entry)
+
+        def set_slot_elapsed(event, index=slot_number-1):
+            slot_list[index].setElapsed(slot_elapsed_value.get())
+            slot_page.focus_set()
+        slot_elapsed_entry.bind("<Return>", set_slot_elapsed)
+
+        slot_cooldown_value = ttk.IntVar()
+        slot_cooldown_values.append(slot_cooldown_value)
+        slot_cooldown_entry = ttk.Entry(slot_page, textvariable=slot_cooldown_value, width=5, font=("黑体", 8), bootstyle='secondary')
+        slot_cooldown_entrys.append(slot_cooldown_entry)
+
+        def set_slot_cooldown(event, index=slot_number-1):
+            slot_list[index].setCooldown(slot_cooldown_value.get())
+            slot_page.focus_set()
+        slot_cooldown_entry.bind("<Return>", set_slot_cooldown)
+
+
+        slot_cooldown_label = ttk.Label(slot_page, text="冷却进度")
+        slot_cooldown_label.grid(row=slot_number-1, column=3, padx=(2,0))
+        slot_cd_progressBar=ttk.Progressbar(slot_page,length=100,mode=DETERMINATE,maximum=slot_cooldown_value.get(),variable=slot_elapsed_value,bootstyle="success-striped")
+        slot_cd_progressBar.grid(row=slot_number-1, column=4, ipady=0)
+        slot_cd_progressBars.append(slot_cd_progressBar)    
+        def set_cd_progressBar_focus(event):
+            slot_cd_progressBar.focus_set()
+        def set_cd_value(event,index=slot_number-1):
+            fraction = event.x / slot_cd_progressBar.winfo_width()
+            new_value = int(fraction * slot_cd_progressBar['maximum'])
+            slot_elapsed_value.set(new_value)
+            slot_list[index].setElapsed(slot_elapsed_value.get())
+        slot_cd_progressBar.bind("<Button-1>", set_cd_progressBar_focus)
+        slot_cd_progressBar.bind("<ButtonRelease-1>", set_cd_value)
+        
+        slot_isVisible_flag=ttk.BooleanVar(slot_page)
+        slot_isVisible_flags.append(slot_isVisible_flag)
+        def change_slot_isVisible(index=slot_number-1):
+            slot_list[index].setIsVisible(not slot_isVisible_flag.get())
+        ttk.Checkbutton(slot_page,text="隐形",bootstyle="danger-round-toggle",variable=slot_isVisible_flag,command=lambda:change_slot_isVisible()).grid(row=slot_number-1,column=5)
+        # slot_canUse_flag=ttk.BooleanVar(slot_page)
+        # slot_canUse_flags.append(slot_canUse_flag)
+        # def change_slot_canUse(index=slot_number-1):
+        #     slot_list[index].setCanUse(slot_canUse_flag.get())
+        # ttk.Checkbutton(slot_page,text="可用",bootstyle="danger-round-toggle",variable=slot_canUse_flag,command=lambda:change_slot_canUse()).grid(row=slot_number-1,column=6)
+    # 为slots 1至14创建UI组件
+    for slot_number in range(1, 15):
+        create_slot_ui(slot_number)
+
+    slots_config_frame=ttk.LabelFrame(slot_page,text="卡槽设置",bootstyle=SUCCESS)
+    slots_config_frame.place(x=0,y=0,relx=1,anchor=NE)
+    slot_num_frame=ttk.Frame(slots_config_frame)
+    slot_num_frame.pack()
+    ttk.Label(slot_num_frame,text="卡槽格数：").pack(side=LEFT)
+    slots_num_value=ttk.IntVar()
+    slots_num_combobox=ttk.Combobox(slot_num_frame,textvariable=slots_num_value,width=2,values=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    slots_num_combobox.pack(side=LEFT)
+    def setSlotsNum(event):
+        data.PVZ_memory.write_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24,slots_num_value.get())
+        slot_num_frame.focus_set()
+    slots_num_combobox.bind("<<ComboboxSelected>>",setSlotsNum)
+    no_slot_status=ttk.BooleanVar(slots_config_frame)
+    no_slot_check=ttk.Checkbutton(slots_config_frame,text="无需选卡",variable=no_slot_status,bootstyle="success-round-toggle",command=lambda:pvz.noSolt(no_slot_status.get()))
+    no_slot_check.pack(pady=10,anchor=W)
+    ToolTip(no_slot_check,text="可以不选卡片即开始游戏",bootstyle=(INFO,INVERSE))
+    change_all_frame=ttk.Frame(slots_config_frame)
+    change_all_frame.pack(pady=(0,10))
+    ttk.Label(change_all_frame,text="修改所有卡槽：").pack(anchor=W)
+    change_all_combobox = ttk.Combobox(change_all_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
+    change_all_combobox.pack()
+    def change_all_slots(event):
+        for slot in slot_list:
+            slot.setType(change_all_combobox.current())
+    change_all_combobox.bind("<<ComboboxSelected>>", change_all_slots)
+    
+    # 定义一个函数来更新slot的属性
+    def get_slot_attribute():
+        for index, slot in enumerate(slot_list):
+            try:
+                slot_type_comboboxes[index].current(slot.type)
+                if (slot_page.focus_get() != slot_cooldown_entrys[index] and slot_page.focus_get() !=slot_cd_progressBars[index]):
+                    slot_cooldown_values[index].set(slot.cooldown)
+                    slot_cd_progressBars[index].configure(maximum=slot_cooldown_values[index].get())
+                if (slot_page.focus_get() != slot_elapsed_entrys[index] and slot_page.focus_get() !=slot_cd_progressBars[index]):
+                    slot_elapsed_values[index].set(slot.elapsed)
+                slot_isVisible_flags[index].set(not slot.isViible)
+                # slot_canUse_flags[index].set(slot.canUse)
+            except:
+                pass
+        
+        slots_num_value.set(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24))
+
+
 
     def refreshData():
         if(page_tab.index('current')==0):
@@ -960,8 +1129,17 @@ def mainWindow():
             if(pvz.getMap()!=False):       
                 refresh_item_list()
                 get_item_attribute()
+        if(page_tab.index('current')==4):  
+            refresh_slot_list()
+            get_slot_attribute()
         main_window.after(100,refreshData)
-        
+           
+
+
+
+    
+    support_button=ttk.Button(main_window,text="觉得好用？支持开发者",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=lambda:support())
+    support_button.place(x=0,y=0,relx=1,anchor=NE)
     main_window.after(100,refreshData)
     main_window.mainloop()
 

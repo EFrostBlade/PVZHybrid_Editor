@@ -210,3 +210,32 @@ class item:
         PVZ_memory.write_int(self.addr+0x10,col-1)
     def setTime(self,time):
         PVZ_memory.write_int(self.addr+0x18,time)
+
+
+class slot:
+    def __init__(self,addr):
+        self.addr=addr
+        self.no=PVZ_memory.read_ushort(self.addr + 0x2c)
+        self.canUse=PVZ_memory.read_bool(self.addr+0x48)
+        self.type = PVZ_memory.read_int(self.addr + 0x34)
+        self.imitaterType = PVZ_memory.read_int(self.addr + 0x34)
+        self.cooldown= PVZ_memory.read_int(self.addr + 0x28)
+        self.elapsed= PVZ_memory.read_int(self.addr + 0x24)
+        self.isVisible=PVZ_memory.read_bool(self.addr+0x18)
+        self.count= PVZ_memory.read_int(self.addr + 0x4c)
+
+    def setCanUse(self,canUse):
+        PVZ_memory.write_bool(self.addr+0x48,canUse)
+    def setType(self, type):
+        PVZ_memory.write_int(self.addr + 0x34, type)
+    def setImitaterType(self, imitaterType):
+        PVZ_memory.write_int(self.addr + 0x34, imitaterType)
+    def setCooldown(self, cooldown):
+        PVZ_memory.write_int(self.addr + 0x28, cooldown)
+    def setElapsed(self, elapsed):
+        PVZ_memory.write_int(self.addr + 0x24, elapsed)
+    def setIsVisible(self, isVisible):
+        PVZ_memory.write_bool(self.addr + 0x18, isVisible)
+    def setCount(self, count):
+        PVZ_memory.write_int(self.addr + 0x4c, count)
+        

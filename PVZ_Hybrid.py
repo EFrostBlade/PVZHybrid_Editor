@@ -4,6 +4,8 @@ import pymem.ressources.kernel32
 import pymem.ressources.structure
 import pymem.thread
 import pymem.memory
+from threading import Thread, Event
+import time
 import PVZ_asm as asm
 
 column1addr=None
@@ -255,3 +257,28 @@ def putPlant(row,col,type):
             return plantPut_asm
         
     asm.runThread(plautPut(row,col,type))
+
+def noSlot_operstion(noSlot_event):
+    while not noSlot_event.is_set():
+        try:
+            start=data.PVZ_memory.read_bool(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0x88)+0x1a)
+            if  start==True:
+                data.PVZ_memory.write_bool(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0x88)+0x1a,False)
+        except:
+            pass
+        time.sleep(1)
+noSlot_event=Event()
+noSlot_thread=None
+def noSolt(f):
+    global noSlot_thread
+    if f:
+        if not noSlot_thread or not noSlot_thread.is_alive():
+            noSlot_event.clear()
+            noSlot_thread = Thread(target=noSlot_operstion, args=(noSlot_event,))
+            noSlot_thread.start()
+    else:
+        # 设置事件标志，通知线程停止
+        noSlot_event.set()
+        noSlot_thread.join()  # 等待线程结束
+
+        
