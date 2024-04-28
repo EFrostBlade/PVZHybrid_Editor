@@ -80,6 +80,12 @@ def upperLimit(f):
         data.PVZ_memory.write_bytes(0x00430A78,b'\x7e',1)
         data.PVZ_memory.write_bytes(0x0048CAB0,b'\x7e',1)
 
+def pausePro(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x415df0,b'\x0f\x1f\x80\x00\x00\x00\x00\x66\x90',9)
+    else:
+        data.PVZ_memory.write_bytes(0x415df0,b'\x80\xbd\x64\x01\x00\x00\x00\x74\x35',9)
+
 def ignoreSun(f):
     if f:
         data.PVZ_memory.write_bytes(0x0041ba70,b'\x90\x90\x90\x90\x90\x90',6)

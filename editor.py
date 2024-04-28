@@ -10,6 +10,8 @@ import os
 import sys
 import ctypes
 import webbrowser
+import json
+import keyboard
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -20,10 +22,80 @@ import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
 
+main_window=None
 data.update_PVZ_memory(1)
 zombie_select=None
 plant_select=None
 item_select=None
+shortcut_entries = []
+shortcut_buttons = []
+shortcut_comboboxs = []
+action_values=[]
+action_list=["高级暂停","设置阳光","增加阳光","自由放置","免费种植","取消冷却","自动收集","柱子模式","超级铲子","永不失败",
+             "当前关卡胜利","秒杀所有僵尸","解锁全部植物","放置植物","搭梯"]
+# 默认配置
+default_config = {
+    "shortcuts": {
+        "key1": {
+            "key": "space",
+            "action": 0
+        },
+        "key2": {
+            "key": "Ctrl+f2",
+            "action": 1
+        },
+        "key3": {
+            "key": "Ctrl+f3",
+            "action": 2
+        },
+        "key4": {
+            "key": "Ctrl+f4",
+            "action": 3
+        },
+        "key5": {
+            "key": "Ctrl+f5",
+            "action": 4
+        },
+        "key6": {
+            "key": "Ctrl+f6",
+            "action": 5
+        },
+        "key7": {
+            "key": "Ctrl+f7",
+            "action": 6
+        },
+        "key8": {
+            "key": "Ctrl+f8",
+            "action": 7
+        },
+        "key9": {
+            "key": "Ctrl+f9",
+            "action": 8
+        },
+        "key10": {
+            "key": "Ctrl+f10",
+            "action": 9
+        },
+        "key11": {
+            "key": "Ctrl+f11",
+            "action": 10
+        },
+        "key12": {
+            "key": "Ctrl+f12",
+            "action": 11
+        }
+    }
+}
+#点击关闭退出
+def exit_editor(file_path, window, section='main_window_position'):
+    config = load_config(file_path)
+    config[section] = {
+        'x': window.winfo_x(),
+        'y': window.winfo_y()
+    }
+    save_config(config, file_path)
+    os._exit(0)
+
 
 def resource_path(relative_path):
     """ 获取资源的绝对路径，适用于开发环境和PyInstaller环境 """
@@ -35,7 +107,55 @@ def resource_path(relative_path):
     
     return os.path.join(base_path, relative_path)
 
+# 定义应用程序名称
+app_name = 'PVZHybrid_Editor'
+
+# 获取当前用户的AppData目录路径
+appdata_path = os.getenv('APPDATA')
+
+# 在AppData目录下为你的应用创建一个配置文件夹
+app_config_path = os.path.join(appdata_path, app_name)
+if not os.path.exists(app_config_path):
+    os.makedirs(app_config_path)
+
+# 定义配置文件的路径
+config_file_path = os.path.join(app_config_path, 'config.json')
+
+# 创建配置文件的函数
+def create_config(file_path, default_config):
+    with open(file_path, 'w') as file:
+        json.dump(default_config, file, indent=4)
+
+# 读取配置文件的函数
+def load_config(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return default_config  # 如果文件不存在，返回默认配置
+
+# 修改配置文件的函数
+def modify_config(file_path, section, key, value):
+    config = load_config(file_path)
+    if section not in config:
+        config[section] = {}
+    config[section][key] = value
+    save_config(config, file_path)
+
+
+# 更新配置文件的函数
+def save_config(config, file_path):
+    with open(file_path, 'w') as file:
+        json.dump(config, file, indent=4)
+
+
+
+
+
+
+
 def chooseGame():
+    global main_window
     def openPVZ_memory(process1):
         try:
             data.update_PVZ_memory(Pymem(int(re.search(r'(\d+)',process1).group(1))))
@@ -92,7 +212,10 @@ def chooseGame():
     choose_process_window.title("选择进程")
     choose_process_window.geometry("500x500")
     choose_process_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\choose.png")))
-    choose_process_window.tk.call('tk', 'scaling', 4/3)    
+    choose_process_window.tk.call('tk', 'scaling', 4/3)  
+    main_window_x = main_window.winfo_x()
+    main_window_y = main_window.winfo_y()  
+    choose_process_window.geometry(f'+{main_window_x+50}+{main_window_y + 50}')
     label = ttk.Label(choose_process_window,text="如果未开启游戏请开启游戏后点击寻找游戏按钮",bootstyle=WARNING, font=("黑体", 16))
     label.pack(pady=20)
     frame1 = ttk.Frame(choose_process_window)
@@ -124,11 +247,15 @@ def chooseGame():
     choose_process_window.mainloop()
 
 def support():
+    global main_window
     support_window=ttk.Toplevel(topmost=True)
     support_window.title("关于")
     support_window.geometry("300x300")
     support_window.iconphoto(False,ttk.PhotoImage(file=resource_path((r"res\icon\info.png"))))
     support_window.tk.call('tk', 'scaling', 4/3)    
+    main_window_x = main_window.winfo_x()
+    main_window_y = main_window.winfo_y()  
+    support_window.geometry(f'+{main_window_x+100}+{main_window_y + 100}')
     ttk.Label(support_window,text="本软件完全免费",font=("黑体",18),bootstyle=SUCCESS).pack(pady=20)
     github_frame=ttk.Frame(support_window)
     github_frame.pack()
@@ -157,11 +284,21 @@ def support():
     support_window.mainloop()
 
 def mainWindow():
+    global main_window
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器")
     main_window.geometry("500x500")
     main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
     main_window.tk.call('tk', 'scaling', 4/3)    
+    def apply_window_position(file_path, window, section='main_window_position'):
+        config = load_config(file_path)
+        position = config.get(section, {})
+        x = position.get('x', 100)  # 默认值为100
+        y = position.get('y', 100)  # 默认值为100
+        window.geometry(f'+{x}+{y}')
+
+    # 在主窗口创建后调用
+    apply_window_position(config_file_path, main_window)
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -221,7 +358,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
     sun_add_entry.bind("<Return>",addSun)
     quick_start_frame=ttk.LabelFrame(common_page,text="快速使用",bootstyle=SUCCESS)
-    quick_start_frame.place(x=0,y=0,relx=1,rely=0,anchor=NE)
+    quick_start_frame.place(x=0,y=150,relx=0,rely=0,anchor=NW)
     over_plant_status=ttk.BooleanVar(quick_start_frame)
     over_plant_check=ttk.Checkbutton(quick_start_frame,text="自由放置",variable=over_plant_status,bootstyle="success-round-toggle",command=lambda:pvz.overPlant(over_plant_status.get()))
     over_plant_check.grid(row=0,column=0,sticky=W)
@@ -250,14 +387,18 @@ def mainWindow():
     never_fail_check=ttk.Checkbutton(quick_start_frame,text="永不失败",variable=never_fail_status,bootstyle="success-round-toggle",command=lambda:pvz.ignoreZombies(never_fail_status.get()))
     never_fail_check.grid(row=6,column=0,sticky=W)
     ToolTip(never_fail_check,text="僵尸进家不判定游戏失败",bootstyle=(INFO,INVERSE))
+    pause_pro_status=ttk.BooleanVar(quick_start_frame)
+    pause_pro_check=ttk.Checkbutton(quick_start_frame,text="高级暂停",variable=pause_pro_status,bootstyle="success-round-toggle",command=lambda:pvz.pausePro(pause_pro_status.get()))
+    pause_pro_check.grid(row=7,column=0,sticky=W)
+    ToolTip(pause_pro_check,text="可以暂停种植植物",bootstyle=(INFO,INVERSE))
     win_button=ttk.Button(quick_start_frame,text="当前关卡胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win())
-    win_button.grid(row=7,column=0,sticky=W,pady=(2,2))
+    win_button.grid(row=8,column=0,sticky=W,pady=(2,2))
     ToolTip(win_button,text="当前的游戏关卡直接进行胜利结算",bootstyle=(INFO,INVERSE))
     kill_all_button=ttk.Button(quick_start_frame,text="秒杀所有僵尸",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies())
-    kill_all_button.grid(row=8,column=0,sticky=W,pady=(2,2))
+    kill_all_button.grid(row=9,column=0,sticky=W,pady=(2,2))
     ToolTip(kill_all_button,text="秒杀当前场上的所有僵尸",bootstyle=(INFO,INVERSE))
     unlock_button=ttk.Button(quick_start_frame,text="解锁全部植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock())
-    unlock_button.grid(row=9,column=0,sticky=W,pady=(2,2))
+    unlock_button.grid(row=10,column=0,sticky=W,pady=(2,2))
     ToolTip(unlock_button,text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",bootstyle=(INFO,INVERSE))
     
     game_speed_frame=ttk.LabelFrame(common_page,text="游戏速度",bootstyle=PRIMARY)
@@ -289,6 +430,185 @@ def mainWindow():
     game_speed_scale=ttk.Scale(game_speed_frame,from_=0,to=6,orient=HORIZONTAL,variable=game_speed_value,command=changeSpeedValue)
     game_speed_scale.grid(row=0,column=1)
     
+    # 读取快捷键配置
+    def get_shortcuts():
+        config = load_config(config_file_path)
+        return config.get('shortcuts', {})
+    
+    # 移除所有当前的快捷键监听
+    def remove_all_hotkeys():
+        for shortcut in get_shortcuts().values():
+            keyboard.remove_hotkey(shortcut['key'])
+
+    # 重新加载快捷键并设置监听
+    def reload_hotkeys():
+        remove_all_hotkeys()
+        shortcuts = get_shortcuts()
+        for shortcut_id, shortcut_info in shortcuts.items():
+            keyboard.add_hotkey(shortcut_info['key'], lambda action=shortcut_info['action']: on_triggered(action))
+
+    # 修改快捷键配置并重新加载监听
+    def modify_shortcut(shortcut_id, new_key, new_action):
+        config = load_config(config_file_path)
+        # 保存旧的快捷键值
+        old_key = config['shortcuts'].get(shortcut_id, {}).get('key')
+        if 'shortcuts' not in config:
+            config['shortcuts'] = {}
+        config['shortcuts'][shortcut_id] = {'key': new_key, 'action': new_action}
+        save_config(config, config_file_path)
+        # 如果旧的快捷键存在，则移除旧的快捷键监听
+        if old_key:
+            keyboard.remove_hotkey(old_key)
+        # 添加新的快捷键监听
+        keyboard.add_hotkey(new_key, lambda: on_triggered(new_action))
+        # 更新快捷键显示
+        update_shortcut_display()
+
+    def switch_status(status):
+        if(status.get()==True):
+            status.set(False)
+        elif(status.get()==False):
+            status.set(True)
+        elif(status.get()==1):
+            status.set(0)
+        elif(status.get()==0):
+            status.set(1)
+
+    # 捕获快捷键并在控制台输出
+    def on_triggered(action):
+        if action==0:
+            switch_status(pause_pro_status)
+            pvz.pausePro(pause_pro_status.get())
+        elif action==1:
+            pvz.setSun(sun_value.get())
+        elif action==2:
+            pvz.addSun(sun_add_value.get())
+        elif action==3:
+            switch_status(over_plant_status)
+            pvz.pausePro(over_plant_status.get())
+        elif action==4:
+            switch_status(free_plant_status)
+            pvz.pausePro(free_plant_status.get())
+        elif action==5:
+            switch_status(cancel_cd_status)
+            pvz.pausePro(cancel_cd_status.get())
+        elif action==6:
+            switch_status(auto_colect_status)
+            pvz.pausePro(auto_colect_status.get())
+        elif action==7:
+            switch_status(column_like_status)
+            pvz.pausePro(column_like_status.get())
+        elif action==8:
+            switch_status(shovel_pro_status)
+            pvz.pausePro(shovel_pro_status.get())
+        elif action==9:
+            switch_status(never_fail_status)
+            pvz.pausePro(never_fail_status.get())
+        elif action==10:
+            pvz.win()
+        elif action==11:
+            pvz.killAllZombies()
+        elif action==12:
+            pvz.unlock()
+        elif action==13:
+            putPlants(plantPut_type_combobox.current())
+        elif action==14:
+            putLadders()
+
+
+    # 修改快捷键的窗口
+    def open_change_window(shortcut_id, current_key, current_action):
+        global main_window
+        new_shortcut = []
+
+        def set_new_shortcut():
+            if new_shortcut:
+                new_key = '+'.join(new_shortcut)
+                modify_shortcut(shortcut_id, new_key, current_action)
+                update_shortcut_display()
+                change_shortcut_window.destroy()
+
+        def record_key(event):
+            key = event.keysym.lower() if event.keysym != 'space' else 'space'
+            ctrl_pressed = event.state & 0x0004
+            if 'control' in key:
+                key = 'ctrl'
+            elif 'shift' in key:
+                key = 'shift'
+            elif 'alt' in key:
+                key = 'alt'
+            elif 'win' in key:
+                key = 'win'
+            elif event.char == ' ' or (ctrl_pressed and key == '??'):
+                key = 'space'
+            if key not in new_shortcut:
+                new_shortcut.append(key)
+                entry.delete(0, END)
+                entry.insert(0, '+'.join(new_shortcut))
+            label.pack_forget()
+
+        change_shortcut_window = ttk.Toplevel(topmost=True)
+        change_shortcut_window.title('修改快捷键')
+        change_shortcut_window.geometry("200x100")
+        change_shortcut_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\change.png")))
+        change_shortcut_window.tk.call('tk', 'scaling', 4/3)    
+        main_window_x = main_window.winfo_x()
+        main_window_y = main_window.winfo_y()  
+        change_shortcut_window.geometry(f'+{main_window_x+150}+{main_window_y + 150}')
+
+        label = ttk.Label(change_shortcut_window, text='请按下新的快捷键')
+        label.pack()
+
+        entry = ttk.Entry(change_shortcut_window)
+        entry.pack()
+        entry.focus_set()
+
+        # 记录按键
+        change_shortcut_window.bind('<Key>', record_key)
+
+        confirm_button = ttk.Button(change_shortcut_window, text='确定',bootstyle=SUCCESS, command=set_new_shortcut)
+        confirm_button.place(x=20,y=-10,relx=0,rely=1,anchor=SW)
+
+        cancel_button = ttk.Button(change_shortcut_window, text='取消',bootstyle=DANGER, command=change_shortcut_window.destroy)
+        cancel_button.place(x=-20,y=-10,relx=1,rely=1,anchor=SE)
+
+    # 更新快捷键显示
+    def update_shortcut_display():
+        shortcuts = get_shortcuts()
+        for i, (shortcut_id, shortcut_info) in enumerate(shortcuts.items()):
+            shortcut_entries[i].delete(0, END)
+            shortcut_entries[i].insert(0, shortcut_info['key'])
+            shortcut_buttons[i].config(command=lambda i=i, id=shortcut_id, info=shortcut_info: open_change_window(id, info['key'], info['action']))
+
+    shortcut_frame=ttk.LabelFrame(common_page,text="快捷按键")
+    shortcut_frame.place(x=180,y=0)
+    # 创建快捷键显示文本框和修改按钮
+    shortcuts = get_shortcuts()
+    for i, (shortcut_id, shortcut_info) in enumerate(shortcuts.items()):
+        # 显示快捷键的文本框
+        entry = ttk.Entry(shortcut_frame,width=18,font=("黑体",8))
+        entry.insert(0, shortcut_info['key'])
+        entry.grid(row=i, column=0, padx=2)
+        shortcut_entries.append(entry)
+
+        # 修改快捷键的按钮
+        button = ttk.Button(shortcut_frame, text='修改',padding=0,bootstyle=(OUTLINE), command=lambda i=i, id=shortcut_id, info=shortcut_info: open_change_window(id, info['key'], info['action']))
+        button.grid(row=i, column=1, padx=2)
+        shortcut_buttons.append(button)
+
+        
+        combobox=ttk.Combobox(shortcut_frame,values=action_list,width=13,state=READONLY)
+        combobox.grid(row=i, column=2, padx=2)
+        combobox.current(shortcut_info['action'])
+        shortcut_comboboxs.append(combobox)
+        def modify_action(event,id=shortcut_id,i=i):
+            config = load_config(config_file_path)
+            modify_shortcut(id, config['shortcuts'][id]["key"], shortcut_comboboxs[i].current())
+        combobox.bind("<<ComboboxSelected>>", modify_action)
+    # 设置快捷键监听
+    for shortcut_info in shortcuts.values():
+        keyboard.add_hotkey(shortcut_info['key'], lambda action=shortcut_info['action']: on_triggered(action))
+
     global zombie_select
     zombie_page=ttk.Frame(page_tab)
     zombie_page.pack()
@@ -1040,7 +1360,7 @@ def mainWindow():
 
         slot_cooldown_label = ttk.Label(slot_page, text="冷却进度")
         slot_cooldown_label.grid(row=slot_number-1, column=3, padx=(2,0))
-        slot_cd_progressBar=ttk.Progressbar(slot_page,length=100,mode=DETERMINATE,maximum=slot_cooldown_value.get(),variable=slot_elapsed_value,bootstyle="success-striped")
+        slot_cd_progressBar=ttk.Progressbar(slot_page,length=80,mode=DETERMINATE,maximum=slot_cooldown_value.get(),variable=slot_elapsed_value,bootstyle="success-striped")
         slot_cd_progressBar.grid(row=slot_number-1, column=4, ipady=0)
         slot_cd_progressBars.append(slot_cd_progressBar)    
         def set_cd_progressBar_focus(event):
@@ -1107,8 +1427,10 @@ def mainWindow():
                 # slot_canUse_flags[index].set(slot.canUse)
             except:
                 pass
-        
-        slots_num_value.set(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24))
+        try:
+            slots_num_value.set(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24))
+        except:
+            pass
 
 
 
@@ -1141,6 +1463,8 @@ def mainWindow():
     support_button=ttk.Button(main_window,text="觉得好用？支持开发者",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=lambda:support())
     support_button.place(x=0,y=0,relx=1,anchor=NE)
     main_window.after(100,refreshData)
+
+    main_window.protocol("WM_DELETE_WINDOW", lambda: exit_editor(config_file_path, main_window))
     main_window.mainloop()
 
 if __name__ == '__main__':
