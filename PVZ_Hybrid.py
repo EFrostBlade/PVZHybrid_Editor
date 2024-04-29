@@ -189,6 +189,12 @@ def ignoreZombies(f):
     else:        
         data.PVZ_memory.write_bytes(0x413431,b'\x0f\x84\x7f\x04\x00\x00',6)
 
+def pauseSpawn(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x004265DC,b'\xeb',1)
+    else:
+        data.PVZ_memory.write_bytes(0x004265DC,b'\x74',1)
+
 
 def changeGameSpeed(s):
     FrameDurationAddr=data.PVZ_memory.read_int(data.baseAddress)+0x454
@@ -238,11 +244,44 @@ def putLadder(row,col):
 
     asm.runThread(ladder(row,col))
     
-def putZombe(row,col):
+def putZombie(row,col,type):
     class zombiePut:
-        def __init__(self) -> None:
-            pass
+        def __init__(self,row,col,type):
+            self.row=row
+            self.col=col  
+            self.type=type
 
+        def creat_asm(self,startAddress):
+            zombiePut_asm=asm.Asm(startAddress)
+            zombiePut_asm.push_byte(col)
+            zombiePut_asm.push_byte(type)
+            zombiePut_asm.mov_exx(asm.EAX, row)
+            zombiePut_asm.mov_exx_dword_ptr(asm.ECX, 0x006a9ec0)
+            zombiePut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x768)
+            zombiePut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x160)
+            zombiePut_asm.call(0x0042a0f0)
+            return zombiePut_asm
+        
+    asm.runThread(zombiePut(row,col,type))
+            
+def putBoss(row,col,type):
+    class bossPut:
+        def __init__(self,row,col,type):
+            self.row=row
+            self.col=col  
+            self.type=type
+
+        def creat_asm(self,startAddress):
+            bossPut_asm=asm.Asm(startAddress)
+            bossPut_asm.mov_exx_dword_ptr(asm.EAX, 0x006a9ec0)
+            bossPut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX,asm.EAX,  0x768)
+            bossPut_asm.push_byte(0)
+            bossPut_asm.push_byte(25)
+            bossPut_asm.call(0x0040ddc0)
+            return bossPut_asm
+        
+    asm.runThread(bossPut(row,col,type))
+            
 def putPlant(row,col,type):
     class plautPut:
         def __init__(self,row,col,type):

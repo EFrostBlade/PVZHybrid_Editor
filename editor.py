@@ -12,6 +12,7 @@ import ctypes
 import webbrowser
 import json
 import keyboard
+import requests
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -21,23 +22,25 @@ import PVZ_Hybrid as pvz
 import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-
+current_version = '0.07'
+version_url = 'https://raw.githubusercontent.com/EFrostBlade/PVZHybrid_Editor/main/version.txt'
 main_window=None
 data.update_PVZ_memory(1)
 zombie_select=None
 plant_select=None
 item_select=None
+plant_characteristic_type=None
 shortcut_entries = []
 shortcut_buttons = []
 shortcut_comboboxs = []
 action_values=[]
 action_list=["高级暂停","设置阳光","增加阳光","自由放置","免费种植","取消冷却","自动收集","柱子模式","超级铲子","永不失败",
-             "当前关卡胜利","秒杀所有僵尸","解锁全部植物","放置植物","搭梯"]
+             "当前关卡胜利","秒杀所有僵尸","解锁全部植物","放置植物","搭梯","清除植物"]
 # 默认配置
 default_config = {
     "shortcuts": {
         "key1": {
-            "key": "space",
+            "key": "ctrl+space",
             "action": 0
         },
         "key2": {
@@ -299,6 +302,65 @@ def mainWindow():
 
     # 在主窗口创建后调用
     apply_window_position(config_file_path, main_window)
+
+    def open_update_window(latest_version):            
+        global main_window
+
+        def close():
+            update_window.quit()
+            update_window.destroy()
+
+        update_window=ttk.Toplevel(topmost=True)
+        update_window.title("有新版本")
+        update_window.geometry("320x400")
+        update_window.iconphoto(False,ttk.PhotoImage(file=resource_path((r"res\icon\info.png"))))
+        update_window.tk.call('tk', 'scaling', 4/3)    
+        main_window_x = main_window.winfo_x()
+        main_window_y = main_window.winfo_y()  
+        update_window.geometry(f'+{main_window_x+100}+{main_window_y + 100}')
+        ttk.Label(update_window,text="检测到新版本{}".format(latest_version),font=("黑体",18),bootstyle=INFO).pack()
+        ttk.Label(update_window,text="本软件完全免费",font=("黑体",18),bootstyle=SUCCESS).pack(pady=20)
+        github_frame=ttk.Frame(update_window)
+        github_frame.pack()
+        ttk.Label(github_frame,text="前往下载最新版本",font=("黑体",12),bootstyle=SUCCESS).pack(side=LEFT)
+        def open_code():
+            webbrowser.open_new("https://github.com/EFrostBlade/PVZHybrid_Editor/releases")
+        ttk.Button(github_frame, text="PVZHybrid_Editor(github.com)",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_code).pack(side=LEFT)
+        ttk.Label(update_window,text="如果您觉得本软件有帮助，欢迎赞助支持开发者",font=("黑体",8),bootstyle=WARNING).pack()
+        def open_qq():
+            webbrowser.open_new("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NXcD3BMkaDeyysTJYZZvJnl7xDZEL7et&authKey=rRxScaHQ7BDXklafDeSFtMLVgXRK8%2Bkd0PdQ2sssDv9AtnJE4HATLSbAjTxJKRGR&noverify=0&group_code=678474090")
+        qq_frame=ttk.Frame(update_window)
+        qq_frame.pack()
+        ttk.Label(qq_frame,text="赞助任意金额后即可加入赞助群：",font=("黑体",8),bootstyle=WARNING).pack(side=LEFT)
+        ttk.Button(qq_frame, text="678474090",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_qq).pack(side=LEFT)
+        ttk.Label(update_window,text="进群可享受功能优先适配、1对1解决问题等服务",font=("黑体",8),bootstyle=WARNING).pack()
+        image_frame=ttk.Frame(update_window)
+        image_frame.pack()
+        AliPay = ttk.PhotoImage(file=resource_path(r"res/support/AliPay.png"))
+        WeChatPay = ttk.PhotoImage(file=resource_path(r"res/support/WeChatPay.png"))
+        AliPay_image=ttk.Label(image_frame,image=AliPay)
+        AliPay_image.grid(row=0,column=0,padx=10)
+        WeChatPay_image=ttk.Label(image_frame,image=WeChatPay)
+        WeChatPay_image.grid(row=0,column=1,padx=10)
+        ttk.Label(image_frame,text="支付宝",bootstyle=PRIMARY,font=("黑体",12)).grid(row=1,column=0,pady=5)
+        ttk.Label(image_frame,text="微信支付",bootstyle=SUCCESS,font=("黑体",12)).grid(row=1,column=1,pady=5)
+        update_window.protocol('WM_DELETE_WINDOW',lambda:close())
+        update_window.mainloop()
+
+
+
+    try:
+        # 从服务器获取最新版本号
+        response = requests.get(version_url)
+        latest_version = response.text.strip()
+        print(latest_version)
+        # 比较版本号
+        if latest_version > current_version:
+            # 如果发现新版本，提示用户
+            open_update_window(latest_version)
+    except Exception as e:
+        Messagebox.show_error('无法检查更新，请检查您的网络连接。',title='更新检测失败',)
+
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     process_frame=ttk.Frame(main_window)
@@ -379,7 +441,7 @@ def mainWindow():
     column_like_check=ttk.Checkbutton(quick_start_frame,text="柱子模式",variable=column_like_status,bootstyle="success-round-toggle",command=lambda:pvz.column(column_like_status.get()))
     column_like_check.grid(row=4,column=0,sticky=W)
     ToolTip(column_like_check,text="种植一个植物后在同一列的其他行种植相同的植物(可与自由放置配合使用)",bootstyle=(INFO,INVERSE))
-    shovel_pro_status=ttk.BooleanVar(quick_start_frame)
+    shovel_pro_status=ttk.BooleanVar(quick_start_frame) 
     shovel_pro_check=ttk.Checkbutton(quick_start_frame,text="超级铲子",variable=shovel_pro_status,bootstyle="success-round-toggle",command=lambda:pvz.shovelpro(shovel_pro_status.get()))
     shovel_pro_check.grid(row=5,column=0,sticky=W)
     ToolTip(shovel_pro_check,text="铲掉植物返还其阳光消耗并触发亡语效果",bootstyle=(INFO,INVERSE))
@@ -429,7 +491,31 @@ def mainWindow():
         pvz.changeGameSpeed(game_speed_value.get())
     game_speed_scale=ttk.Scale(game_speed_frame,from_=0,to=6,orient=HORIZONTAL,variable=game_speed_value,command=changeSpeedValue)
     game_speed_scale.grid(row=0,column=1)
-    
+    def on_mousewheel(event):
+        # 计算滚轮的滚动方向和距离
+        increment = -1 if event.delta > 0 else 1
+        # 获取当前Scale的值
+        value = game_speed_value.get()+ increment
+        # 设置新的Scale值
+        step=1
+        adjusted_value = round(float(value) / step) * step
+        game_speed_value.set(adjusted_value)
+        if(game_speed_value.get()==0):
+            game_speed_label.config(text="0.25")
+        elif(game_speed_value.get()==1):
+            game_speed_label.config(text="0.5")
+        elif(game_speed_value.get()==2):
+            game_speed_label.config(text="1")
+        elif(game_speed_value.get()==3):
+            game_speed_label.config(text="2")
+        elif(game_speed_value.get()==4):
+            game_speed_label.config(text="5")
+        elif(game_speed_value.get()==5):
+            game_speed_label.config(text="10")
+        elif(game_speed_value.get()==6):
+            game_speed_label.config(text="20")
+        pvz.changeGameSpeed(game_speed_value.get())
+    game_speed_scale.bind("<MouseWheel>", on_mousewheel)
     # 读取快捷键配置
     def get_shortcuts():
         config = load_config(config_file_path)
@@ -485,25 +571,25 @@ def mainWindow():
             pvz.addSun(sun_add_value.get())
         elif action==3:
             switch_status(over_plant_status)
-            pvz.pausePro(over_plant_status.get())
+            pvz.overPlant(over_plant_status.get())
         elif action==4:
             switch_status(free_plant_status)
-            pvz.pausePro(free_plant_status.get())
+            pvz.ignoreSun(free_plant_status.get())
         elif action==5:
             switch_status(cancel_cd_status)
-            pvz.pausePro(cancel_cd_status.get())
+            pvz.cancelCd(cancel_cd_status.get())
         elif action==6:
             switch_status(auto_colect_status)
-            pvz.pausePro(auto_colect_status.get())
+            pvz.autoCollect(auto_colect_status.get())
         elif action==7:
             switch_status(column_like_status)
-            pvz.pausePro(column_like_status.get())
+            pvz.column(column_like_status.get())
         elif action==8:
             switch_status(shovel_pro_status)
-            pvz.pausePro(shovel_pro_status.get())
+            pvz.shovelpro(shovel_pro_status.get())
         elif action==9:
             switch_status(never_fail_status)
-            pvz.pausePro(never_fail_status.get())
+            pvz.ignoreZombies(never_fail_status.get())
         elif action==10:
             pvz.win()
         elif action==11:
@@ -514,6 +600,8 @@ def mainWindow():
             putPlants(plantPut_type_combobox.current())
         elif action==14:
             putLadders()
+        elif action==15:
+            clearPlants()
 
 
     # 修改快捷键的窗口
@@ -545,7 +633,6 @@ def mainWindow():
                 new_shortcut.append(key)
                 entry.delete(0, END)
                 entry.insert(0, '+'.join(new_shortcut))
-            label.pack_forget()
 
         change_shortcut_window = ttk.Toplevel(topmost=True)
         change_shortcut_window.title('修改快捷键')
@@ -782,7 +869,60 @@ def mainWindow():
         zombie_select.setIsDying(not zombie_isDying_flag.get())
     ttk.Checkbutton(zombie_flag_frame,text="濒死",bootstyle="danger-round-toggle",variable=zombie_isDying_flag,command=lambda:change_zombie_isDying()).grid(row=2,column=1)
 
+    zombie_put_frame=ttk.LabelFrame(zombie_page,text="放置僵尸",bootstyle=DANGER)
+    zombie_put_frame.place(x=280,y=0,anchor=NW,height=100,width=130)
+    ttk.Label(zombie_put_frame,text="第").grid(row=0,column=0)
+    zombiePut_start_row_value=ttk.IntVar(zombie_put_frame)
+    zombiePut_start_row_combobox=ttk.Combobox(zombie_put_frame,textvariable=zombiePut_start_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombiePut_start_row_combobox.grid(row=0,column=1)
+    zombiePut_start_row_value.set(1)
+    ttk.Label(zombie_put_frame,text="行").grid(row=0,column=2)
+    zombiePut_start_col_value=ttk.IntVar(zombie_put_frame)
+    zombiePut_start_col_combobox=ttk.Combobox(zombie_put_frame,textvariable=zombiePut_start_col_value,width=2,values=[1,2,3,4,5,6,7,8,9,10,11,12],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombiePut_start_col_combobox.grid(row=0,column=3)
+    zombiePut_start_col_value.set(1)
+    ttk.Label(zombie_put_frame,text="列").grid(row=0,column=4)
+    ttk.Label(zombie_put_frame,text="至").grid(row=1,column=0)
+    zombiePut_end_row_value=ttk.IntVar(zombie_put_frame)
+    zombiePut_end_row_combobox=ttk.Combobox(zombie_put_frame,textvariable=zombiePut_end_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombiePut_end_row_combobox.grid(row=1,column=1)
+    zombiePut_end_row_value.set(1)
+    ttk.Label(zombie_put_frame,text="行").grid(row=1,column=2)
+    zombiePut_end_col_value=ttk.IntVar(zombie_put_frame)
+    zombiePut_end_col_combobox=ttk.Combobox(zombie_put_frame,textvariable=zombiePut_end_col_value,width=2,values=[1,2,3,4,5,6,7,8,9,10,11,12],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombiePut_end_col_combobox.grid(row=1,column=3)
+    zombiePut_end_col_value.set(1)
+    ttk.Label(zombie_put_frame,text="列").grid(row=1,column=4)
+    zombiePut_type_combobox=ttk.Combobox(zombie_put_frame,width=7,values=data.zombiesType,font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    zombiePut_type_combobox.grid(row=2,column=0,columnspan=4,sticky=W)
+    zombiePut_type_combobox.current(0)
+    def putZombies(type):
+        startRow=zombiePut_start_row_value.get()-1
+        startCol=zombiePut_start_col_value.get()-1
+        endRow=zombiePut_end_row_value.get()-1
+        endCol=zombiePut_end_col_value.get()-1
+        if(type==25):
+            pvz.putBoss
+        print(startRow,startCol,endRow,endCol,type)
+        if(pvz.getMap!=False):
+            rows=pvz.getMap()-1
+            if startRow>rows:
+                startRow=rows
+            if endRow>rows:
+                endRow=rows
+            if startRow>endRow or startCol>endCol:
+                Messagebox.show_error("起始行列大于终止行列",title="输入错误")
+            else:
+                for i in range(startRow,endRow+1):
+                    for j in range(startCol,endCol+1):
+                        pvz.putZombie(i,j,type)
+    ttk.Button(zombie_put_frame,text="放置僵尸",padding=0,bootstyle=(OUTLINE,DANGER),command=lambda:putZombies(zombiePut_type_combobox.current())).grid(row=2,column=0,columnspan=5,sticky=E)
 
+    zombie_seed_frame=ttk.LabelFrame(zombie_page,text="修改出怪",bootstyle=DANGER)
+    zombie_seed_frame.place(x=280,y=110,anchor=NW,height=100,width=130)
+    pausee_spawn_status=ttk.BooleanVar(zombie_seed_frame)
+    pausee_spawn_check=ttk.Checkbutton(zombie_seed_frame,text="暂停刷怪",variable=pausee_spawn_status,bootstyle="success-round-toggle",command=lambda:pvz.pauseSpawn(pausee_spawn_status.get()))
+    pausee_spawn_check.grid(row=0,column=0,sticky=W)
 
     def get_zombie_select(event):
         global zombie_select
@@ -1037,8 +1177,7 @@ def mainWindow():
     plant_flag_frame.grid(row=3,column=3,columnspan=8,sticky=W)
     plant_exist_flag=ttk.BooleanVar(plant_flag_frame)
     def change_plant_exist():
-        if(plant_exist_flag.get()==False):
-            plant_select.setExist(2)
+        plant_select.setExist(not plant_exist_flag.get())
     ttk.Checkbutton(plant_flag_frame,text="存在",bootstyle="success-round-toggle",variable=plant_exist_flag,command=lambda:change_plant_exist()).grid(row=0,column=0)
     plant_isVisible_flag=ttk.BooleanVar(plant_flag_frame)
     def change_plant_isVisible():
@@ -1058,7 +1197,7 @@ def mainWindow():
     ttk.Checkbutton(plant_flag_frame,text="睡眠",bootstyle="success-round-toggle",variable=plant_isSleep_flag,command=lambda:change_plant_isSleep()).grid(row=4,column=0)
     
     plant_put_frame=ttk.LabelFrame(plant_page,text="种植",bootstyle=SUCCESS)
-    plant_put_frame.place(x=240,y=0,anchor=NW,height=100,width=130)
+    plant_put_frame.place(x=240,y=0,anchor=NW,height=120,width=130)
     ttk.Label(plant_put_frame,text="第").grid(row=0,column=0)
     plantPut_start_row_value=ttk.IntVar(plant_put_frame)
     plantPut_start_row_combobox=ttk.Combobox(plant_put_frame,textvariable=plantPut_start_row_value,width=2,values=[1,2,3,4,5,6],font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
@@ -1105,8 +1244,65 @@ def mainWindow():
                     for j in range(startCol,endCol+1):
                         pvz.putPlant(i,j,type)
     ttk.Button(plant_put_frame,text="种植",padding=0,bootstyle=(OUTLINE,SUCCESS),command=lambda:putPlants(plantPut_type_combobox.current())).grid(row=2,column=0,columnspan=5,sticky=E)
+    def clearPlants():
+        try:
+            plant_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xbc)
+        except:
+            return
+        i=0
+        j=0
+        while i<plant_num:
+            plant_addresss=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+            plant_exist=data.PVZ_memory.read_bytes(plant_addresss+0x141,1)
+            if(plant_exist==b'\x00'):
+                data.PVZ_memory.write_bytes(plant_addresss+0x141,b'\x01',1)
+                i=i+1
+            j=j+1
+    ttk.Button(plant_put_frame,text="清空所有植物",padding=0,bootstyle=(OUTLINE,SUCCESS),command=lambda:clearPlants()).grid(row=3,column=0,columnspan=5,pady=(5,0),sticky=W)
 
-    
+    plant_characteristic_frame=ttk.Labelframe(plant_page,text="基础属性",bootstyle=SUCCESS)
+    plant_characteristic_frame.place(x=240,y=130,anchor=NW,height=140,width=130)
+    plant_type_combobox=ttk.Combobox(plant_characteristic_frame,width=10,values=data.plantsType,font=("黑体",8),bootstyle=SECONDARY,state=READONLY)
+    plant_type_combobox.grid(row=0,column=0,columnspan=4,sticky=W)
+    ttk.Label(plant_characteristic_frame,text="阳光:").grid(row=1,column=0)
+    plant_characteristic_sun_value=ttk.IntVar(plant_characteristic_frame)
+    plant_characteristic_sun_entry=ttk.Entry(plant_characteristic_frame,textvariable=plant_characteristic_sun_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_characteristic_sun_entry.grid(row=1,column=1,ipady=0)
+    def setPlantCharacteristicSun(event):
+        plant_characteristic_type.setSun(plant_characteristic_sun_value.get())
+        plant_characteristic_frame.focus_set()
+    plant_characteristic_sun_entry.bind("<Return>",setPlantCharacteristicSun)
+    plant_characteristic_cd_label=ttk.Label(plant_characteristic_frame,text="冷却:")
+    plant_characteristic_cd_label.grid(row=2,column=0)
+    plant_characteristic_cd_value=ttk.IntVar(plant_characteristic_frame)
+    plant_characteristic_cd_entry=ttk.Entry(plant_characteristic_frame,textvariable=plant_characteristic_cd_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_characteristic_cd_entry.grid(row=2,column=1,ipady=0)
+    def setPlantCharacteristicCd(event):
+        plant_characteristic_type.setCd(plant_characteristic_cd_value.get())
+        plant_characteristic_frame.focus_set()
+    plant_characteristic_cd_entry.bind("<Return>",setPlantCharacteristicCd)
+    plant_characteristic_canAttack_flag=ttk.BooleanVar(plant_flag_frame)
+    def change_plant_characteristic_canAttack():
+        plant_characteristic_type.setCanAttack(plant_characteristic_canAttack_flag.get())
+    ttk.Checkbutton(plant_characteristic_frame,text="可攻击",bootstyle="success-round-toggle",variable=plant_characteristic_canAttack_flag,command=lambda:change_plant_characteristic_canAttack()).grid(row=3,column=0,columnspan=4)
+    ttk.Label(plant_characteristic_frame,text="攻击间隔:").grid(row=4,column=0)
+    plant_characteristic_attackinterval_value=ttk.IntVar(plant_characteristic_frame)
+    plant_characteristic_attackinterval_entry=ttk.Entry(plant_characteristic_frame,textvariable=plant_characteristic_attackinterval_value,width=5,font=("黑体",8),bootstyle=SECONDARY)
+    plant_characteristic_attackinterval_entry.grid(row=4,column=1,ipady=0)
+    def setPlantCharacteristicAttackInterval(event):
+        plant_characteristic_type.setAttackInterval(zombie_frozen_value.get())
+        zombie_control_frame.focus_set()
+    zombie_frozen_entry.bind("<Return>",setPlantCharacteristicAttackInterval)
+
+    def get_plant_type(event):
+        global plant_characteristic_type
+        plant_characteristic_type=data.plantCharacteristic(plant_type_combobox.current())
+        plant_characteristic_sun_value.set(plant_characteristic_type.sun)
+        plant_characteristic_cd_value.set(plant_characteristic_type.cd)
+        plant_characteristic_attackinterval_value.set(plant_characteristic_type.attackInterval)
+        plant_characteristic_canAttack_flag.set(plant_characteristic_type.canAttack)
+        plant_characteristic_frame.focus_set()
+    plant_type_combobox.bind("<<ComboboxSelected>>", get_plant_type)
 
 
     def get_plant_select(event):
@@ -1148,13 +1344,10 @@ def mainWindow():
                     plant_suntime_value.set(plant_select.sunTime)
                 if(plant_attribute_frame.focus_get()!=plant_humtime_entry):
                     plant_humtime_value.set(plant_select.humTime)
-                if(plant_select.exist==0):
-                    plant_exist_flag.set(True)
-                else:
-                    plant_exist_flag.set(False)
             except:
                 pass
             plant_isVisible_flag.set(not plant_select.isVisible)
+            plant_exist_flag.set(not plant_select.exist)
             plant_isAttack_flag.set(plant_select.isAttack)
             plant_isSquash_flag.set(plant_select.isSquash)
             plant_isSleep_flag.set(plant_select.isSleep)
@@ -1436,9 +1629,12 @@ def mainWindow():
 
     def refreshData():
         if(page_tab.index('current')==0):
-            if(pvz.getMap()!=False):        
-                if(main_window.focus_get()!=sun_value_entry):
-                    sun_value.set(pvz.getSun())
+            if(pvz.getMap()!=False):  
+                try:      
+                    if(main_window.focus_get()!=sun_value_entry):
+                        sun_value.set(pvz.getSun())
+                except:
+                    pass
         if(page_tab.index('current')==1):
             if(pvz.getMap()!=False):       
                 refresh_zombie_list()

@@ -239,3 +239,19 @@ class slot:
     def setCount(self, count):
         PVZ_memory.write_int(self.addr + 0x4c, count)
         
+class plantCharacteristic:
+    def __init__(self,type):
+        self.addr=0x007A2010+type*0x24
+        self.sun= PVZ_memory.read_int(self.addr)
+        self.cd= PVZ_memory.read_int(self.addr+0x4)
+        self.canAttack= PVZ_memory.read_bool(self.addr+0x8)
+        self.attackInterval= PVZ_memory.read_int(self.addr+0xc)
+
+    def setSun(self, sun):
+        PVZ_memory.write_int(self.addr, sun)
+    def setCd(self, cd):
+        PVZ_memory.write_int(self.addr + 0x4, cd)
+    def setCanAttack(self, canAttack):
+        PVZ_memory.write_bool(self.addr + 0x8, canAttack)
+    def setAttackInterval(self, attackInterval):
+        PVZ_memory.write_int(self.addr + 0xc, attackInterval)
