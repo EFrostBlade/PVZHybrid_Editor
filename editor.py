@@ -22,8 +22,8 @@ import PVZ_Hybrid as pvz
 import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-current_version = '0.07'
-version_url = 'https://raw.githubusercontent.com/EFrostBlade/PVZHybrid_Editor/main/version.txt'
+current_version = '0.08'
+version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window=None
 data.update_PVZ_memory(1)
 zombie_select=None
@@ -289,7 +289,7 @@ def support():
 def mainWindow():
     global main_window
     main_window=ttk.Window()
-    main_window.title("杂交版多功能修改器")
+    main_window.title("杂交版多功能修改器  "+str(current_version))
     main_window.geometry("500x500")
     main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
     main_window.tk.call('tk', 'scaling', 4/3)    
@@ -324,8 +324,8 @@ def mainWindow():
         github_frame.pack()
         ttk.Label(github_frame,text="前往下载最新版本",font=("黑体",12),bootstyle=SUCCESS).pack(side=LEFT)
         def open_code():
-            webbrowser.open_new("https://github.com/EFrostBlade/PVZHybrid_Editor/releases")
-        ttk.Button(github_frame, text="PVZHybrid_Editor(github.com)",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_code).pack(side=LEFT)
+            webbrowser.open_new("https://gitee.com/EFrostBlade/PVZHybrid_Editor/releases")
+        ttk.Button(github_frame, text="PVZHybrid_Editor(gitee.com)",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=open_code).pack(side=LEFT)
         ttk.Label(update_window,text="如果您觉得本软件有帮助，欢迎赞助支持开发者",font=("黑体",8),bootstyle=WARNING).pack()
         def open_qq():
             webbrowser.open_new("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NXcD3BMkaDeyysTJYZZvJnl7xDZEL7et&authKey=rRxScaHQ7BDXklafDeSFtMLVgXRK8%2Bkd0PdQ2sssDv9AtnJE4HATLSbAjTxJKRGR&noverify=0&group_code=678474090")
@@ -415,8 +415,11 @@ def mainWindow():
     sun_add_value=ttk.IntVar(resource_modify_frame)
     sun_add_entry=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING,textvariable=sun_add_value)
     sun_add_entry.grid(row=2,column=1)
+    config = load_config(config_file_path)
+    sun_add_value.set(config["data"]["sunadd"])
     def addSun(event):
         pvz.addSun(sun_add_value.get())
+        modify_config(config_file_path,"data","sunadd",sun_add_value.get())
         resource_modify_frame.focus_set()
     sun_add_entry.bind("<Return>",addSun)
     quick_start_frame=ttk.LabelFrame(common_page,text="快速使用",bootstyle=SUCCESS)
