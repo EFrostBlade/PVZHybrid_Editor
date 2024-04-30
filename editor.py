@@ -22,7 +22,7 @@ import PVZ_Hybrid as pvz
 import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-current_version = '0.08'
+current_version = '0.09'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window=None
 data.update_PVZ_memory(1)
@@ -308,7 +308,7 @@ def mainWindow():
     global main_window
     main_window=ttk.Window()
     main_window.title("杂交版多功能修改器  "+str(current_version))
-    main_window.geometry("500x500")
+    main_window.geometry("500x550")
     main_window.iconphoto(False,ttk.PhotoImage(file=resource_path(r"res\icon\editor.png")))
     main_window.tk.call('tk', 'scaling', 4/3)    
     def apply_window_position(file_path, window, section='main_window_position'):
@@ -1529,7 +1529,11 @@ def mainWindow():
 
     slot_page=ttk.Frame(page_tab)
     slot_page.pack()
-    page_tab.add(slot_page,text="卡槽修改")    
+    page_tab.add(slot_page,text="卡槽修改") 
+    slots_configuration_mode=ttk.BooleanVar(slot_page)
+    slots_configuration_mode.set(False)
+    slots_frame=ttk.LabelFrame(slot_page,text="监视模式",bootstyle=SUCCESS)
+    slots_frame.place(x=0,y=0)
     slot_list=list()
     def refresh_slot_list():
         slot_list.clear()
@@ -1552,64 +1556,69 @@ def mainWindow():
     slot_isVisible_flags = []
     # slot_canUse_flags = []
     def create_slot_ui(slot_number):
-        ttk.Label(slot_page, text=f"{slot_number}").grid(row=slot_number-1, column=0, sticky=W)
-        ttk.Label(slot_page, text="植物:").grid(row=slot_number-1, column=1, sticky=W)
+        ttk.Label(slots_frame, text=f"{slot_number}").grid(row=slot_number-1, column=0, sticky=W)
+        ttk.Label(slots_frame, text="植物:").grid(row=slot_number-1, column=1, sticky=W)
 
-        slot_type_combobox = ttk.Combobox(slot_page, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
+        slot_type_combobox = ttk.Combobox(slots_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
         slot_type_combobox.grid(row=slot_number-1, column=2, sticky=W)
         slot_type_comboboxes.append(slot_type_combobox)
 
         def set_slot_type(event, index=slot_number-1):
-            slot_list[index].setType(slot_type_combobox.current())
-            slot_page.focus_set()
+            if(slots_configuration_mode.get()==False):
+                slot_list[index].setType(slot_type_combobox.current())
+                slots_frame.focus_set()
         slot_type_combobox.bind("<<ComboboxSelected>>", set_slot_type)
 
         slot_elapsed_value = ttk.IntVar()
         slot_elapsed_values.append(slot_elapsed_value)
-        slot_elapsed_entry = ttk.Entry(slot_page, textvariable=slot_elapsed_value, width=5, font=("黑体", 8), bootstyle='secondary')
+        slot_elapsed_entry = ttk.Entry(slots_frame, textvariable=slot_elapsed_value, width=5, font=("黑体", 8), bootstyle='secondary')
         slot_elapsed_entrys.append(slot_elapsed_entry)
 
         def set_slot_elapsed(event, index=slot_number-1):
-            slot_list[index].setElapsed(slot_elapsed_value.get())
-            slot_page.focus_set()
+            if(slots_configuration_mode.get()==False):
+                slot_list[index].setElapsed(slot_elapsed_value.get())
+                slots_frame.focus_set()
         slot_elapsed_entry.bind("<Return>", set_slot_elapsed)
 
         slot_cooldown_value = ttk.IntVar()
         slot_cooldown_values.append(slot_cooldown_value)
-        slot_cooldown_entry = ttk.Entry(slot_page, textvariable=slot_cooldown_value, width=5, font=("黑体", 8), bootstyle='secondary')
+        slot_cooldown_entry = ttk.Entry(slots_frame, textvariable=slot_cooldown_value, width=5, font=("黑体", 8), bootstyle='secondary')
         slot_cooldown_entrys.append(slot_cooldown_entry)
 
         def set_slot_cooldown(event, index=slot_number-1):
             slot_list[index].setCooldown(slot_cooldown_value.get())
-            slot_page.focus_set()
+            slots_frame.focus_set()
         slot_cooldown_entry.bind("<Return>", set_slot_cooldown)
 
 
-        slot_cooldown_label = ttk.Label(slot_page, text="冷却进度")
+        slot_cooldown_label = ttk.Label(slots_frame, text="冷却进度")
         slot_cooldown_label.grid(row=slot_number-1, column=3, padx=(2,0))
-        slot_cd_progressBar=ttk.Progressbar(slot_page,length=80,mode=DETERMINATE,maximum=slot_cooldown_value.get(),variable=slot_elapsed_value,bootstyle="success-striped")
+        slot_cd_progressBar=ttk.Progressbar(slots_frame,length=80,mode=DETERMINATE,maximum=slot_cooldown_value.get(),variable=slot_elapsed_value,bootstyle="success-striped")
         slot_cd_progressBar.grid(row=slot_number-1, column=4, ipady=0)
         slot_cd_progressBars.append(slot_cd_progressBar)    
         def set_cd_progressBar_focus(event):
-            slot_cd_progressBar.focus_set()
+            if(slots_configuration_mode.get()==False):
+                slot_cd_progressBar.focus_set()
         def set_cd_value(event,index=slot_number-1):
-            fraction = event.x / slot_cd_progressBar.winfo_width()
-            new_value = int(fraction * slot_cd_progressBar['maximum'])
-            slot_elapsed_value.set(new_value)
-            slot_list[index].setElapsed(slot_elapsed_value.get())
+            if(slots_configuration_mode.get()==False):
+                fraction = event.x / slot_cd_progressBar.winfo_width()
+                new_value = int(fraction * slot_cd_progressBar['maximum'])
+                slot_elapsed_value.set(new_value)
+                slot_list[index].setElapsed(slot_elapsed_value.get())
         slot_cd_progressBar.bind("<Button-1>", set_cd_progressBar_focus)
         slot_cd_progressBar.bind("<ButtonRelease-1>", set_cd_value)
         
-        slot_isVisible_flag=ttk.BooleanVar(slot_page)
+        slot_isVisible_flag=ttk.BooleanVar(slots_frame)
         slot_isVisible_flags.append(slot_isVisible_flag)
         def change_slot_isVisible(index=slot_number-1):
-            slot_list[index].setIsVisible(not slot_isVisible_flag.get())
-        ttk.Checkbutton(slot_page,text="隐形",bootstyle="danger-round-toggle",variable=slot_isVisible_flag,command=lambda:change_slot_isVisible()).grid(row=slot_number-1,column=5)
-        # slot_canUse_flag=ttk.BooleanVar(slot_page)
+            if(slots_configuration_mode.get()==False):
+                slot_list[index].setIsVisible(not slot_isVisible_flag.get())
+        ttk.Checkbutton(slots_frame,text="隐形",bootstyle="danger-round-toggle",variable=slot_isVisible_flag,command=lambda:change_slot_isVisible()).grid(row=slot_number-1,column=5)
+        # slot_canUse_flag=ttk.BooleanVar(slots_frame)
         # slot_canUse_flags.append(slot_canUse_flag)
         # def change_slot_canUse(index=slot_number-1):
         #     slot_list[index].setCanUse(slot_canUse_flag.get())
-        # ttk.Checkbutton(slot_page,text="可用",bootstyle="danger-round-toggle",variable=slot_canUse_flag,command=lambda:change_slot_canUse()).grid(row=slot_number-1,column=6)
+        # ttk.Checkbutton(slots_frame,text="可用",bootstyle="danger-round-toggle",variable=slot_canUse_flag,command=lambda:change_slot_canUse()).grid(row=slot_number-1,column=6)
     # 为slots 1至14创建UI组件
     for slot_number in range(1, 15):
         create_slot_ui(slot_number)
@@ -1636,16 +1645,25 @@ def mainWindow():
     change_all_combobox = ttk.Combobox(change_all_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
     change_all_combobox.pack()
     def change_all_slots(event):
-        for slot in slot_list:
-            slot.setType(change_all_combobox.current())
+        if(slots_configuration_mode.get()==False):
+            for slot in slot_list:
+                slot.setType(change_all_combobox.current())
     change_all_combobox.bind("<<ComboboxSelected>>", change_all_slots)
 
-    card_select_frame=ttk.LabelFrame(slot_page,text="选卡",bootstyle=SUCCESS)
+    card_select_frame=ttk.LabelFrame(slot_page,text="选卡配置",bootstyle=DARK)
     card_select_frame.place(x=0,y=150,relx=1,anchor=NE)
-    card_select_combobox = ttk.Combobox(change_all_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
-    card_select_combobox.pack()
-    ttk.Button(card_select_frame,text="选卡",command=lambda:pvz.selectCard(card_select_combobox.current())).pack()
-    ttk.Button(card_select_frame,text="退卡",command=lambda:pvz.deselectCard(card_select_combobox.current())).pack()
+    def changeSlotsConfiguration():
+        if(slots_configuration_mode.get()==True):
+            slots_frame.configure(text="配置模式",bootstyle=DARK)
+        else:
+            slots_frame.configure(text="监视模式",bootstyle=SUCCESS)
+    slots_configuration_change=ttk.Checkbutton(card_select_frame,text="配置模式",variable=slots_configuration_mode,bootstyle="dark-round-toggle",command=lambda:changeSlotsConfiguration())
+    slots_configuration_change.pack()
+    ToolTip(slots_configuration_change,text="开启后左侧卡槽进入配置模式，可以配置选卡方案",bootstyle=(INFO,INVERSE))
+    # card_select_combobox = ttk.Combobox(card_select_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
+    # card_select_combobox.pack()
+    # ttk.Button(card_select_frame,text="选卡",command=lambda:pvz.selectCard(card_select_combobox.current())).pack()
+    # ttk.Button(card_select_frame,text="退卡",command=lambda:pvz.deselectCard(card_select_combobox.current())).pack()
     
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
@@ -1689,8 +1707,9 @@ def mainWindow():
                 refresh_item_list()
                 get_item_attribute()
         if(page_tab.index('current')==4):  
-            refresh_slot_list()
-            get_slot_attribute()
+            if(slots_configuration_mode.get()==False):
+                refresh_slot_list()
+                get_slot_attribute()
         main_window.after(100,refreshData)
            
 
