@@ -63,6 +63,10 @@ class Asm:
         self.add_byte(0x8b)
         self.add_byte(0x80 + exx * 8 + eyy)
         self.add_dword(val)
+        
+    def mov_exx_dword_ptr_eyy(self, exx, eyy):
+        self.add_byte(0x8b)
+        self.add_byte(exx * 8 + eyy)
 
     def push_exx(self, exx):
         self.add_byte(0x50 + exx)
@@ -88,10 +92,22 @@ class Asm:
         self.add_byte(0x89)
         self.add_byte(0xc0 + eyy * 8 + exx)
 
+    def imul_exx_eyy_byte(self,exx,eyy,val):
+        self.add_byte(0x6b)
+        self.add_byte(0xc0 + exx * 8 + eyy)
+        self.add_byte(val)
+
+    def lea_exx_byte_dword(self,exx,exy,val):
+        self.add_byte(0x8d)
+        self.add_byte(0x84+exx * 8)
+        self.add_byte(exy)#exx+(eyy)*8
+        self.add_dword(val)
+        
 
 def runThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
     startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
+    print(hex(startAddress))
     asm=cla.creat_asm(startAddress+1)
     shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
     data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)
@@ -112,6 +128,32 @@ def runThread(cla):
             pass
         else:
             data.PVZ_memory.write_bytes(0x00552014,b'\xdb',1)
+            break
+        time.sleep(0.001)    
+    pymem.memory.free_memory(process_handle, startAddress) 
+    
+def justRunThread(cla):
+    process_handle = pymem.process.open(data.PVZ_pid)
+    startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
+    print(hex(startAddress))
+    asm=cla.creat_asm(startAddress+1)
+    shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
+    data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)
+    thread_h = pymem.ressources.kernel32.CreateRemoteThread(
+                process_handle,
+                ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
+                0,
+                startAddress,
+                0,
+                0,
+                ctypes.byref(ctypes.c_ulong(0))
+            ) 
+    exit_code=ctypes.c_ulong()
+    while(1):
+        pymem.ressources.kernel32.GetExitCodeThread(thread_h,ctypes.byref(exit_code))
+        if(exit_code.value==259):
+            pass
+        else:
             break
         time.sleep(0.001)    
     pymem.memory.free_memory(process_handle, startAddress) 
