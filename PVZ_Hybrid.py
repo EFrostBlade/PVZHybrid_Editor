@@ -253,9 +253,9 @@ def putZombie(row,col,type):
 
         def creat_asm(self,startAddress):
             zombiePut_asm=asm.Asm(startAddress)
-            zombiePut_asm.push_byte(col)
-            zombiePut_asm.push_byte(type)
-            zombiePut_asm.mov_exx(asm.EAX, row)
+            zombiePut_asm.push_byte(self.col)
+            zombiePut_asm.push_byte(self.type)
+            zombiePut_asm.mov_exx(asm.EAX, self.row)
             zombiePut_asm.mov_exx_dword_ptr(asm.ECX, 0x006a9ec0)
             zombiePut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x768)
             zombiePut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x160)
@@ -302,6 +302,67 @@ def putPlant(row,col,type):
             return plantPut_asm
         
     asm.runThread(plautPut(row,col,type))
+
+def selectCard(type):
+    class cardSelect:
+        def __init__(self,type):
+            self.type=type
+        
+        def creat_asm(self,startAddress):
+            cardSelect_asm=asm.Asm(startAddress)
+            cardSelect_asm.mov_exx_dword_ptr(asm.EAX,0x006A9EC0)
+            cardSelect_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ESI,asm.EAX,0x00000774)
+            cardSelect_asm.mov_exx(asm.EBX,self.type)
+            cardSelect_asm.imul_exx_eyy_byte(asm.EDX,asm.EBX,0xf)
+            cardSelect_asm.lea_exx_byte_dword(asm.EAX,0x96,0xa4)
+            cardSelect_asm.push_exx(asm.EAX)
+            cardSelect_asm.mov_exx_eyy(asm.EAX,asm.ESI)
+            cardSelect_asm.call(0x00486030)
+            return cardSelect_asm
+    
+    asm.runThread(cardSelect(type))
+
+def deselectCard(type):
+    class cardDeselect:
+        def __init__(self,type):
+            self.type=type
+        
+        def creat_asm(self,startAddress):
+            cardDeselect_asm=asm.Asm(startAddress)
+            cardDeselect_asm.mov_exx_dword_ptr(asm.EAX,0x006A9EC0)
+            cardDeselect_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ESI,asm.EAX,0x00000774)
+            cardDeselect_asm.mov_exx(asm.EBX,self.type)
+            cardDeselect_asm.imul_exx_eyy_byte(asm.EDX,asm.EBX,0xf)
+            cardDeselect_asm.lea_exx_byte_dword(asm.EAX,0x96,0xa4)
+            cardDeselect_asm.push_exx(asm.EAX)
+            cardDeselect_asm.mov_exx_eyy(asm.EAX,asm.ESI)
+            cardDeselect_asm.call(0x00485E90)
+            return cardDeselect_asm
+    
+    asm.runThread(cardDeselect(type))
+
+def defeat():
+    class Defeat:
+        def __init__(self) -> None:
+            pass
+        
+        def creat_asm(self,startAddress):
+            Defeat_asm=asm.Asm(startAddress)
+            Defeat_asm.mov_exx_dword_ptr(asm.EAX,0x006A9EC0)
+            Defeat_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
+            Defeat_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ESI, asm.EAX, 0x90)
+            Defeat_asm.mov_exx_dword_ptr_eyy(asm.EBX,asm.ESI)
+            Defeat_asm.mov_exx(asm.EDX,0x2d)
+            Defeat_asm.mov_exx_eyy(asm.ECX,asm.ESI)
+            Defeat_asm.mov_exx(asm.EDI,0xFFFFFF9C)
+            Defeat_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EAX,asm.ESI,0x04)
+            Defeat_asm.push_exx(asm.ESI)
+            Defeat_asm.push_exx(asm.EAX)
+            Defeat_asm.call(0x413400)
+            return Defeat_asm
+            
+    asm.justRunThread(Defeat())
+        
 
 def noSlot_operstion(noSlot_event):
     while not noSlot_event.is_set():

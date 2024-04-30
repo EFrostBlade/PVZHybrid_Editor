@@ -99,6 +99,9 @@ def exit_editor(file_path, window, section='main_window_position'):
     save_config(config, file_path)
     os._exit(0)
 
+def exit_with_delete_config(config_file_path):
+    os.remove(config_file_path)
+    os._exit(0)
 
 def resource_path(relative_path):
     """ 获取资源的绝对路径，适用于开发环境和PyInstaller环境 """
@@ -286,6 +289,21 @@ def support():
     ttk.Label(image_frame,text="微信支付",bootstyle=SUCCESS,font=("黑体",12)).grid(row=1,column=1,pady=5)
     support_window.mainloop()
 
+def delete_config():
+    global main_window
+    deete_config_window=ttk.Toplevel(topmost=True)
+    deete_config_window.title("配置文件出错！")
+    deete_config_window.geometry("300x300")
+    deete_config_window.tk.call('tk', 'scaling', 4/3)    
+    main_window_x = main_window.winfo_x()
+    main_window_y = main_window.winfo_y()  
+    deete_config_window.geometry(f'+{main_window_x+100}+{main_window_y + 100}')
+    ttk.Label(deete_config_window,text="读取配置文件时发生错误\n将删除配置文件并关闭程序\n请重新启动程序",font=("黑体",18),bootstyle=DANGER).pack(pady=20)
+    ttk.Button(deete_config_window,text="确定",bootstyle=DANGER,command=lambda:exit_with_delete_config(config_file_path)).pack()
+    deete_config_window.protocol("WM_DELETE_WINDOW", lambda: exit_with_delete_config(config_file_path))
+    deete_config_window.mainloop()
+
+
 def mainWindow():
     global main_window
     main_window=ttk.Window()
@@ -416,7 +434,10 @@ def mainWindow():
     sun_add_entry=ttk.Entry(resource_modify_frame,width=8,bootstyle=WARNING,textvariable=sun_add_value)
     sun_add_entry.grid(row=2,column=1)
     config = load_config(config_file_path)
-    sun_add_value.set(config["data"]["sunadd"])
+    try:
+        sun_add_value.set(config["data"]["sunadd"])
+    except:
+        pass
     def addSun(event):
         pvz.addSun(sun_add_value.get())
         modify_config(config_file_path,"data","sunadd",sun_add_value.get())
@@ -459,11 +480,14 @@ def mainWindow():
     win_button=ttk.Button(quick_start_frame,text="当前关卡胜利",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.win())
     win_button.grid(row=8,column=0,sticky=W,pady=(2,2))
     ToolTip(win_button,text="当前的游戏关卡直接进行胜利结算",bootstyle=(INFO,INVERSE))
+    defeat_button=ttk.Button(quick_start_frame,text="当前关卡失败",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.defeat())
+    defeat_button.grid(row=9,column=0,sticky=W,pady=(2,2))
+    ToolTip(defeat_button,text="当前的游戏关卡直接进行失败结算",bootstyle=(INFO,INVERSE))
     kill_all_button=ttk.Button(quick_start_frame,text="秒杀所有僵尸",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.killAllZombies())
-    kill_all_button.grid(row=9,column=0,sticky=W,pady=(2,2))
+    kill_all_button.grid(row=10,column=0,sticky=W,pady=(2,2))
     ToolTip(kill_all_button,text="秒杀当前场上的所有僵尸",bootstyle=(INFO,INVERSE))
     unlock_button=ttk.Button(quick_start_frame,text="解锁全部植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock())
-    unlock_button.grid(row=10,column=0,sticky=W,pady=(2,2))
+    unlock_button.grid(row=11,column=0,sticky=W,pady=(2,2))
     ToolTip(unlock_button,text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",bootstyle=(INFO,INVERSE))
     
     game_speed_frame=ttk.LabelFrame(common_page,text="游戏速度",bootstyle=PRIMARY)
@@ -538,6 +562,11 @@ def mainWindow():
 
     # 修改快捷键配置并重新加载监听
     def modify_shortcut(shortcut_id, new_key, new_action):
+        try:
+            keyboard.add_hotkey(new_key, lambda: on_triggered(new_action))
+        except:
+            Messagebox.show_error("请检查快捷键输入是否正确",title="快捷键非法")
+            return
         config = load_config(config_file_path)
         # 保存旧的快捷键值
         old_key = config['shortcuts'].get(shortcut_id, {}).get('key')
@@ -549,7 +578,6 @@ def mainWindow():
         if old_key:
             keyboard.remove_hotkey(old_key)
         # 添加新的快捷键监听
-        keyboard.add_hotkey(new_key, lambda: on_triggered(new_action))
         # 更新快捷键显示
         update_shortcut_display()
 
@@ -644,7 +672,7 @@ def mainWindow():
         change_shortcut_window.tk.call('tk', 'scaling', 4/3)    
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()  
-        change_shortcut_window.geometry(f'+{main_window_x+150}+{main_window_y + 150}')
+        change_shortcut_window.geometry(f'+{main_window_x+200}+{main_window_y + 200}')
 
         label = ttk.Label(change_shortcut_window, text='请按下新的快捷键')
         label.pack()
@@ -696,8 +724,11 @@ def mainWindow():
             modify_shortcut(id, config['shortcuts'][id]["key"], shortcut_comboboxs[i].current())
         combobox.bind("<<ComboboxSelected>>", modify_action)
     # 设置快捷键监听
-    for shortcut_info in shortcuts.values():
-        keyboard.add_hotkey(shortcut_info['key'], lambda action=shortcut_info['action']: on_triggered(action))
+    try:
+        for shortcut_info in shortcuts.values():
+            keyboard.add_hotkey(shortcut_info['key'], lambda action=shortcut_info['action']: on_triggered(action))
+    except:
+        delete_config()
 
     global zombie_select
     zombie_page=ttk.Frame(page_tab)
@@ -1608,6 +1639,13 @@ def mainWindow():
         for slot in slot_list:
             slot.setType(change_all_combobox.current())
     change_all_combobox.bind("<<ComboboxSelected>>", change_all_slots)
+
+    card_select_frame=ttk.LabelFrame(slot_page,text="选卡",bootstyle=SUCCESS)
+    card_select_frame.place(x=0,y=150,relx=1,anchor=NE)
+    card_select_combobox = ttk.Combobox(change_all_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
+    card_select_combobox.pack()
+    ttk.Button(card_select_frame,text="选卡",command=lambda:pvz.selectCard(card_select_combobox.current())).pack()
+    ttk.Button(card_select_frame,text="退卡",command=lambda:pvz.deselectCard(card_select_combobox.current())).pack()
     
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
