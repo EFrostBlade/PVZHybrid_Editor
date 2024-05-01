@@ -388,3 +388,32 @@ def noSolt(f):
         noSlot_thread.join()  # 等待线程结束
 
         
+        
+def save():
+    class Save:
+        def __init__(self) -> None:
+            pass
+        
+        def creat_asm(self,startAddress):
+            Save_asm=asm.Asm(startAddress)
+            Save_asm.mov_exx_dword_ptr(asm.ECX,0x006A9EC0)
+            Save_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x768)
+            Save_asm.push_exx(asm.ECX)
+            Save_asm.call(0x408c30)
+            return Save_asm
+            
+    asm.runThread(Save())
+    
+def load():
+    class Load:
+        def __init__(self) -> None:
+            pass
+        
+        def creat_asm(self,startAddress):
+            Load_asm=asm.Asm(startAddress)
+            Load_asm.mov_exx_dword_ptr(asm.ESI,0x006A9EC0)
+            Load_asm.push_exx(asm.ESI)
+            Load_asm.call(0x44f7a0)
+            return Load_asm
+            
+    asm.runThread(Load())

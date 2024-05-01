@@ -35,7 +35,8 @@ shortcut_buttons = []
 shortcut_comboboxs = []
 action_values=[]
 action_list=["高级暂停","设置阳光","增加阳光","自由放置","免费种植","取消冷却","自动收集","柱子模式","超级铲子","永不失败",
-             "当前关卡胜利","秒杀所有僵尸","解锁全部植物","放置植物","搭梯","清除植物"]
+             "当前关卡胜利","秒杀所有僵尸","解锁全部植物","放置植物","搭梯","清除植物","放置僵尸","关卡失败","存档","读档",
+             "游戏加速","游戏减速"]
 # 默认配置
 default_config = {
     "shortcuts": {
@@ -489,6 +490,12 @@ def mainWindow():
     unlock_button=ttk.Button(quick_start_frame,text="解锁全部植物",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.unlock())
     unlock_button.grid(row=11,column=0,sticky=W,pady=(2,2))
     ToolTip(unlock_button,text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",bootstyle=(INFO,INVERSE))
+    save_load_frame=ttk.Frame(quick_start_frame)
+    save_load_frame.grid(row=12,column=0,sticky=W,pady=(2,2))
+    save_button=ttk.Button(save_load_frame,text="存档",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.save())
+    save_button.grid(row=0,column=0,sticky=W,padx=(5,0),pady=(2,2))
+    load_button=ttk.Button(save_load_frame,text="读档",padding=0,bootstyle=(SUCCESS,OUTLINE),command=lambda:pvz.load())
+    load_button.grid(row=0,column=1,sticky=W,padx=(10,0),pady=(2,2))
     
     game_speed_frame=ttk.LabelFrame(common_page,text="游戏速度",bootstyle=PRIMARY)
     game_speed_frame.place(x=0,y=100,anchor=NW)
@@ -633,6 +640,22 @@ def mainWindow():
             putLadders()
         elif action==15:
             clearPlants()
+        elif action==16:
+            putZombies()
+        elif action==17:
+            putZombies(pvz.defeat())
+        elif action==18:
+            putZombies(pvz.save())
+        elif action==19:
+            putZombies(pvz.load())
+        elif action==20:
+            if(game_speed_value.get()<6):
+                game_speed_value.set(game_speed_value.get()+1)
+                pvz.changeGameSpeed(game_speed_value.get())
+        elif action==21:
+            if(game_speed_value.get()>0):
+                game_speed_value.set(game_speed_value.get()-1)
+                pvz.changeGameSpeed(game_speed_value.get())
 
 
     # 修改快捷键的窗口
