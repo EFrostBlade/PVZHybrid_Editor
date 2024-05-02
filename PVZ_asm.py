@@ -107,7 +107,7 @@ class Asm:
 def runThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
     startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
-    print(hex(startAddress))
+    # print(hex(startAddress))
     asm=cla.creat_asm(startAddress+1)
     shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
     data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)
@@ -135,7 +135,7 @@ def runThread(cla):
 def justRunThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
     startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
-    print(hex(startAddress))
+    # print(hex(startAddress))
     asm=cla.creat_asm(startAddress+1)
     shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
     data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)

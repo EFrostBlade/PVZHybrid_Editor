@@ -22,7 +22,7 @@ import PVZ_Hybrid as pvz
 import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-current_version = '0.10'
+current_version = '0.11'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window=None
 data.update_PVZ_memory(1)
@@ -131,12 +131,12 @@ config_file_path = os.path.join(app_config_path, 'config.json')
 # 创建配置文件的函数
 def create_config(file_path, default_config):
     with open(file_path, 'w') as file:
-        json.dump(default_config, file, indent=4)
+        json.dump(default_config, file, indent=4,ensure_ascii=False)
 
 # 读取配置文件的函数
 def load_config(file_path):
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding="utf-8") as file:
             return json.load(file)
     except FileNotFoundError:
         return default_config  # 如果文件不存在，返回默认配置
@@ -1041,6 +1041,7 @@ def mainWindow():
                     zombie_exist_flag.set(True)
                 else:
                     zombie_exist_flag.set(False)
+                print(zombie_select.stolenPlant)
             except:
                 pass
             zombie_isVisible_flag.set(not zombie_select.isVisible)
@@ -1609,8 +1610,9 @@ def mainWindow():
         slot_cooldown_entrys.append(slot_cooldown_entry)
 
         def set_slot_cooldown(event, index=slot_number-1):
-            slot_list[index].setCooldown(slot_cooldown_value.get())
-            slots_frame.focus_set()
+            if(slots_configuration_mode.get()==False):
+                slot_list[index].setCooldown(slot_cooldown_value.get())
+                slots_frame.focus_set()
         slot_cooldown_entry.bind("<Return>", set_slot_cooldown)
 
 
@@ -1687,6 +1689,166 @@ def mainWindow():
     # card_select_combobox.pack()
     # ttk.Button(card_select_frame,text="选卡",command=lambda:pvz.selectCard(card_select_combobox.current())).pack()
     # ttk.Button(card_select_frame,text="退卡",command=lambda:pvz.deselectCard(card_select_combobox.current())).pack()
+    new_solts_config_frame=ttk.Frame(card_select_frame)
+    new_solts_config_frame.pack()
+    new_solts_config_entry=ttk.Entry(new_solts_config_frame,width=8,font=("宋体",8))
+    new_solts_config_entry.pack(side=LEFT)
+    def create_slots_config():
+        if(slots_configuration_mode.get()==True):
+            if(new_solts_config_entry.get()==""):
+                Messagebox.show_error("请输入配置名称",title="创建配置失败")
+            else:
+                config = load_config(config_file_path)
+                if "slots" not in config:
+                    config["slots"] = {}
+                if new_solts_config_entry.get() not in config["slots"]:
+                    config["slots"][new_solts_config_entry.get()] = {}
+                plants=[]
+                for c in slot_type_comboboxes:
+                    plants.append(c.current())
+                config["slots"][new_solts_config_entry.get()]["plants"] = plants
+                save_config(config, config_file_path)
+                Messagebox.show_info("配置”"+new_solts_config_entry.get()+"”已创建",title="创建配置成功")
+                update_slots_config_combobox()
+        else:
+            Messagebox.show_error("请在配置模式下修改卡槽配置",title="创建配置失败")
+    new_solts_config_button=ttk.Button(new_solts_config_frame,text="新建",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:create_slots_config())
+    new_solts_config_button.pack(side=LEFT)
+    slots_config_combobox=ttk.Combobox(card_select_frame, width=12, bootstyle='secondary')
+    slots_config_combobox.pack()
+    slots_config_combobox.insert(0,"选择配置")
+    slots_config_combobox.configure(state=READONLY)
+    def update_slots_config_combobox():
+        config = load_config(config_file_path)
+        if "slots" not in config:
+            return
+        slots_config_combobox.configure(values=list(config['slots'].keys()))
+    update_slots_config_combobox()
+    def set_config_slots(event):
+        if (slots_configuration_mode.get()==False):
+            slots_configuration_mode.set(True)
+            changeSlotsConfiguration()
+        config = load_config(config_file_path)
+        n=0
+        for i in config["slots"][slots_config_combobox.get()]["plants"]:
+            slot_type_comboboxes[n].current(i)
+            n=n+1
+    slots_config_combobox.bind("<<ComboboxSelected>>", set_config_slots)
+    card_select_button_frame=ttk.Frame(card_select_frame)
+    card_select_button_frame.pack()
+    def save_slots_config():
+        if(slots_configuration_mode.get()==True):
+            config = load_config(config_file_path)
+            if "slots" not in config:
+                config["slots"] = {}
+            if slots_config_combobox.get() not in config["slots"]:
+                Messagebox.show_error("配置名称不存在，请先新建配置",title="保存配置失败")
+            plants=[]
+            for c in slot_type_comboboxes:
+                plants.append(c.current())
+            config["slots"][slots_config_combobox.get()]["plants"] = plants
+            save_config(config, config_file_path)
+            Messagebox.show_info("配置”"+slots_config_combobox.get()+"”已保存",title="保存配置成功")
+            update_slots_config_combobox()
+        else:
+            Messagebox.show_error("请在配置模式下修改卡槽配置",title="保存配置失败")
+    def delete_slots_config():        
+        if(slots_configuration_mode.get()==True):
+            config = load_config(config_file_path)
+            if "slots" not in config:
+                config["slots"] = {}
+            if slots_config_combobox.get() not in config["slots"]:
+                Messagebox.show_error("配置名称不存在",title="删除配置失败")
+            del config["slots"][slots_config_combobox.get()]
+            save_config(config, config_file_path)
+            Messagebox.show_info("配置”"+slots_config_combobox.get()+"”已删除",title="删除配置成功")
+            update_slots_config_combobox()
+        else:
+            Messagebox.show_error("请在配置模式下修改卡槽配置",title="删除配置失败")
+    def select_slots_config():
+        card_list=[999]*14  
+        try:
+            selected_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xd24)
+        except:
+            Messagebox.show_error("请在选卡界面使用选卡\n关卡内请点击应用",title="选卡失败")
+            return
+        if(selected_num!=0):
+            i=0
+            j=0
+            while j<selected_num:
+                if(i==48):
+                    i=i+27
+                if(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xc8+0x3c*i)==1):
+                    n=int((data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xa4+0x3c*i)-79)/51)
+                    print("卡槽第"+str(n)+"张卡为"+data.plantsType[i])
+                    card_list[n]=i
+                    j=j+1
+                i=i+1
+        for c in slot_type_comboboxes:
+            selected_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xd24)
+            limit_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x144)+0x24)
+            print(selected_num,limit_num)
+            if(selected_num<limit_num):
+                if(c.current()>47 and c.current()<75):
+                    Messagebox.show_error("不能选择特殊卡牌\n如需使用特殊卡牌，请开始游戏后点击应用",title="选卡失败")
+                    for c in reversed(card_list):
+                        if(c!=999):
+                            print(c)
+                            pvz.deselectCard(c)
+                    return
+                if c.current() not in card_list:
+                    pvz.selectCard(c.current())
+                    print(c.current())
+                    card_list[selected_num]=(c.current())
+                else:
+                    print("------")
+                    Messagebox.show_error("不能选择重复卡片\n如需使用相同卡牌，请开始游戏后点击应用",title="选卡失败")
+                    for c in reversed(card_list):
+                        if(c!=999):
+                            print(c)
+                            pvz.deselectCard(c)
+                    return
+                
+    def clear_slots():
+        card_list=[999]*14  
+        try:
+            selected_num=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xd24)
+        except:
+            Messagebox.show_error("请在选卡界面使用",title="清除选卡失败")
+            return
+        if(selected_num!=0):
+            i=0
+            j=0
+            while j<selected_num:
+                if(i==48):
+                    i=i+27
+                if(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xc8+0x3c*i)==1 or data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xc8+0x3c*i)==0):
+                    n=int((data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x774)+0xa4+0x3c*i)-79)/51)
+                    print("卡槽第"+str(n)+"张卡为"+data.plantsType[i])
+                    card_list[n]=i
+                    j=j+1
+                i=i+1
+        for c in reversed(card_list):
+            if(c!=999):
+                print(c)
+                pvz.deselectCard(c)
+    def apply_slots_config():
+        if(slots_configuration_mode.get()==True):
+            i=0
+            for c in slot_type_comboboxes:
+                slot_list[i].setType(c.current())
+                i=i+1
+            slots_configuration_mode.set(False)
+            changeSlotsConfiguration() 
+        else:
+            Messagebox.show_error("请在配置模式下应用卡槽配置",title="应用配置失败")
+        
+    ttk.Button(card_select_button_frame,text="保存",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:save_slots_config()).grid(row=0,column=0)
+    ttk.Button(card_select_button_frame,text="删除",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:delete_slots_config()).grid(row=0,column=1)
+    ttk.Button(card_select_button_frame,text="选卡",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:select_slots_config()).grid(row=1,column=0)
+    ttk.Button(card_select_button_frame,text="清除选卡",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:clear_slots()).grid(row=1,column=1)
+    ttk.Button(card_select_button_frame,text="应用",padding=0,bootstyle=(DARK,OUTLINE),command=lambda:apply_slots_config()).grid(row=1,column=2)
+    
     
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():

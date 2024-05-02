@@ -31,6 +31,12 @@ def getMap():
     except:
         return False
 
+def getState():
+    try:
+        game_state=data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress)+0x7fc)
+        return game_state  #1主菜单 2选局内  5帮助  7关卡选择  
+    except:
+        return False
 def backGround(f):
     if f:
         data.PVZ_memory.write_bytes(0x0054EBEF,b'\xc3',1)

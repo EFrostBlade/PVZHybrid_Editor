@@ -152,6 +152,7 @@ class zombie:
         self.isHpynotized=PVZ_memory.read_bool(self.addr+0xb8)
         self.isBlow=PVZ_memory.read_bool(self.addr+0xb9)
         self.isDying=PVZ_memory.read_bool(self.addr+0xba)
+        self.stolenPlant=PVZ_memory.read_ushort(self.addr+0x128)
 
     def setRow(self,row):
         PVZ_memory.write_int(self.addr+0x1c,row-1)
@@ -190,6 +191,8 @@ class zombie:
         PVZ_memory.write_bool(self.addr+0xb9,isBlow)
     def setIsDying(self,isDying):
         PVZ_memory.write_bool(self.addr+0xba,isDying)
+    def setStolenPlant(self,stolenPlant):
+        PVZ_memory.write_ushort(self.addr+0x128,stolenPlant)
 
 
 class item:
