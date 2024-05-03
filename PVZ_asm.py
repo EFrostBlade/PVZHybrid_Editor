@@ -138,6 +138,8 @@ class Asm:
     def random(self,val):#取小于val的随机数
         self.add_byte(0x0f) 
         self.add_byte(0x31) #rdtsc读取时间戳计数器的值到 EDX:EAX
+        self.add_byte(0x31) 
+        self.add_byte(0xd2) #xor edx, edx  ; 将 EDX 寄存器清零
         self.mov_exx(ECX,val)
         self.add_byte(0xf7) 
         self.add_byte(0xf1)#div ecx   EAX = EAX / ECX，EDX = EAX % ECX

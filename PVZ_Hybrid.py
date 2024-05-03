@@ -10,7 +10,9 @@ import PVZ_asm as asm
 
 column1addr=None
 column2addr=None
-newmem1=None
+newmem_shovelpro=None
+newmem_spoils=None
+newmem_spoils2=None
 
 def calculate_call_address(ctypes_obj):
     """S
@@ -160,34 +162,34 @@ def unlock():
     data.PVZ_memory.write_bytes(0x00453b20,b'\x56\x8b\xb7\x2c\x08\x00\x00',7)
 
 def shovelpro(f):
-    global newmem1
+    global newmem_shovelpro
     addr=int.from_bytes(data.PVZ_memory.read_bytes(0x411141,1)+data.PVZ_memory.read_bytes(0x411140,1)+data.PVZ_memory.read_bytes(0x41113f,1)+data.PVZ_memory.read_bytes(0x41113e,1))+0x411142+0x3
     print(hex(addr))
     if f:
         data.PVZ_memory.write_bytes(addr,b'\x90\x90\x90\xeb\x77\x90\x90\x90\x90',9)
-        newmem1=pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 100) 
-        print(newmem1)
+        newmem_shovelpro=pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 100) 
+        print(newmem_shovelpro)
         byte_data=(
                 b'\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8'
-                +calculate_call_address(0x0041dae0-newmem1-0x11)+
+                +calculate_call_address(0x0041dae0-newmem_shovelpro-0x11)+
                 b'\x01\x85\x2c\x01\x00\x00\x61\x83\xbd\x2c\x01\x00\x00\x32\x7c\x1d\x83\xad\x2c\x01\x00\x00\x32'
                 b'\x60\x8b\x4d\x04\x6a\x02\x6a\x06\xff\x75\x0c\xff\x75\x08\xe8'
-                +calculate_call_address(0x0040cb10-newmem1-0x3b)+
+                +calculate_call_address(0x0040cb10-newmem_shovelpro-0x3b)+
                 b'\x61\xeb\xda\x83\xbd\x2c\x01\x00\x00\x19\x7c\x1d\x83\xad\x2c\x01\x00\x00\x19\x60\x8b\x4d\x04'
                 b'\x6a\x02\x6a\x04\xff\x75\x0c\xff\x75\x08\xe8'
-                +calculate_call_address(0x0040cb10-newmem1-0x61)+
+                +calculate_call_address(0x0040cb10-newmem_shovelpro-0x61)+
                 b'\x61\xeb\xb4\x83\xbd\x2c\x01\x00\x00\x0f\x7c\x1d\x83\xad\x2c\x01\x00\x00\x0f\x60\x8b\x4d\x04'
                 b'\x6a\x02\x6a\x05\xff\x75\x0c\xff\x75\x08\xe8'
-                +calculate_call_address(0x0040cb10-newmem1-0x87)+
+                +calculate_call_address(0x0040cb10-newmem_shovelpro-0x87)+
                 b'\x61\xeb\x8e\x01\x9f\x9c\x57\x00\x00\xe9'
-                +calculate_call_address(0x004111de-newmem1-0x95)
+                +calculate_call_address(0x004111de-newmem_shovelpro-0x95)
         )
-        data.PVZ_memory.write_bytes(newmem1,byte_data,149)
-        data.PVZ_memory.write_bytes(0x004111d8,b'\xe9'+calculate_call_address(newmem1-0x004111dd)+b'\x90',6)
+        data.PVZ_memory.write_bytes(newmem_shovelpro,byte_data,149)
+        data.PVZ_memory.write_bytes(0x004111d8,b'\xe9'+calculate_call_address(newmem_shovelpro-0x004111dd)+b'\x90',6)
     else:
         data.PVZ_memory.write_bytes(addr,b'\x83\xf8\x36\x0f\x84\x64\x00\x00\x00',9)
         data.PVZ_memory.write_bytes(0x004111d8,b'\x01\x9f\x9c\x57\x00\x00',6)
-        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem1)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
 
 def ignoreZombies(f):
     if f:
@@ -425,10 +427,155 @@ def load():
     asm.runThread(Load())
 
 
-def spoil(f):
-    if(f):
+def spoils(spoils_config):
+    global newmem_spoils
+    global newmem_spoils2
+    print(spoils_config)
+    if(spoils_config!=False):
         data.PVZ_memory.write_bytes(0x00530275,b'\x70',1)
+        newmem_spoils=pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 256) 
+        newmem_spoils2=pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 32) 
+        print(hex(newmem_spoils))
+        print(hex(newmem_spoils2))
+        shellcode=asm.Asm(newmem_spoils)
+        shellcode.mov_exx_dword_ptr_eyy(asm.EAX,asm.EBX)
+        shellcode.mov_exx(asm.ESI,4)
+        shellcode.call(0x00453630)
+        if(len(spoils_config)>0):
+            shellcode.random(100)
+            shellcode.cmp_exx_byte(asm.EDX,spoils_config[0]["percent"])
+            shellcode.add_byte(0x72)#jb
+            shellcode.add_byte(0x05)#小于则后移5位
+            shellcode.add_byte(0xe9)#大于则jmp
+            shellcode.add_dword(0x1f)
+            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ESI,asm.ESP,0x24)
+            shellcode.add_byte(0x0c)#mov esi,[esp+0c]
+            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ECX,asm.EBX,0x04)
+            shellcode.push_byte(0x03)            
+            if(spoils_config[0]["type"]<=6):
+                shellcode.push_byte(spoils_config[0]["type"])
+            elif(spoils_config[0]["type"]==7):
+                shellcode.push_byte(0x8)
+            elif(spoils_config[0]["type"]==8):
+                shellcode.push_byte(0xf)
+            elif(spoils_config[0]["type"]==9):
+                shellcode.push_byte(0x10)
+            elif(spoils_config[0]["type"]==10):
+                shellcode.push_byte(0x12)      
+            if(spoils_config[0]["card"]==-1):
+                shellcode.mov_dword_ptr_dword(0x00751EC0,0)    
+            else:   
+                shellcode.mov_dword_ptr_dword(0x00751EC0,spoils_config[0]["card"])
+            shellcode.push_exx(asm.ESI)
+            shellcode.lea_exy_byte(0x47,0xec)
+            shellcode.push_exx(asm.EAX)
+            shellcode.call(0x0040CB10)
+            if(len(spoils_config)>1):
+                shellcode.random(100)
+                shellcode.cmp_exx_byte(asm.EDX,spoils_config[1]["percent"])
+                shellcode.add_byte(0x72)#jb
+                shellcode.add_byte(0x05)#小于则后移5位
+                shellcode.add_byte(0xe9)#大于则jmp
+                shellcode.add_dword(0x1b)
+                shellcode.push_byte(0x03)            
+                if(spoils_config[1]["type"]<=6):
+                    shellcode.push_byte(spoils_config[1]["type"])
+                elif(spoils_config[1]["type"]==7):
+                    shellcode.push_byte(0x8)
+                elif(spoils_config[1]["type"]==8):
+                    shellcode.push_byte(0xf)
+                elif(spoils_config[1]["type"]==9):
+                    shellcode.push_byte(0x10)
+                elif(spoils_config[1]["type"]==10):
+                    shellcode.push_byte(0x12)      
+                if(spoils_config[1]["card"]==-1):
+                    shellcode.mov_dword_ptr_dword(0x00751EC0,0)    
+                else:   
+                    shellcode.mov_dword_ptr_dword(0x00751EC0,spoils_config[1]["card"])
+                shellcode.push_exx(asm.ESI)
+                shellcode.lea_exy_byte(0x4f,0xe2)
+                shellcode.push_exx(asm.ECX)
+                shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ECX,asm.EBX,0x04)
+                shellcode.call(0x0040CB10)
+                if(len(spoils_config)>2):
+                    shellcode.random(100)
+                    shellcode.cmp_exx_byte(asm.EDX,spoils_config[2]["percent"])
+                    shellcode.add_byte(0x72)#jb
+                    shellcode.add_byte(0x05)#小于则后移5位
+                    shellcode.add_byte(0xe9)#大于则jmp
+                    shellcode.add_dword(0x1b)
+                    shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ECX,asm.EBX,0x04)
+                    shellcode.push_byte(0x03)            
+                    if(spoils_config[2]["type"]<=6):
+                        shellcode.push_byte(spoils_config[2]["type"])
+                    elif(spoils_config[2]["type"]==7):
+                        shellcode.push_byte(0x8)
+                    elif(spoils_config[2]["type"]==8):
+                        shellcode.push_byte(0xf)
+                    elif(spoils_config[2]["type"]==9):
+                        shellcode.push_byte(0x10)
+                    elif(spoils_config[2]["type"]==10):
+                        shellcode.push_byte(0x12)      
+                    if(spoils_config[2]["card"]==-1):
+                        shellcode.mov_dword_ptr_dword(0x00751EC0,0)    
+                    else:   
+                        shellcode.mov_dword_ptr_dword(0x00751EC0,spoils_config[2]["card"])
+                    shellcode.push_exx(asm.ESI)
+                    shellcode.lea_exy_byte(0x57,0xd8)
+                    shellcode.push_exx(asm.EDX)
+                    shellcode.call(0x0040CB10)
+                    if(len(spoils_config)>3):
+                        shellcode.random(100)
+                        shellcode.cmp_exx_byte(asm.EDX,spoils_config[3]["percent"])
+                        shellcode.add_byte(0x72)#jb
+                        shellcode.add_byte(0x05)#小于则后移5位
+                        shellcode.add_byte(0xe9)#大于则jmp
+                        shellcode.add_dword(0x1b)
+                        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ECX,asm.EBX,0x04)
+                        shellcode.push_byte(0x03)            
+                        if(spoils_config[3]["type"]<=6):
+                            shellcode.push_byte(spoils_config[2]["type"])
+                        elif(spoils_config[3]["type"]==7):
+                            shellcode.push_byte(0x8)
+                        elif(spoils_config[3]["type"]==8):
+                            shellcode.push_byte(0xf)
+                        elif(spoils_config[3]["type"]==9):
+                            shellcode.push_byte(0x10)
+                        elif(spoils_config[3]["type"]==10):
+                            shellcode.push_byte(0x12)      
+                        if(spoils_config[3]["card"]==-1):
+                            shellcode.mov_dword_ptr_dword(0x00751EC0,0)    
+                        else:   
+                            shellcode.mov_dword_ptr_dword(0x00751EC0,spoils_config[3]["card"])
+                        shellcode.push_exx(asm.ESI)
+                        shellcode.add_exx_byte(asm.EDI,0xce)
+                        shellcode.push_exx(asm.EDI)
+                        shellcode.call(0x0040CB10)
+            shellcode.pop_exx(asm.EDI)
+            shellcode.pop_exx(asm.ESI)
+            shellcode.pop_exx(asm.EBX)
+            shellcode.mov_exx_eyy(asm.ESP,asm.EBP)
+            shellcode.pop_exx(asm.EBP)
+            shellcode.ret()
+            shellcode.jmp(0x005302D2)            
+            
+        tempcode=asm.Asm(newmem_spoils2)
+        tempcode.mov_exx_dword_ptr(asm.EAX,0x00751EC0)
+        tempcode.add_byte(0x89)
+        tempcode.add_byte(0x45)
+        tempcode.add_byte(0x68)
+        tempcode.jmp(0x0042FFBD)
+        
+        
+        data.PVZ_memory.write_bytes(newmem_spoils2,bytes(tempcode.code[:tempcode.index]),tempcode.index)
+        data.PVZ_memory.write_bytes(0x42ffb6,b'\xe9'+calculate_call_address(newmem_spoils2-0x0042ffbb)+b'\x66\x90',7)
+        data.PVZ_memory.write_bytes(newmem_spoils,bytes(shellcode.code[:shellcode.index]),shellcode.index)
+        data.PVZ_memory.write_bytes(0x00530277,b'\xe9'+calculate_call_address(newmem_spoils-0x0053027c),5)
     else:
         data.PVZ_memory.write_bytes(0x00530275,b'\x75',1)
+        data.PVZ_memory.write_bytes(0x42ffb6,b'\xc7\x45\x68\x00\x00\x00\x00',7)
+        data.PVZ_memory.write_bytes(0x00530277,b'\x8b\x03\xbe\x04\x00',5)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_spoils)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_spoils2)
 
         

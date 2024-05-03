@@ -983,84 +983,182 @@ def mainWindow():
     pausee_spawn_check=ttk.Checkbutton(zombie_seed_frame,text="暂停刷怪",variable=pausee_spawn_status,bootstyle="success-round-toggle",command=lambda:pvz.pauseSpawn(pausee_spawn_status.get()))
     pausee_spawn_check.grid(row=0,column=0,sticky=W)
 
-    zombie_characteristic_frame=ttk.Labelframe(zombie_page,text="基础属性",bootstyle=DANGER)
-    zombie_characteristic_frame.place(x=0,y=260,anchor=NW,height=200,width=275)
+    # zombie_characteristic_frame=ttk.Labelframe(zombie_page,text="基础属性",bootstyle=DANGER)
+    # zombie_characteristic_frame.place(x=280,y=210,anchor=NW,height=200,width=150)
 
 
     
     zombie_spoils_frame=ttk.LabelFrame(zombie_page,text="击杀掉落",bootstyle=DANGER)
-    zombie_spoils_frame.place(x=280,y=210,anchor=NW,height=200,width=130)
+    zombie_spoils_frame.place(x=0,y=260,anchor=NW,height=200,width=275)
+    spoil_1_percent=ttk.IntVar(zombie_spoils_frame)
+    spoil_1_percent_spinbox=ttk.Spinbox(zombie_spoils_frame,from_=0,to=100,width=3,textvariable=spoil_1_percent)
+    spoil_1_percent_spinbox.grid(row=1,column=0)
+    ttk.Label(zombie_spoils_frame,text="%").grid(row=1,column=1)
+    spoil_1_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","潜艇伟伟迷"],state=READONLY)
+    spoil_1_combobox.grid(row=1,column=2)
+    spoil_1_combobox.current(0)
+    spoil_1_card=ttk.Combobox(zombie_spoils_frame,width=12,values=data.plantsType)
+    spoil_1_card.insert(0,"选择植物")
+    spoil_1_card.configure(state=DISABLED)
+    spoil_1_card.grid(row=1,column=3)
+    def setCard1(event):
+        if(spoil_1_combobox.current()==9):
+            spoil_1_card.configure(state=READONLY)
+        else:
+            spoil_1_card.configure(state=DISABLED)
+    spoil_1_combobox.bind("<<ComboboxSelected>>",setCard1)
+    spoil_2_percent=ttk.IntVar(zombie_spoils_frame)
+    spoil_2_percent_spinbox=ttk.Spinbox(zombie_spoils_frame,from_=0,to=100,width=3,textvariable=spoil_2_percent)
+    spoil_2_percent_spinbox.grid(row=2,column=0)
+    ttk.Label(zombie_spoils_frame,text="%").grid(row=2,column=1)
+    spoil_2_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","潜艇伟伟迷"],state=READONLY)
+    spoil_2_combobox.grid(row=2,column=2)
+    spoil_2_combobox.current(0)
+    spoil_2_card=ttk.Combobox(zombie_spoils_frame,width=12,values=data.plantsType)
+    spoil_2_card.insert(0,"选择植物")
+    spoil_2_card.configure(state=DISABLED)
+    spoil_2_card.grid(row=2,column=3)
+    def setCard2(event):
+        if(spoil_2_combobox.current()==9):
+            spoil_2_card.configure(state=READONLY)
+        else:
+            spoil_2_card.configure(state=DISABLED)
+    spoil_2_combobox.bind("<<ComboboxSelected>>",setCard2)
+    spoil_3_percent=ttk.IntVar(zombie_spoils_frame)
+    spoil_3_percent_spinbox=ttk.Spinbox(zombie_spoils_frame,from_=0,to=100,width=3,textvariable=spoil_3_percent)
+    spoil_3_percent_spinbox.grid(row=3,column=0)
+    ttk.Label(zombie_spoils_frame,text="%").grid(row=3,column=1)
+    spoil_3_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","潜艇伟伟迷"],state=READONLY)
+    spoil_3_combobox.grid(row=3,column=2)
+    spoil_3_combobox.current(0)
+    spoil_3_card=ttk.Combobox(zombie_spoils_frame,width=12,values=data.plantsType)
+    spoil_3_card.insert(0,"选择植物")
+    spoil_3_card.configure(state=DISABLED)
+    spoil_3_card.grid(row=3,column=3)
+    def setCard3(event):
+        if(spoil_3_combobox.current()==9):
+            spoil_3_card.configure(state=READONLY)
+        else:
+            spoil_3_card.configure(state=DISABLED)
+    spoil_3_combobox.bind("<<ComboboxSelected>>",setCard3)
+    spoil_4_percent=ttk.IntVar(zombie_spoils_frame)
+    spoil_4_percent_spinbox=ttk.Spinbox(zombie_spoils_frame,from_=0,to=100,width=3,textvariable=spoil_4_percent)
+    spoil_4_percent_spinbox.grid(row=4,column=0)
+    ttk.Label(zombie_spoils_frame,text="%").grid(row=4,column=1)
+    spoil_4_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","潜艇伟伟迷"],state=READONLY)
+    spoil_4_combobox.grid(row=4,column=2)
+    spoil_4_combobox.current(0)
+    spoil_4_card=ttk.Combobox(zombie_spoils_frame,width=12,values=data.plantsType)
+    spoil_4_card.insert(0,"选择植物")
+    spoil_4_card.configure(state=DISABLED)
+    spoil_4_card.grid(row=4,column=3)
+    def setCard4(event):
+        if(spoil_4_combobox.current()==9):
+            spoil_4_card.configure(state=READONLY)
+        else:
+            spoil_4_card.configure(state=DISABLED)
+    spoil_4_combobox.bind("<<ComboboxSelected>>",setCard4)
+    spoils_card_frame=ttk.Frame(zombie_spoils_frame)
+    spoils_card_frame.grid(row=5,column=0)
+    def load_spoils_config():
+        config = load_config(config_file_path)
+        try:
+            spoil_1_percent.set(config["spoils"]["spoil1"]["percent"])
+        except:
+            pass
+        try:
+            spoil_1_combobox.current(config["spoils"]["spoil1"]["type"])
+        except:
+            pass
+        try:
+            spoil_1_card.current(config["spoils"]["spoil1"]["card"])
+        except:
+            pass
+        try:
+            spoil_2_percent.set(config["spoils"]["spoil2"]["percent"])
+        except:
+            pass
+        try:
+            spoil_2_combobox.current(config["spoils"]["spoil2"]["type"])
+        except:
+            pass
+        try:
+            spoil_2_card.current(config["spoils"]["spoil2"]["card"])
+        except:
+            pass
+        try:
+            spoil_3_percent.set(config["spoils"]["spoil3"]["percent"])
+        except:
+            pass
+        try:
+            spoil_3_combobox.current(config["spoils"]["spoil3"]["type"])
+        except:
+            pass
+        try:
+            spoil_3_card.current(config["spoils"]["spoil3"]["card"])
+        except:
+            pass
+        try:
+            spoil_4_percent.set(config["spoils"]["spoil4"]["percent"])
+        except:
+            pass
+        try:
+            spoil_4_combobox.current(config["spoils"]["spoil4"]["type"])
+        except:
+            pass
+        try:
+            spoil_4_card.current(config["spoils"]["spoil4"]["card"])
+        except:
+            pass
+    load_spoils_config()
+    def setSpoils():
+        if(zombie_spoils_status.get()):
+            config = load_config(config_file_path)
+            if "spoils" not in config:
+                config["spoils"] = {}
+            spoils_config=list()
+            if "spoil1" not in config["spoils"]:
+                config["spoils"]["spoil1"] = {}
+            config["spoils"]["spoil1"]["percent"]=spoil_1_percent.get()
+            config["spoils"]["spoil1"]["type"]=spoil_1_combobox.current()
+            config["spoils"]["spoil1"]["card"]=spoil_1_card.current()
+            if(spoil_1_percent.get()!=0 and spoil_1_combobox.current()!=0):
+                spoils_config.append(config["spoils"]["spoil1"])
+            if "spoil2" not in config["spoils"]:
+                config["spoils"]["spoil2"] = {}
+            config["spoils"]["spoil2"]["percent"]=spoil_2_percent.get()
+            config["spoils"]["spoil2"]["type"]=spoil_2_combobox.current()
+            config["spoils"]["spoil2"]["card"]=spoil_2_card.current()
+            if(spoil_2_percent.get()!=0 and spoil_2_combobox.current()!=0):
+                spoils_config.append(config["spoils"]["spoil2"])
+            if "spoil3" not in config["spoils"]:
+                config["spoils"]["spoil3"] = {}
+            config["spoils"]["spoil3"]["percent"]=spoil_3_percent.get()
+            config["spoils"]["spoil3"]["type"]=spoil_3_combobox.current()
+            config["spoils"]["spoil3"]["card"]=spoil_3_card.current()
+            if(spoil_3_percent.get()!=0 and spoil_3_combobox.current()!=0):
+                spoils_config.append(config["spoils"]["spoil3"])
+            if "spoil4" not in config["spoils"]:
+                config["spoils"]["spoil4"] = {}
+            config["spoils"]["spoil4"]["percent"]=spoil_4_percent.get()
+            config["spoils"]["spoil4"]["type"]=spoil_4_combobox.current()
+            config["spoils"]["spoil4"]["card"]=spoil_4_card.current()
+            if(spoil_4_percent.get()!=0 and spoil_4_combobox.current()!=0):
+                spoils_config.append(config["spoils"]["spoil4"])
+            save_config(config, config_file_path)
+            pvz.spoils(spoils_config)
+        else:
+            pvz.spoils(False)
+
     zombie_spoils_status=ttk.BooleanVar(zombie_spoils_frame)
-    zombie_spoils_check=ttk.Checkbutton(zombie_spoils_frame,text="开启",variable=zombie_spoils_status,bootstyle="success-round-toggle",command=lambda:pvz.spoil(zombie_spoils_status.get()))
-    zombie_spoils_check.grid(row=0,column=0,columnspan=4,sticky=W)
-    ttk.Label(zombie_spoils_frame,text="掉落1").grid(row=1,column=0)
-    spoil_1_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
-    spoil_1_combobox.grid(row=1,column=1)
-    def setSpoil1(event):
-        if(spoil_1_combobox.current()==0):
-             data.PVZ_memory.write_bytes(0x530293,b'\x90\x90\x90\x90\x90',5)
-        elif(spoil_1_combobox.current()<7):
-            data.PVZ_memory.write_uchar(0x0053028D,spoil_1_combobox.current())
-        elif(spoil_1_combobox.current()==7):
-            data.PVZ_memory.write_uchar(0x0053028D,8)
-        elif(spoil_1_combobox.current()==8):
-            data.PVZ_memory.write_uchar(0x0053028D,15)
-        elif(spoil_1_combobox.current()==9):
-            data.PVZ_memory.write_uchar(0x0053028D,16)
-        elif(spoil_1_combobox.current()==10):
-            data.PVZ_memory.write_uchar(0x0053028D,18)
-    spoil_1_combobox.bind("<<ComboboxSelected>>",setSpoil1)
-    ttk.Label(zombie_spoils_frame,text="掉落2").grid(row=2,column=0)
-    spoil_2_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
-    spoil_2_combobox.grid(row=2,column=1)
-    def setSpoil2(event):
-        if(spoil_2_combobox.current()<7):
-            data.PVZ_memory.write_uchar(0x0053029B,spoil_2_combobox.current())
-        elif(spoil_2_combobox.current()==7):
-            data.PVZ_memory.write_uchar(0x0053029B,8)
-        elif(spoil_2_combobox.current()==8):
-            data.PVZ_memory.write_uchar(0x0053029B,15)
-        elif(spoil_2_combobox.current()==9):
-            data.PVZ_memory.write_uchar(0x0053029B,16)
-        elif(spoil_2_combobox.current()==10):
-            data.PVZ_memory.write_uchar(0x0053029B,18)
-    spoil_2_combobox.bind("<<ComboboxSelected>>",setSpoil2)
-    ttk.Label(zombie_spoils_frame,text="掉落3").grid(row=3,column=0)
-    spoil_3_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
-    spoil_3_combobox.grid(row=3,column=1)
-    def setSpoil3(event):
-        if(spoil_3_combobox.current()<7):
-            data.PVZ_memory.write_uchar(0x005302AF,spoil_3_combobox.current())
-        elif(spoil_3_combobox.current()==7):
-            data.PVZ_memory.write_uchar(0x005302AF,8)
-        elif(spoil_3_combobox.current()==8):
-            data.PVZ_memory.write_uchar(0x005302AF,15)
-        elif(spoil_3_combobox.current()==9):
-            data.PVZ_memory.write_uchar(0x005302AF,16)
-        elif(spoil_3_combobox.current()==10):
-            data.PVZ_memory.write_uchar(0x005302AF,18)
-    spoil_3_combobox.bind("<<ComboboxSelected>>",setSpoil3)
-    ttk.Label(zombie_spoils_frame,text="掉落4").grid(row=4,column=0)
-    spoil_4_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
-    spoil_4_combobox.grid(row=4,column=1)
-    def setSpoil4(event):
-        if(spoil_4_combobox.current()<7):
-            data.PVZ_memory.write_uchar(0x005302C0,spoil_4_combobox.current())
-        elif(spoil_4_combobox.current()==7):
-            data.PVZ_memory.write_uchar(0x005302C0,8)
-        elif(spoil_4_combobox.current()==8):
-            data.PVZ_memory.write_uchar(0x005302C0,15)
-        elif(spoil_4_combobox.current()==9):
-            data.PVZ_memory.write_uchar(0x005302C0,16)
-        elif(spoil_4_combobox.current()==10):
-            data.PVZ_memory.write_uchar(0x005302C0,18)
-    spoil_4_combobox.bind("<<ComboboxSelected>>",setSpoil4)
-    ttk.Label(zombie_spoils_frame,text="卡片").grid(row=5,column=0)
-    spoil_card_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=data.plantsType,state=READONLY)
-    spoil_card_combobox.grid(row=5,column=1)
-    def setSpoilCard(event):
-        data.PVZ_memory.write_int(0x0042FFB9,spoil_card_combobox.current())
-    spoil_card_combobox.bind("<<ComboboxSelected>>",setSpoilCard)
+    zombie_spoils_check=ttk.Checkbutton(zombie_spoils_frame,text="开启",variable=zombie_spoils_status,bootstyle="success-round-toggle",command=lambda:setSpoils())
+    zombie_spoils_check.grid(row=5,column=0,columnspan=4,sticky=W)
+    # ttk.Label(zombie_spoils_frame,text="卡片").grid(row=5,column=0)
+    # spoil_card_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=data.plantsType,state=READONLY)
+    # spoil_card_combobox.grid(row=5,column=1)
+    # def setSpoilCard(event):
+    #     data.PVZ_memory.write_int(0x0042FFB9,spoil_card_combobox.current())
+    # spoil_card_combobox.bind("<<ComboboxSelected>>",setSpoilCard)
 
     def get_zombie_select(event):
         global zombie_select
