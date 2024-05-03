@@ -110,7 +110,7 @@ class Asm:
 
     def je(self,addr):
         # 计算相对偏移量，需要减去当前指令的长度（5字节）
-        relative_offset = addr - (self.startAddress+self.index + 5)
+        relative_offset = addr - (self.startAddress+self.index + 6)
         # 将相对偏移量转换为32位有符号整数的字节序列
         # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
         # 使用 signed=True 来允许负数的转换
@@ -119,6 +119,17 @@ class Asm:
         self.add_byte(0x84) 
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
+
+    def jmp(self,addr):
+        relative_offset = addr - (self.startAddress+self.index + 5)
+        # 将相对偏移量转换为32位有符号整数的字节序列
+        # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
+        # 使用 signed=True 来允许负数的转换
+        offset_bytes = relative_offset.to_bytes(4, byteorder='little', signed=True)
+        self.add_byte(0xe9) 
+        self.code[self.index:self.index + 4] = offset_bytes
+        self.index += 4
+
 
 
 def runThread(cla):
