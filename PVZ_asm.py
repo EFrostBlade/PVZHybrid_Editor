@@ -130,15 +130,13 @@ class Asm:
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
-    def random(self,val):#val/16的概率
+    def random(self,val):#取小于val的随机数
         self.add_byte(0x0f) 
-        self.add_byte(0x31) 
-        self.add_byte(0x83) 
-        self.add_byte(0xe2) 
-        self.add_byte(0x0f) 
-        self.add_byte(0x83) 
-        self.add_byte(0xfa) 
-        self.add_byte(val) 
+        self.add_byte(0x31) #rdtsc读取时间戳计数器
+        self.mov_exx(ECX,val)
+        self.add_byte(0xf7) 
+        self.add_byte(0xf1)#div ecx   EAX = EAX / ECX，EDX = EAX % ECX
+        #现在 EDX 寄存器中的值是1到val的随机数
 
 
 
