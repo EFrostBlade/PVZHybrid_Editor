@@ -423,3 +423,12 @@ def load():
             return Load_asm
             
     asm.runThread(Load())
+
+
+def spoil(f):
+    if(f):
+        data.PVZ_memory.write_bytes(0x00530275,b'\x70',1)
+    else:
+        data.PVZ_memory.write_bytes(0x00530275,b'\x75',1)
+
+        

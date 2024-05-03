@@ -983,6 +983,85 @@ def mainWindow():
     pausee_spawn_check=ttk.Checkbutton(zombie_seed_frame,text="暂停刷怪",variable=pausee_spawn_status,bootstyle="success-round-toggle",command=lambda:pvz.pauseSpawn(pausee_spawn_status.get()))
     pausee_spawn_check.grid(row=0,column=0,sticky=W)
 
+    zombie_characteristic_frame=ttk.Labelframe(zombie_page,text="基础属性",bootstyle=DANGER)
+    zombie_characteristic_frame.place(x=0,y=260,anchor=NW,height=200,width=275)
+
+
+    
+    zombie_spoils_frame=ttk.LabelFrame(zombie_page,text="击杀掉落",bootstyle=DANGER)
+    zombie_spoils_frame.place(x=280,y=210,anchor=NW,height=200,width=130)
+    zombie_spoils_status=ttk.BooleanVar(zombie_spoils_frame)
+    zombie_spoils_check=ttk.Checkbutton(zombie_spoils_frame,text="开启",variable=zombie_spoils_status,bootstyle="success-round-toggle",command=lambda:pvz.spoil(zombie_spoils_status.get()))
+    zombie_spoils_check.grid(row=0,column=0,columnspan=4,sticky=W)
+    ttk.Label(zombie_spoils_frame,text="掉落1").grid(row=1,column=0)
+    spoil_1_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
+    spoil_1_combobox.grid(row=1,column=1)
+    def setSpoil1(event):
+        if(spoil_1_combobox.current()==0):
+             data.PVZ_memory.write_bytes(0x530293,b'\x90\x90\x90\x90\x90',5)
+        elif(spoil_1_combobox.current()<7):
+            data.PVZ_memory.write_uchar(0x0053028D,spoil_1_combobox.current())
+        elif(spoil_1_combobox.current()==7):
+            data.PVZ_memory.write_uchar(0x0053028D,8)
+        elif(spoil_1_combobox.current()==8):
+            data.PVZ_memory.write_uchar(0x0053028D,15)
+        elif(spoil_1_combobox.current()==9):
+            data.PVZ_memory.write_uchar(0x0053028D,16)
+        elif(spoil_1_combobox.current()==10):
+            data.PVZ_memory.write_uchar(0x0053028D,18)
+    spoil_1_combobox.bind("<<ComboboxSelected>>",setSpoil1)
+    ttk.Label(zombie_spoils_frame,text="掉落2").grid(row=2,column=0)
+    spoil_2_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
+    spoil_2_combobox.grid(row=2,column=1)
+    def setSpoil2(event):
+        if(spoil_2_combobox.current()<7):
+            data.PVZ_memory.write_uchar(0x0053029B,spoil_2_combobox.current())
+        elif(spoil_2_combobox.current()==7):
+            data.PVZ_memory.write_uchar(0x0053029B,8)
+        elif(spoil_2_combobox.current()==8):
+            data.PVZ_memory.write_uchar(0x0053029B,15)
+        elif(spoil_2_combobox.current()==9):
+            data.PVZ_memory.write_uchar(0x0053029B,16)
+        elif(spoil_2_combobox.current()==10):
+            data.PVZ_memory.write_uchar(0x0053029B,18)
+    spoil_2_combobox.bind("<<ComboboxSelected>>",setSpoil2)
+    ttk.Label(zombie_spoils_frame,text="掉落3").grid(row=3,column=0)
+    spoil_3_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
+    spoil_3_combobox.grid(row=3,column=1)
+    def setSpoil3(event):
+        if(spoil_3_combobox.current()<7):
+            data.PVZ_memory.write_uchar(0x005302AF,spoil_3_combobox.current())
+        elif(spoil_3_combobox.current()==7):
+            data.PVZ_memory.write_uchar(0x005302AF,8)
+        elif(spoil_3_combobox.current()==8):
+            data.PVZ_memory.write_uchar(0x005302AF,15)
+        elif(spoil_3_combobox.current()==9):
+            data.PVZ_memory.write_uchar(0x005302AF,16)
+        elif(spoil_3_combobox.current()==10):
+            data.PVZ_memory.write_uchar(0x005302AF,18)
+    spoil_3_combobox.bind("<<ComboboxSelected>>",setSpoil3)
+    ttk.Label(zombie_spoils_frame,text="掉落4").grid(row=4,column=0)
+    spoil_4_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=["无","银币","金币","钻石","中阳光","小阳光","大阳光","奖杯","纸条","植物卡片","钱袋"],state=READONLY)
+    spoil_4_combobox.grid(row=4,column=1)
+    def setSpoil4(event):
+        if(spoil_4_combobox.current()<7):
+            data.PVZ_memory.write_uchar(0x005302C0,spoil_4_combobox.current())
+        elif(spoil_4_combobox.current()==7):
+            data.PVZ_memory.write_uchar(0x005302C0,8)
+        elif(spoil_4_combobox.current()==8):
+            data.PVZ_memory.write_uchar(0x005302C0,15)
+        elif(spoil_4_combobox.current()==9):
+            data.PVZ_memory.write_uchar(0x005302C0,16)
+        elif(spoil_4_combobox.current()==10):
+            data.PVZ_memory.write_uchar(0x005302C0,18)
+    spoil_4_combobox.bind("<<ComboboxSelected>>",setSpoil4)
+    ttk.Label(zombie_spoils_frame,text="卡片").grid(row=5,column=0)
+    spoil_card_combobox=ttk.Combobox(zombie_spoils_frame,width=8,values=data.plantsType,state=READONLY)
+    spoil_card_combobox.grid(row=5,column=1)
+    def setSpoilCard(event):
+        data.PVZ_memory.write_int(0x0042FFB9,spoil_card_combobox.current())
+    spoil_card_combobox.bind("<<ComboboxSelected>>",setSpoilCard)
+
     def get_zombie_select(event):
         global zombie_select
         try:

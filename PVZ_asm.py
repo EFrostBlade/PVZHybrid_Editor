@@ -130,6 +130,16 @@ class Asm:
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
+    def random(self,val):#val/16的概率
+        self.add_byte(0x0f) 
+        self.add_byte(0x31) 
+        self.add_byte(0x83) 
+        self.add_byte(0xe2) 
+        self.add_byte(0x0f) 
+        self.add_byte(0x83) 
+        self.add_byte(0xfa) 
+        self.add_byte(val) 
+
 
 
 def runThread(cla):
