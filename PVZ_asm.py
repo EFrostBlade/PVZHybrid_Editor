@@ -103,6 +103,11 @@ class Asm:
         self.add_byte(exy)#exx+(eyy)*8
         self.add_dword(val)
         
+    def lea_exy_byte(self,exy,val):
+        self.add_byte(0x8d)
+        self.add_byte(exy)#exx+(eyy)*8
+        self.add_byte(val)
+    
     def cmp_exx_byte(self,exx,val):
         self.add_byte(0x83)
         self.add_byte(0xf8+exx)
@@ -132,12 +137,22 @@ class Asm:
 
     def random(self,val):#取小于val的随机数
         self.add_byte(0x0f) 
-        self.add_byte(0x31) #rdtsc读取时间戳计数器
+        self.add_byte(0x31) #rdtsc读取时间戳计数器的值到 EDX:EAX
         self.mov_exx(ECX,val)
         self.add_byte(0xf7) 
         self.add_byte(0xf1)#div ecx   EAX = EAX / ECX，EDX = EAX % ECX
-        #现在 EDX 寄存器中的值是1到val的随机数
+        #现在 EDX 寄存器中的值是0到val的随机数
 
+    def mov_dword_ptr_dword(self,address,val):
+        self.add_byte(0xc7)
+        self.add_byte(0x05)
+        self.add_dword(address)
+        self.add_dword(val)
+
+    def add_exx_byte(self,exx,val):
+        self.add_byte(0x83)
+        self.add_byte(0xc0+exx)
+        self.add_byte(val)
 
 
 def runThread(cla):
