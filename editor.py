@@ -13,10 +13,12 @@ import webbrowser
 import json
 import keyboard
 import requests
+import importlib.util
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from ttkbootstrap.tooltip import ToolTip
+from tkinter import filedialog
 import PVZ_data as data
 import PVZ_Hybrid as pvz
 import PVZ_asm
@@ -1898,15 +1900,34 @@ def mainWindow():
         main_window.after(100,refreshData)
            
 
-
+    def load_plugin(main_window):
+        pyc_name = filedialog.askopenfilename(
+        title='选择pyc文件',
+        filetypes=[('PYC files', '*.pyc')]
+    )
+        if pyc_name:
+            print(f"选中的文件: {pyc_name}")
+            # 这里可以添加加载和使用pyc文件的代码
+        else:
+            print("没有选择文件")
+        spec = importlib.util.spec_from_file_location("module.name", pyc_name)
+        plugin = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(plugin)
+        plugin.open_plugin_window(main_window)
+    plugin_button=ttk.Button(main_window,text="载入插件",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=lambda:load_plugin(main_window))
+    plugin_button.place(x=100,y=0,relx=0,rely=1,anchor=SW)
 
     
     support_button=ttk.Button(main_window,text="觉得好用？支持开发者",padding=0,bootstyle=(PRIMARY,LINK),cursor="hand2",command=lambda:support())
     support_button.place(x=0,y=0,relx=1,anchor=NE)
     main_window.after(100,refreshData)
 
+
+
+
     main_window.protocol("WM_DELETE_WINDOW", lambda: exit_editor(config_file_path, main_window))
     main_window.mainloop()
+
 
 if __name__ == '__main__':
     mainWindow()
