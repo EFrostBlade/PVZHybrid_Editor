@@ -24,7 +24,7 @@ import PVZ_Hybrid as pvz
 import PVZ_asm
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-current_version = '0.11'
+current_version = '0.12'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window=None
 data.update_PVZ_memory(1)
