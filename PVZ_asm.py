@@ -98,6 +98,11 @@ class Asm:
         self.add_byte(0xc0 + exx * 8 + eyy)
         self.add_byte(val)
 
+    def imul_exx_eyy_dword(self, exx, eyy, val):
+        self.add_byte(0x69)
+        self.add_byte(0xc0 + exx * 8 + eyy)
+        self.add_dword(val)
+
     def lea_exx_byte_dword(self, exx, exy, val):
         self.add_byte(0x8d)
         self.add_byte(0x84+exx * 8)
@@ -113,6 +118,28 @@ class Asm:
         self.add_byte(0x83)
         self.add_byte(0xf8+exx)
         self.add_byte(val)
+
+    def cmp_exx_dword(self, exx, val):
+        self.add_byte(0x81)
+        self.add_byte(0xf8+exx)
+        self.add_dword(val)
+
+    def cmp_ptr_exx_add_byte_eyy(self, exx, val, eyy):
+        self.add_byte(0x39)
+        self.add_byte(0x40+exx+eyy*8)
+        self.add_byte(val)
+
+    def cmp_dword_ptr_exx_add_byte_byte(self, exx, val, val2):
+        self.add_byte(0x83)
+        self.add_byte(0x78+exx)
+        self.add_byte(val)
+        self.add_byte(val2)
+
+    def cmp_dword_ptr_exx_add_dword_byte(self, exx, val, val2):
+        self.add_byte(0x83)
+        self.add_byte(0xb8+exx)
+        self.add_dword(val)
+        self.add_byte(val2)
 
     def je(self, addr):
         # 计算相对偏移量，需要减去当前指令的长度（5字节）
@@ -154,10 +181,57 @@ class Asm:
         self.add_dword(address)
         self.add_dword(val)
 
+    def mov_ptr_exx_add_byte_dword(self, exx, val, val2):
+        self.add_byte(0xc7)
+        self.add_byte(0x40+exx)
+        self.add_byte(val)
+        self.add_dword(val2)
+
+    def mov_ptr_exx_add_dowrd_dword(self, exx, val, val2):
+        self.add_byte(0xc7)
+        self.add_byte(0x80+exx)
+        self.add_dword(val)
+        self.add_dword(val2)
+
     def add_exx_byte(self, exx, val):
         self.add_byte(0x83)
         self.add_byte(0xc0+exx)
         self.add_byte(val)
+
+    def add_exx_eyy(self, exx, eyy):
+        self.add_byte(0x01)
+        self.add_byte(0xc0+exx+eyy*8)
+
+    def je_offset(self, val):
+        self.add_byte(0x0f)
+        self.add_byte(0x84)
+        self.add_dword(val)
+
+    def jl_offset(self, val):
+        self.add_byte(0x7c)
+        self.add_byte(val)
+
+    def jne_offset(self, val):
+        self.add_byte(0x75)
+        self.add_byte(val)
+
+    def jmp_offest(self, val):
+        self.add_byte(0xeb)
+        self.add_byte(val)
+
+    def nop_6(self):
+        self.add_byte(0x66)
+        self.add_byte(0x0f)
+        self.add_byte(0x1f)
+        self.add_byte(0x44)
+        self.add_byte(0x00)
+        self.add_byte(0x00)
+
+    def pushad(self):
+        self.add_byte(0x60)
+
+    def popad(self):
+        self.add_byte(0x61)
 
 
 def runThread(cla):

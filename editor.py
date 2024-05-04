@@ -22,9 +22,7 @@ import win32gui
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
-ScaleFactor = ctypes.windll.shcore.GetScaleFactorForDevice(0)
-current_version = '0.12'
+current_version = '0.13'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -2145,7 +2143,7 @@ def mainWindow():
     no_slot_status = ttk.BooleanVar(slots_config_frame)
     no_slot_check = ttk.Checkbutton(slots_config_frame, text="无需选卡", variable=no_slot_status,
                                     bootstyle="success-round-toggle", command=lambda: pvz.noSolt(no_slot_status.get()))
-    no_slot_check.pack(pady=10, anchor=W)
+    no_slot_check.pack(pady=5, anchor=W)
     ToolTip(no_slot_check, text="可以不选卡片即开始游戏", bootstyle=(INFO, INVERSE))
     change_all_frame = ttk.Frame(slots_config_frame)
     change_all_frame.pack(pady=(0, 10))
@@ -2153,6 +2151,10 @@ def mainWindow():
     change_all_combobox = ttk.Combobox(
         change_all_frame, width=12, values=data.plantsType, state='readonly', bootstyle='secondary')
     change_all_combobox.pack()
+    random_slots_status = ttk.BooleanVar(slots_config_frame)
+    random_slots_check = ttk.Checkbutton(slots_config_frame, text="卡槽随机变化", variable=random_slots_status,
+                                         bootstyle="success-round-toggle", command=lambda: pvz.randomSlots(random_slots_status.get()))
+    random_slots_check.pack(pady=5, anchor=W)
 
     def change_all_slots(event):
         if (slots_configuration_mode.get() == False):
@@ -2161,7 +2163,7 @@ def mainWindow():
     change_all_combobox.bind("<<ComboboxSelected>>", change_all_slots)
 
     card_select_frame = ttk.LabelFrame(slot_page, text="选卡配置", bootstyle=DARK)
-    card_select_frame.place(x=0, y=150, relx=1, anchor=NE)
+    card_select_frame.place(x=0, y=180, relx=1, anchor=NE)
 
     def changeSlotsConfiguration():
         if (slots_configuration_mode.get() == True):
@@ -2368,118 +2370,317 @@ def mainWindow():
     card_select_frame.place(x=0, y=455, relx=0, anchor=NW)
     ttk.Label(card_select_frame, text="1:").grid(row=0, column=0)
     slot_1_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_1_key.grid(row=0, column=1)
+    slot_1_key.current(0)
     ttk.Label(card_select_frame, text="2:").grid(row=0, column=2)
     slot_2_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_2_key.grid(row=0, column=3)
+    slot_2_key.current(0)
     ttk.Label(card_select_frame, text="3:").grid(row=0, column=4)
     slot_3_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_3_key.grid(row=0, column=5)
+    slot_3_key.current(0)
     ttk.Label(card_select_frame, text="4:").grid(row=0, column=6)
     slot_4_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_4_key.grid(row=0, column=7)
+    slot_4_key.current(0)
     ttk.Label(card_select_frame, text="5:").grid(row=0, column=8)
     slot_5_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_5_key.grid(row=0, column=9)
+    slot_5_key.current(0)
     ttk.Label(card_select_frame, text="6:").grid(row=0, column=10)
     slot_6_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_6_key.grid(row=0, column=11)
+    slot_6_key.current(0)
     ttk.Label(card_select_frame, text="7:").grid(row=0, column=12)
     slot_7_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_7_key.grid(row=0, column=13)
+    slot_7_key.current(0)
     shovel_key_label = ttk.Label(card_select_frame, text="铲:")
     shovel_key_label.grid(row=0, column=14)
     slot_shovel_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_shovel_key.grid(row=0, column=15)
+    slot_shovel_key.current(0)
     ToolTip(shovel_key_label, text="使用铲子", bootstyle=(INFO, INVERSE))
     hp_key_label = ttk.Label(card_select_frame, text="血:")
     hp_key_label.grid(row=0, column=16)
     slot_hp_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_hp_key.grid(row=0, column=17)
+    slot_hp_key.current(0)
     ToolTip(hp_key_label, text="显示僵尸血量", bootstyle=(INFO, INVERSE))
-    ttk.Label(slot_hp_key, text="8:").grid(row=1, column=0)
+    ttk.Label(card_select_frame, text="8:").grid(row=1, column=0)
     slot_8_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_8_key.grid(row=1, column=1)
+    slot_8_key.current(0)
     ttk.Label(card_select_frame, text="9:").grid(row=1, column=2)
     slot_9_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_9_key.grid(row=1, column=3)
+    slot_9_key.current(0)
     ttk.Label(card_select_frame, text="10:").grid(row=1, column=4)
     slot_10_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_10_key.grid(row=1, column=5)
+    slot_10_key.current(0)
     ttk.Label(card_select_frame, text="11:").grid(row=1, column=6)
     slot_11_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_11_key.grid(row=1, column=7)
+    slot_11_key.current(0)
     ttk.Label(card_select_frame, text="12:").grid(row=1, column=8)
     slot_12_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_12_key.grid(row=1, column=9)
+    slot_12_key.current(0)
     ttk.Label(card_select_frame, text="13:").grid(row=1, column=10)
     slot_13_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_13_key.grid(row=1, column=11)
+    slot_13_key.current(0)
     ttk.Label(card_select_frame, text="14:").grid(row=1, column=12)
     slot_14_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_14_key.grid(row=1, column=13)
+    slot_14_key.current(0)
     top_key_label = ttk.Label(card_select_frame, text="顶:")
     top_key_label.grid(row=1, column=14)
     slot_top_key = ttk.Combobox(
-        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8))
+        card_select_frame, width=3, values=data.keyTpye, font=("黑体", 8), state=READONLY)
     slot_top_key.grid(row=1, column=15)
+    slot_top_key.current(0)
     ToolTip(top_key_label, text="卡槽置顶", bootstyle=(INFO, INVERSE))
+
+    def loadSlotKey():
+        config = load_config(config_file_path)
+        try:
+            slot_1_key.current(config["slotKeys"]["1"])
+        except:
+            pass
+        try:
+            slot_2_key.current(config["slotKeys"]["2"])
+        except:
+            pass
+        try:
+            slot_3_key.current(config["slotKeys"]["3"])
+        except:
+            pass
+        try:
+            slot_4_key.current(config["slotKeys"]["4"])
+        except:
+            pass
+        try:
+            slot_5_key.current(config["slotKeys"]["5"])
+        except:
+            pass
+        try:
+            slot_6_key.current(config["slotKeys"]["6"])
+        except:
+            pass
+        try:
+            slot_7_key.current(config["slotKeys"]["7"])
+        except:
+            pass
+        try:
+            slot_8_key.current(config["slotKeys"]["8"])
+        except:
+            pass
+        try:
+            slot_9_key.current(config["slotKeys"]["9"])
+        except:
+            pass
+        try:
+            slot_10_key.current(config["slotKeys"]["10"])
+        except:
+            pass
+        try:
+            slot_11_key.current(config["slotKeys"]["11"])
+        except:
+            pass
+        try:
+            slot_12_key.current(config["slotKeys"]["12"])
+        except:
+            pass
+        try:
+            slot_13_key.current(config["slotKeys"]["13"])
+        except:
+            pass
+        try:
+            slot_14_key.current(config["slotKeys"]["14"])
+        except:
+            pass
+        try:
+            slot_shovel_key.current(config["slotKeys"]["shovel"])
+        except:
+            pass
+        try:
+            slot_hp_key.current(config["slotKeys"]["hp"])
+        except:
+            pass
+        try:
+            slot_top_key.current(config["slotKeys"]["top"])
+        except:
+            pass
+    loadSlotKey()
 
     def setSlotKey():
         if (slot_key_status.get()):
             config = load_config(config_file_path)
             if "slotKeys" not in config:
                 config["slotKeys"] = {}
-            if (slot_1_key != -1):
+            slot_key_list = list()
+            if (slot_1_key.current() != -1):
                 config["slotKeys"]["1"] = slot_1_key.current()
-            if (slot_2_key != -1):
-                config["slotKeys"]["2"] = slot_2_key.current()
-            if (slot_3_key != -1):
-                config["slotKeys"]["3"] = slot_3_key.current()
-            if (slot_4_key != -1):
-                config["slotKeys"]["4"] = slot_4_key.current()
-            if (slot_5_key != -1):
-                config["slotKeys"]["5"] = slot_5_key.current()
-            if (slot_6_key != -1):
-                config["slotKeys"]["6"] = slot_6_key.current()
-            if (slot_7_key != -1):
-                config["slotKeys"]["7"] = slot_7_key.current()
-            if (slot_8_key != -1):
-                config["slotKeys"]["8"] = slot_8_key.current()
-            if (slot_9_key != -1):
-                config["slotKeys"]["9"] = slot_9_key.current()
-            if (slot_10_key != -1):
-                config["slotKeys"]["10"] = slot_10_key.current()
-            if (slot_11_key != -1):
-                config["slotKeys"]["11"] = slot_11_key.current()
-            if (slot_12_key != -1):
-                config["slotKeys"]["12"] = slot_12_key.current()
-            if (slot_13_key != -1):
-                config["slotKeys"]["13"] = slot_13_key.current()
-            if (slot_14_key != -1):
-                config["slotKeys"]["14"] = slot_14_key.current()
-            if (slot_shovel_key != -1):
-                config["slotKeys"]["shovel"] = slot_shovel_key.current()
-            if (slot_hp_key != -1):
-                config["slotKeys"]["hp"] = slot_hp_key.current()
-            if (slot_top_key != -1):
-                config["slotKeys"]["top"] = slot_top_key.current()
+                slot_key_list.append(slot_1_key.current())
+            if (slot_2_key.current() != -1):
+                if (slot_2_key.current() not in slot_key_list or slot_2_key.current() == 0):
+                    config["slotKeys"]["2"] = slot_2_key.current()
+                    slot_key_list.append(slot_2_key.current())
+                else:
+                    Messagebox.show_error("快捷键2重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if (slot_3_key.current() != -1):
+                if (slot_3_key.current() not in slot_key_list or slot_3_key.current() == 0):
+                    config["slotKeys"]["3"] = slot_3_key.current()
+                    slot_key_list.append(slot_3_key.current())
+                else:
+                    Messagebox.show_error("快捷键3重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_4_key.current() != -1):
+                if (slot_4_key.current() not in slot_key_list or slot_4_key.current() == 0):
+                    config["slotKeys"]["4"] = slot_4_key.current()
+                    slot_key_list.append(slot_4_key.current())
+                else:
+                    Messagebox.show_error("快捷键4重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_5_key.current() != -1):
+                if (slot_5_key.current() not in slot_key_list or slot_5_key.current() == 0):
+                    config["slotKeys"]["5"] = slot_5_key.current()
+                    slot_key_list.append(slot_5_key.current())
+                else:
+                    Messagebox.show_error("快捷键5重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_6_key.current() != -1):
+                if (slot_6_key.current() not in slot_key_list or slot_6_key.current() == 0):
+                    config["slotKeys"]["6"] = slot_6_key.current()
+                    slot_key_list.append(slot_6_key.current())
+                else:
+                    Messagebox.show_error("快捷键6重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_7_key.current() != -1):
+                if (slot_7_key.current() not in slot_key_list or slot_7_key.current() == 0):
+                    config["slotKeys"]["7"] = slot_7_key.current()
+                    slot_key_list.append(slot_7_key.current())
+                else:
+                    Messagebox.show_error("快捷键7重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_8_key.current() != -1):
+                if (slot_8_key.current() not in slot_key_list or slot_8_key.current() == 0):
+                    config["slotKeys"]["8"] = slot_8_key.current()
+                    slot_key_list.append(slot_8_key.current())
+                else:
+                    Messagebox.show_error("快捷键8重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_9_key.current() != -1):
+                if (slot_9_key.current() not in slot_key_list or slot_9_key.current() == 0):
+                    config["slotKeys"]["9"] = slot_9_key.current()
+                    slot_key_list.append(slot_9_key.current())
+                else:
+                    Messagebox.show_error("快捷键9重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_10_key.current() != -1):
+                if (slot_10_key.current() not in slot_key_list or slot_10_key.current() == 0):
+                    config["slotKeys"]["10"] = slot_10_key.current()
+                    slot_key_list.append(slot_10_key.current())
+                else:
+                    Messagebox.show_error("快捷键10重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_11_key.current() != -1):
+                if (slot_11_key.current() not in slot_key_list or slot_11_key.current() == 0):
+                    config["slotKeys"]["11"] = slot_11_key.current()
+                    slot_key_list.append(slot_11_key.current())
+                else:
+                    Messagebox.show_error("快捷键11重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_12_key.current() != -1):
+                if (slot_12_key.current() not in slot_key_list or slot_12_key.current() == 0):
+                    config["slotKeys"]["12"] = slot_12_key.current()
+                    slot_key_list.append(slot_12_key.current())
+                else:
+                    Messagebox.show_error("快捷键12重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_13_key.current() != -1):
+                if (slot_13_key.current() not in slot_key_list or slot_13_key.current() == 0):
+                    config["slotKeys"]["13"] = slot_13_key.current()
+                    slot_key_list.append(slot_13_key.current())
+                else:
+                    Messagebox.show_error("快捷键13重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
+            if (slot_14_key.current() != -1):
+                if (slot_14_key.current() not in slot_key_list or slot_14_key.current() == 0):
+                    config["slotKeys"]["14"] = slot_14_key.current()
+                    slot_key_list.append(slot_14_key.current())
+                else:
+                    Messagebox.show_error("快捷键14重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if (slot_shovel_key.current() != -1):
+                if (slot_shovel_key.current() not in slot_key_list or slot_shovel_key.current() == 0):
+                    config["slotKeys"]["shovel"] = slot_shovel_key.current()
+                    slot_key_list.append(slot_shovel_key.current())
+                else:
+                    Messagebox.show_error("铲子快捷键重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if (slot_hp_key.current() != -1):
+                if (slot_hp_key.current() not in slot_key_list or slot_hp_key.current() == 0):
+                    config["slotKeys"]["hp"] = slot_hp_key.current()
+                    slot_key_list.append(slot_hp_key.current())
+                else:
+                    Messagebox.show_error("显血快捷键重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if (slot_top_key.current() != -1):
+                if (slot_top_key.current() not in slot_key_list or slot_top_key.current() == 0):
+                    config["slotKeys"]["top"] = slot_top_key.current()
+                    slot_key_list.append(slot_top_key.current())
+                else:
+                    Messagebox.show_error("卡槽置顶快捷键重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+
             save_config(config, config_file_path)
             slot_key_list = config["slotKeys"]
             pvz.slotKey(slot_key_list)
@@ -2489,7 +2690,7 @@ def mainWindow():
     slot_key_status = ttk.BooleanVar(card_select_frame)
     slot_key_check = ttk.Checkbutton(card_select_frame, text="开启", variable=slot_key_status,
                                      bootstyle="primary-round-toggle", command=lambda: setSlotKey())
-    slot_key_check.grid(row=1, column=16, columnspan=2)
+    slot_key_check.grid(row=1, column=16, columnspan=4)
 
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
