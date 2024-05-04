@@ -9,21 +9,21 @@ import pymem.memory
 import pymem.thread
 import PVZ_data as data
 
-EAX= 0
-ECX= 1
-EDX= 2
-EBX= 3
-ESP= 4
-EBP= 5
-ESI= 6
-EDI= 7
+EAX = 0
+ECX = 1
+EDX = 2
+EBX = 3
+ESP = 4
+EBP = 5
+ESI = 6
+EDI = 7
 
 
 class Asm:
-    def __init__(self,startAddress):
+    def __init__(self, startAddress):
         self.code = bytearray(2048)
         self.index = 0
-        self.startAddress=startAddress
+        self.startAddress = startAddress
 
     def add_byte(self, val):
         self.code[self.index] = val
@@ -63,7 +63,7 @@ class Asm:
         self.add_byte(0x8b)
         self.add_byte(0x80 + exx * 8 + eyy)
         self.add_dword(val)
-        
+
     def mov_exx_dword_ptr_eyy(self, exx, eyy):
         self.add_byte(0x8b)
         self.add_byte(exx * 8 + eyy)
@@ -83,7 +83,8 @@ class Asm:
         # 将相对偏移量转换为32位有符号整数的字节序列
         # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
         # 使用 signed=True 来允许负数的转换
-        offset_bytes = relative_offset.to_bytes(4, byteorder='little', signed=True)
+        offset_bytes = relative_offset.to_bytes(
+            4, byteorder='little', signed=True)
         self.add_byte(0xe8)  # call 指令的操作码
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
@@ -92,66 +93,68 @@ class Asm:
         self.add_byte(0x89)
         self.add_byte(0xc0 + eyy * 8 + exx)
 
-    def imul_exx_eyy_byte(self,exx,eyy,val):
+    def imul_exx_eyy_byte(self, exx, eyy, val):
         self.add_byte(0x6b)
         self.add_byte(0xc0 + exx * 8 + eyy)
         self.add_byte(val)
 
-    def lea_exx_byte_dword(self,exx,exy,val):
+    def lea_exx_byte_dword(self, exx, exy, val):
         self.add_byte(0x8d)
         self.add_byte(0x84+exx * 8)
-        self.add_byte(exy)#exx+(eyy)*8
+        self.add_byte(exy)  # exx+(eyy)*8
         self.add_dword(val)
-        
-    def lea_exy_byte(self,exy,val):
+
+    def lea_exy_byte(self, exy, val):
         self.add_byte(0x8d)
-        self.add_byte(exy)#exx+(eyy)*8
+        self.add_byte(exy)  # exx+(eyy)*8
         self.add_byte(val)
-    
-    def cmp_exx_byte(self,exx,val):
+
+    def cmp_exx_byte(self, exx, val):
         self.add_byte(0x83)
         self.add_byte(0xf8+exx)
         self.add_byte(val)
 
-    def je(self,addr):
+    def je(self, addr):
         # 计算相对偏移量，需要减去当前指令的长度（5字节）
         relative_offset = addr - (self.startAddress+self.index + 6)
         # 将相对偏移量转换为32位有符号整数的字节序列
         # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
         # 使用 signed=True 来允许负数的转换
-        offset_bytes = relative_offset.to_bytes(4, byteorder='little', signed=True)
-        self.add_byte(0x0f) 
-        self.add_byte(0x84) 
+        offset_bytes = relative_offset.to_bytes(
+            4, byteorder='little', signed=True)
+        self.add_byte(0x0f)
+        self.add_byte(0x84)
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
-    def jmp(self,addr):
+    def jmp(self, addr):
         relative_offset = addr - (self.startAddress+self.index + 5)
         # 将相对偏移量转换为32位有符号整数的字节序列
         # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
         # 使用 signed=True 来允许负数的转换
-        offset_bytes = relative_offset.to_bytes(4, byteorder='little', signed=True)
-        self.add_byte(0xe9) 
+        offset_bytes = relative_offset.to_bytes(
+            4, byteorder='little', signed=True)
+        self.add_byte(0xe9)
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
-    def random(self,val):#取小于val的随机数
-        self.add_byte(0x0f) 
-        self.add_byte(0x31) #rdtsc读取时间戳计数器的值到 EDX:EAX
-        self.add_byte(0x31) 
-        self.add_byte(0xd2) #xor edx, edx  ; 将 EDX 寄存器清零
-        self.mov_exx(ECX,val)
-        self.add_byte(0xf7) 
-        self.add_byte(0xf1)#div ecx   EAX = EAX / ECX，EDX = EAX % ECX
-        #现在 EDX 寄存器中的值是0到val的随机数
+    def random(self, val):  # 取小于val的随机数
+        self.add_byte(0x0f)
+        self.add_byte(0x31)  # rdtsc读取时间戳计数器的值到 EDX:EAX
+        self.add_byte(0x31)
+        self.add_byte(0xd2)  # xor edx, edx  ; 将 EDX 寄存器清零
+        self.mov_exx(ECX, val)
+        self.add_byte(0xf7)
+        self.add_byte(0xf1)  # div ecx   EAX = EAX / ECX，EDX = EAX % ECX
+        # 现在 EDX 寄存器中的值是0到val的随机数
 
-    def mov_dword_ptr_dword(self,address,val):
+    def mov_dword_ptr_dword(self, address, val):
         self.add_byte(0xc7)
         self.add_byte(0x05)
         self.add_dword(address)
         self.add_dword(val)
 
-    def add_exx_byte(self,exx,val):
+    def add_exx_byte(self, exx, val):
         self.add_byte(0x83)
         self.add_byte(0xc0+exx)
         self.add_byte(val)
@@ -159,57 +162,57 @@ class Asm:
 
 def runThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
-    startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
+    startAddress = pymem.memory.allocate_memory(process_handle, 1024)
     # print(hex(startAddress))
-    asm=cla.creat_asm(startAddress+1)
-    shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
-    data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)
-    data.PVZ_memory.write_bytes(0x00552014,b'\xfe',1)
+    asm = cla.creat_asm(startAddress+1)
+    shellcode = b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
+    data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index+3)
+    data.PVZ_memory.write_bytes(0x00552014, b'\xfe', 1)
     thread_h = pymem.ressources.kernel32.CreateRemoteThread(
-                process_handle,
-                ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
-                0,
-                startAddress,
-                0,
-                0,
-                ctypes.byref(ctypes.c_ulong(0))
-            ) 
-    exit_code=ctypes.c_ulong()
-    while(1):
-        pymem.ressources.kernel32.GetExitCodeThread(thread_h,ctypes.byref(exit_code))
-        if(exit_code.value==259):
+        process_handle,
+        ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
+        0,
+        startAddress,
+        0,
+        0,
+        ctypes.byref(ctypes.c_ulong(0))
+    )
+    exit_code = ctypes.c_ulong()
+    while (1):
+        pymem.ressources.kernel32.GetExitCodeThread(
+            thread_h, ctypes.byref(exit_code))
+        if (exit_code.value == 259):
             pass
         else:
-            data.PVZ_memory.write_bytes(0x00552014,b'\xdb',1)
+            data.PVZ_memory.write_bytes(0x00552014, b'\xdb', 1)
             break
-        time.sleep(0.001)    
-    pymem.memory.free_memory(process_handle, startAddress) 
-    
+        time.sleep(0.001)
+    pymem.memory.free_memory(process_handle, startAddress)
+
+
 def justRunThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
-    startAddress=pymem.memory.allocate_memory(process_handle, 1024) 
+    startAddress = pymem.memory.allocate_memory(process_handle, 1024)
     # print(hex(startAddress))
-    asm=cla.creat_asm(startAddress+1)
-    shellcode=b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
-    data.PVZ_memory.write_bytes(startAddress,shellcode,asm.index+3)
+    asm = cla.creat_asm(startAddress+1)
+    shellcode = b'\x60'+bytes(asm.code[:asm.index])+b'\x61\xc3'
+    data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index+3)
     thread_h = pymem.ressources.kernel32.CreateRemoteThread(
-                process_handle,
-                ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
-                0,
-                startAddress,
-                0,
-                0,
-                ctypes.byref(ctypes.c_ulong(0))
-            ) 
-    exit_code=ctypes.c_ulong()
-    while(1):
-        pymem.ressources.kernel32.GetExitCodeThread(thread_h,ctypes.byref(exit_code))
-        if(exit_code.value==259):
+        process_handle,
+        ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
+        0,
+        startAddress,
+        0,
+        0,
+        ctypes.byref(ctypes.c_ulong(0))
+    )
+    exit_code = ctypes.c_ulong()
+    while (1):
+        pymem.ressources.kernel32.GetExitCodeThread(
+            thread_h, ctypes.byref(exit_code))
+        if (exit_code.value == 259):
             pass
         else:
             break
-        time.sleep(0.001)    
-    pymem.memory.free_memory(process_handle, startAddress) 
-
-
-
+        time.sleep(0.001)
+    pymem.memory.free_memory(process_handle, startAddress)
