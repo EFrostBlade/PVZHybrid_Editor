@@ -181,6 +181,11 @@ class Asm:
         self.add_dword(address)
         self.add_dword(val)
 
+    def mov_ptr_exx_add_byte_eyy(self, exx, val, eyy):
+        self.add_byte(0x89)
+        self.add_byte(0x40+exx+eyy*8)
+        self.add_byte(val)
+
     def mov_ptr_exx_add_byte_dword(self, exx, val, val2):
         self.add_byte(0xc7)
         self.add_byte(0x40+exx)

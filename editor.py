@@ -22,7 +22,7 @@ import win32gui
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-current_version = '0.13'
+current_version = '0.14'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -36,7 +36,7 @@ shortcut_comboboxs = []
 action_values = []
 action_list = ["高级暂停", "设置阳光", "增加阳光", "自由放置", "免费种植", "取消冷却", "自动收集", "柱子模式", "超级铲子", "永不失败",
                "当前关卡胜利", "秒杀所有僵尸", "解锁全部植物", "放置植物", "搭梯", "清除植物", "放置僵尸", "关卡失败", "存档", "读档",
-               "游戏加速", "游戏减速"]
+               "游戏加速", "游戏减速", "随机卡槽"]
 # 默认配置
 default_config = {
     "shortcuts": {
@@ -749,6 +749,9 @@ def mainWindow():
             if (game_speed_value.get() > 0):
                 game_speed_value.set(game_speed_value.get()-1)
                 pvz.changeGameSpeed(game_speed_value.get())
+        elif action == 22:
+            switch_status(random_slots_status)
+            pvz.randomSlots(random_slots_status.get())
 
     # 修改快捷键的窗口
 
@@ -1079,7 +1082,7 @@ def mainWindow():
 
     zombie_put_frame = ttk.LabelFrame(
         zombie_page, text="放置僵尸", bootstyle=DANGER)
-    zombie_put_frame.place(x=280, y=0, anchor=NW, height=100, width=130)
+    zombie_put_frame.place(x=280, y=0, anchor=NW, height=120, width=130)
     ttk.Label(zombie_put_frame, text="第").grid(row=0, column=0)
     zombiePut_start_row_value = ttk.IntVar(zombie_put_frame)
     zombiePut_start_row_combobox = ttk.Combobox(zombie_put_frame, textvariable=zombiePut_start_row_value, width=2, values=[
@@ -1106,37 +1109,44 @@ def mainWindow():
     zombiePut_end_col_combobox.grid(row=1, column=3)
     zombiePut_end_col_value.set(1)
     ttk.Label(zombie_put_frame, text="列").grid(row=1, column=4)
-    zombiePut_type_combobox = ttk.Combobox(zombie_put_frame, width=7, values=data.zombiesType, font=(
+    zombiePut_type_combobox = ttk.Combobox(zombie_put_frame, width=15, values=data.zombiesType, font=(
         "黑体", 8), bootstyle=SECONDARY, state=READONLY)
     zombiePut_type_combobox.grid(row=2, column=0, columnspan=4, sticky=W)
     zombiePut_type_combobox.current(0)
+    zombiePut_num = ttk.IntVar(zombie_put_frame)
+    zombiePut_num_entry = ttk.Entry(
+        zombie_put_frame, textvariable=zombiePut_num, font=("黑体", 8), width=7)
+    zombiePut_num_entry.grid(row=3, column=0, columnspan=2, sticky=W)
+    ttk.Label(zombie_put_frame, text="只").grid(row=3, column=2)
+    zombiePut_num.set(1)
 
-    def putZombies(type):
-        startRow = zombiePut_start_row_value.get()-1
-        startCol = zombiePut_start_col_value.get()-1
-        endRow = zombiePut_end_row_value.get()-1
-        endCol = zombiePut_end_col_value.get()-1
-        if (type == 25):
-            pvz.putBoss
-        print(startRow, startCol, endRow, endCol, type)
-        if (pvz.getMap != False):
-            rows = pvz.getMap()-1
-            if startRow > rows:
-                startRow = rows
-            if endRow > rows:
-                endRow = rows
-            if startRow > endRow or startCol > endCol:
-                Messagebox.show_error("起始行列大于终止行列", title="输入错误")
-            else:
-                for i in range(startRow, endRow+1):
-                    for j in range(startCol, endCol+1):
-                        pvz.putZombie(i, j, type)
+    def putZombies(type, num):
+        for _ in range(0, num):
+            startRow = zombiePut_start_row_value.get()-1
+            startCol = zombiePut_start_col_value.get()-1
+            endRow = zombiePut_end_row_value.get()-1
+            endCol = zombiePut_end_col_value.get()-1
+            if (type == 25):
+                pvz.putBoss
+            print(startRow, startCol, endRow, endCol, type)
+            if (pvz.getMap != False):
+                rows = pvz.getMap()-1
+                if startRow > rows:
+                    startRow = rows
+                if endRow > rows:
+                    endRow = rows
+                if startRow > endRow or startCol > endCol:
+                    Messagebox.show_error("起始行列大于终止行列", title="输入错误")
+                else:
+                    for i in range(startRow, endRow+1):
+                        for j in range(startCol, endCol+1):
+                            pvz.putZombie(i, j, type)
     ttk.Button(zombie_put_frame, text="放置僵尸", padding=0, bootstyle=(OUTLINE, DANGER), command=lambda: putZombies(
-        zombiePut_type_combobox.current())).grid(row=2, column=0, columnspan=5, sticky=E)
+        zombiePut_type_combobox.current(), zombiePut_num.get())).grid(row=3, column=0, columnspan=5, sticky=E)
 
     zombie_seed_frame = ttk.LabelFrame(
         zombie_page, text="修改出怪", bootstyle=DANGER)
-    zombie_seed_frame.place(x=280, y=110, anchor=NW, height=100, width=130)
+    zombie_seed_frame.place(x=280, y=130, anchor=NW, height=100, width=130)
     pausee_spawn_status = ttk.BooleanVar(zombie_seed_frame)
     pausee_spawn_check = ttk.Checkbutton(zombie_seed_frame, text="暂停刷怪", variable=pausee_spawn_status,
                                          bootstyle="success-round-toggle", command=lambda: pvz.pauseSpawn(pausee_spawn_status.get()))
@@ -1399,7 +1409,6 @@ def mainWindow():
                     zombie_exist_flag.set(True)
                 else:
                     zombie_exist_flag.set(False)
-                print(zombie_select.stolenPlant)
             except:
                 pass
             zombie_isVisible_flag.set(not zombie_select.isVisible)
@@ -1803,6 +1812,57 @@ def mainWindow():
             plant_characteristic_type.canAttack)
         plant_characteristic_frame.focus_set()
     plant_type_combobox.bind("<<ComboboxSelected>>", get_plant_type)
+
+    bullet_frame = ttk.Labelframe(
+        plant_page, text="子弹修改", bootstyle=SUCCESS)
+    bullet_frame.place(
+        x=0, y=390, anchor=NW, height=120, width=300)
+    all_bullet_frame = ttk.Frame(bullet_frame)
+    all_bullet_frame.pack(anchor=W)
+    all_bullet_status = ttk.BooleanVar(all_bullet_frame)
+    bullet_type_combobox = ttk.Combobox(all_bullet_frame, width=10, values=data.bulletType, font=(
+        "黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    bullet_type_combobox.pack(side=RIGHT)
+    bullet_type_combobox.current(0)
+    ttk.Checkbutton(all_bullet_frame, variable=all_bullet_status, text="修改所有子弹为",
+                    bootstyle="success-round-toggle", command=lambda: pvz.setAllBullet(all_bullet_status.get(), bullet_type_combobox.current())).pack(side=RIGHT)
+    random_bullet_frame = ttk.Frame(bullet_frame)
+    random_bullet_frame.pack(anchor=W)
+    random_bullet_hasPepper = ttk.BooleanVar(random_bullet_frame)
+    ttk.Checkbutton(random_bullet_frame, text="辣椒",
+                    variable=random_bullet_hasPepper).pack(side=RIGHT)
+    random_bullet_hasMine = ttk.BooleanVar(random_bullet_frame)
+    ttk.Checkbutton(random_bullet_frame, text="土豆雷",
+                    variable=random_bullet_hasMine).pack(side=RIGHT)
+    random_bullet_hasDoom = ttk.BooleanVar(random_bullet_frame)
+    ttk.Checkbutton(random_bullet_frame, text="毁灭菇",
+                    variable=random_bullet_hasDoom).pack(side=RIGHT)
+    ttk.Label(random_bullet_frame, text="包含").pack(side=RIGHT)
+    random_bullet_status = ttk.BooleanVar(random_bullet_frame)
+    ttk.Checkbutton(random_bullet_frame, variable=random_bullet_status, text="随机所有子弹",
+                    bootstyle="success-round-toggle", command=lambda: pvz.randomBullet(random_bullet_status.get(), random_bullet_hasDoom.get(), random_bullet_hasMine.get(), random_bullet_hasPepper.get())).pack(side=RIGHT)
+    attack_speed_frame = ttk.Frame(bullet_frame)
+    attack_speed_frame.pack(anchor=W)
+    attack_speed_label = ttk.Label(attack_speed_frame, text="植物攻速倍率:")
+    attack_speed_label.pack(side=LEFT)
+    ToolTip(attack_speed_label,
+            text="过高会导致植物无法攻击", bootstyle=(INFO, INVERSE))
+    attack_speed_multiple = ttk.IntVar(attack_speed_frame)
+    attack_speed_multiple.set(1)
+    attack_speed_entry = ttk.Entry(attack_speed_frame, font=("黑体", 8), width=3,
+                                   textvariable=attack_speed_multiple)
+    attack_speed_entry.pack(side=LEFT)
+    attack_animation_status = ttk.BooleanVar(attack_speed_frame)
+    attack_animation_check = ttk.Checkbutton(attack_speed_frame, variable=attack_animation_status, text="攻击无视动画",
+                                             bootstyle="success-round-toggle", command=lambda: pvz.cancelAttackAnimation(attack_animation_status.get()))
+    attack_animation_check.pack(side=LEFT)
+    ToolTip(attack_animation_check,
+            text="部分植物有效，可无视动画进行攻击，提高攻速上限", bootstyle=(INFO, INVERSE))
+
+    def setAttackSpeed(event):
+        pvz.setAttackSpeed(attack_speed_multiple.get())
+        attack_speed_frame.focus_set()
+    attack_speed_entry.bind("<Return>", setAttackSpeed)
 
     def get_plant_select(event):
         global plant_select

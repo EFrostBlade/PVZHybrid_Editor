@@ -15,6 +15,7 @@ newmem_shovelpro = None
 newmem_spoils = None
 newmem_spoils2 = None
 newmem_slotKey = None
+newmem_setAllBullet = None
 
 
 def calculate_call_address(ctypes_obj):
@@ -1195,3 +1196,83 @@ def slotKey(slot_key_list):
     else:
         data.PVZ_memory.write_bytes(
             0x0041B272, b'\x8b\x96\x8c\x00\x00\x00', 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_slotKey)
+
+
+def setAllBullet(f, type):
+    global newmem_setAllBullet
+    if (f):
+        newmem_setAllBullet = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        shellcode = (
+            b'\xc7\x46\x5c'+type.to_bytes(4, byteorder='little')
+            + b'\xda\x64\x24\x18\x57\xe9' +
+            calculate_call_address(0x0046e8e1-newmem_setAllBullet-0x11)
+        )
+        data.PVZ_memory.write_bytes(newmem_setAllBullet, shellcode, 17)
+        data.PVZ_memory.write_bytes(
+            0x0046e8dc, b'\xe9'+calculate_call_address(newmem_setAllBullet-0x0046e8e1), 5)
+    else:
+        data.PVZ_memory.write_bytes(0x0046e8dc, b'\xda\x64\x24\x18\x57', 5)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_setAllBullet)
+
+
+def randomBullet(f, hasDoom, hasMine, hasPepper):
+    global newmem_randomBullet
+    if (f):
+        newmem_randomBullet = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        shellcode = asm.Asm(newmem_randomBullet)
+        shellcode.random(25)
+        shellcode.cmp_exx_dword(asm.EDX, 13)
+        shellcode.je_offset(0x29)
+        if (hasDoom):
+            shellcode.nop_6()
+            shellcode.nop_6()
+        else:
+            shellcode.cmp_exx_dword(asm.EDX, 11)
+            shellcode.je_offset(0x1d)
+        if (hasMine):
+            shellcode.nop_6()
+            shellcode.nop_6()
+        else:
+            shellcode.cmp_exx_dword(asm.EDX, 22)
+            shellcode.je_offset(0x11)
+        if (hasPepper):
+            shellcode.nop_6()
+            shellcode.nop_6()
+        else:
+            shellcode.cmp_exx_dword(asm.EDX, 24)
+            shellcode.je_offset(0x3)
+        shellcode.mov_ptr_exx_add_byte_eyy(asm.ESI, 0x5c, asm.EDX)
+        shellcode.add_byte(0xda)
+        shellcode.add_byte(0x64)
+        shellcode.add_byte(0x24)
+        shellcode.add_byte(0x18)
+        shellcode.add_byte(0x57)
+        shellcode.jmp(0x0046e8e1)
+        data.PVZ_memory.write_bytes(newmem_randomBullet, bytes(
+            shellcode.code[:shellcode.index]), shellcode.index)
+        data.PVZ_memory.write_bytes(
+            0x0046e8dc, b'\xe9'+calculate_call_address(newmem_randomBullet-0x0046e8e1), 5)
+    else:
+        data.PVZ_memory.write_bytes(0x0046e8dc, b'\xda\x64\x24\x18\x57', 5)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_randomBullet)
+
+
+def setAttackSpeed(multiple):
+    data.PVZ_memory.write_uchar(0x045f8ac, 256-1*multiple)
+
+
+def cancelAttackAnimation(f):
+    if (f):
+        data.PVZ_memory.write_bytes(0x00464A96, b'\x90\x90\x90\x90\x90\x90', 6)
+        data.PVZ_memory.write_bytes(
+            0x00464A62, b'\x90\x90\x90\x90\x90\x90\x90', 7)
+    else:
+        data.PVZ_memory.write_bytes(0x00464A96, b'\x0f\x85\x98\xfe\xff\xff', 6)
+        data.PVZ_memory.write_bytes(
+            0x00464A62, b'\x83\xbf\x90\x00\x00\x00\x13', 7)
