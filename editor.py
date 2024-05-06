@@ -6,6 +6,8 @@ from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from ttkbootstrap.constants import *
 import ttkbootstrap as ttk
+import tkinter as tk
+from tkinter import messagebox, Toplevel, Listbox, Checkbutton, IntVar, font
 import importlib.util
 import requests
 import keyboard
@@ -22,7 +24,7 @@ import win32gui
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-current_version = '0.14'
+current_version = '0.15'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -1705,7 +1707,7 @@ def mainWindow():
     plantPut_end_col_combobox.grid(row=1, column=3)
     plantPut_end_col_value.set(1)
     ttk.Label(plant_put_frame, text="列").grid(row=1, column=4)
-    plantPut_type_combobox = ttk.Combobox(plant_put_frame, width=10, values=data.plantPutType, font=(
+    plantPut_type_combobox = ttk.Combobox(plant_put_frame, width=10, values=data.plantsType, font=(
         "黑体", 8), bootstyle=SECONDARY, state=READONLY)
     plantPut_type_combobox.grid(row=2, column=0, columnspan=4, sticky=W)
     plantPut_type_combobox.current(0)
@@ -1796,7 +1798,8 @@ def mainWindow():
     plant_characteristic_attackinterval_entry.grid(row=4, column=1, ipady=0)
 
     def setPlantCharacteristicAttackInterval(event):
-        plant_characteristic_type.setAttackInterval(zombie_frozen_value.get())
+        plant_characteristic_type.setAttackInterval(
+            plant_characteristic_attackinterval_value.get())
         zombie_control_frame.focus_set()
     zombie_frozen_entry.bind("<Return>", setPlantCharacteristicAttackInterval)
 
@@ -1996,6 +1999,24 @@ def mainWindow():
         item_time_meter.focus_set()
     item_time_meter.indicator.bind("<Button-1>", setItemTimeMeterFocus)
     item_time_meter.indicator.bind("<ButtonRelease-1>", setItemTime)
+
+    def clearLadders():
+        try:
+            item_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x12c)
+        except:
+            return
+        i = 0
+        j = 0
+        while i < item_num:
+            item_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x11c)+0xec*j
+            item_exist = data.PVZ_memory.read_bytes(item_addresss+0x20, 1)
+            if (item_exist == b'\x00'):
+                data.PVZ_memory.write_bytes(item_addresss+0x20, b'\x01', 1)
+                i = i+1
+            j = j+1
+
     ladder_put_frame = ttk.LabelFrame(grid_page, text="搭梯", bootstyle=DARK)
     ladder_put_frame.place(x=200, y=0, anchor=NW, height=90, width=130)
     ttk.Label(ladder_put_frame, text="第").grid(row=0, column=0)
@@ -2073,6 +2094,256 @@ def mainWindow():
                 item_time_meter.grid_forget()
 
     item_list_box.bind("<<TreeviewSelect>>", get_item_select)
+
+    formation_frame = ttk.LabelFrame(grid_page, text="布阵", bootstyle=SUCCESS)
+    formation_frame.place(x=0, y=140)
+    # 设置字体
+    small_font = ('黑体', 8)
+
+    # 场地数据和梯子属性
+    plants_data = [[[] for _ in range(9)] for _ in range(6)]
+    ladders_data = [[0 for _ in range(9)] for _ in range(6)]
+
+    # 更新场地格子显示的植物类型
+
+    def update_field():
+        for i, row in enumerate(plants_data):
+            for j, indices in enumerate(row):
+                text = '\n'.join([data.plantsType[index]
+                                 for index in indices]) if indices else ''
+                buttons[i][j].config(
+                    text=text, bg='gray' if ladders_data[i][j] else '#90ee90')
+
+    # 管理植物类型的窗口
+
+    def manage_plants(i, j):
+        formation_plant_window = ttk.Toplevel(formation_frame)
+        formation_plant_window.title('管理植物')
+        formation_plant_window.geometry("200x300")
+
+        main_window_x = main_window.winfo_x()
+        main_window_y = main_window.winfo_y()
+        formation_plant_window.geometry(
+            f'+{main_window_x+150}+{main_window_y + 150}')
+        # 列表框
+        listbox = Listbox(formation_plant_window, height=10, font=small_font)
+        listbox.pack()
+
+        # 将已有植物类型添加到列表框
+        for index in plants_data[i][j]:
+            listbox.insert(tk.END, data.plantsType[index])
+
+        # Combobox
+        combobox = ttk.Combobox(
+            formation_plant_window, values=data.plantsType, font=small_font)
+        combobox.pack()
+
+        # 梯子属性复选框
+        ladder_check = IntVar(value=ladders_data[i][j])
+        ladder_checkbox = Checkbutton(
+            formation_plant_window, text='是否有梯子', variable=ladder_check)
+        ladder_checkbox.pack()
+
+        # 添加植物类型
+        def add_plant():
+            selected_plant = combobox.get()
+            if selected_plant in data.plantsType:
+                index = data.plantsType.index(selected_plant)
+                plants_data[i][j].append(index)
+                listbox.insert(tk.END, selected_plant)
+
+        # 删除选中的植物类型
+        def delete_plant():
+            selections = listbox.curselection()
+            if selections:
+                for index in selections[::-1]:
+                    del plants_data[i][j][listbox.index(index)]
+                    listbox.delete(index)
+        button_frame = ttk.Frame(formation_plant_window)
+        button_frame.pack()
+        # 添加按钮
+        add_button = ttk.Button(button_frame, text='添加',
+                                command=add_plant)
+        add_button.pack(side=LEFT, padx=10, pady=5)
+
+        # 删除按钮
+        delete_button = ttk.Button(button_frame, text='删除',
+                                   command=delete_plant, bootstyle=DANGER)
+        delete_button.pack(side=LEFT, padx=10, pady=5)
+
+        # 更新并关闭窗口
+        def close_and_update():
+            # 更新梯子属性
+            ladders_data[i][j] = ladder_check.get()
+            update_field()
+            formation_plant_window.destroy()
+
+        # 完成按钮
+        done_button = ttk.Button(formation_plant_window, text='完成',
+                                 command=close_and_update, bootstyle=SUCCESS)
+        done_button.pack()
+
+    # 创建场地格子按钮
+    buttons = [[tk.Label(formation_frame, text='', width=9, height=4, font=small_font, borderwidth=2,
+                         relief='groove', bg='#90ee90') for j in range(9)] for i in range(6)]
+    for i in range(6):
+        for j in range(9):
+            buttons[i][j].grid(row=i, column=j, padx=1, pady=1, sticky='nsew')
+            buttons[i][j].bind('<Button-1>', lambda e, i=i,
+                               j=j: manage_plants(i, j))
+    update_field()
+
+    # 保存场地数据到 JSON 文件
+
+    def creat_formation_config(plants_data, ladders_data):
+        if (new_formation_config_entry.get() == ""):
+            Messagebox.show_error("请输入阵型名称", title="创建阵型失败")
+        else:
+            config = load_config(config_file_path)
+            if "formation" not in config:
+                config["formation"] = {}
+            if new_formation_config_entry.get() not in config["formation"]:
+                config["formation"][new_formation_config_entry.get()] = {}
+            config["formation"][new_formation_config_entry.get()
+                                ]['plants'] = plants_data
+            config["formation"][new_formation_config_entry.get()
+                                ]['ladders'] = ladders_data
+            save_config(config, config_file_path)
+            Messagebox.show_info(
+                "阵型”"+new_formation_config_entry.get()+"”已创建", title="创建阵型成功")
+            update_formation_config_combobox()
+            formation_config_combobox.set(new_formation_config_entry.get())
+
+    def save_formation_config(plants_data, ladders_data):
+        config = load_config(config_file_path)
+        if "formation" not in config:
+            config["formation"] = {}
+        if formation_config_combobox.get() not in config["formation"]:
+            Messagebox.show_error("阵型名称不存在，请先新建阵型", title="保存阵型失败")
+        config["formation"][formation_config_combobox.get()
+                            ]['plants'] = plants_data
+        config["formation"][formation_config_combobox.get()
+                            ]['ladders'] = ladders_data
+        save_config(config, config_file_path)
+        Messagebox.show_info(
+            "阵型"+formation_config_combobox.get()+"”修改成功", title="修改阵型成功")
+
+    # 创建保存和读取按钮
+    formation_config_frame = ttk.Frame(formation_frame)
+    formation_config_frame.grid(row=6, column=0, columnspan=9, pady=(10, 0))
+    new_formation_config_entry = ttk.Entry(
+        formation_config_frame, width=10, font=("宋体", 8))
+    new_formation_config_entry.pack(side=LEFT, padx=2)
+    new_formation_config_button = ttk.Button(formation_config_frame, text='新建阵型', bootstyle=SUCCESS, padding=0,
+                                             command=lambda: creat_formation_config(plants_data, ladders_data))
+    new_formation_config_button.pack(side=LEFT, padx=2)
+    formation_config_combobox = ttk.Combobox(
+        formation_config_frame, width=12, bootstyle='secondary', font=("宋体", 8))
+    formation_config_combobox.pack(side=LEFT, padx=2)
+    formation_config_combobox.insert(0, "选择阵型")
+    formation_config_combobox.configure(state=READONLY)
+
+    def update_formation_config_combobox():
+        config = load_config(config_file_path)
+        if "formation" not in config:
+            return
+        formation_config_combobox.configure(
+            values=list(config['formation'].keys()))
+    update_formation_config_combobox()
+
+    def load_formation_config(event, plants_data, ladders_data):
+        config = load_config(config_file_path)
+        loaded_data = config["formation"][formation_config_combobox.get()]
+        for i in range(6):
+            for j in range(9):
+                plants_data[i][j] = loaded_data['plants'][i][j]
+                ladders_data[i][j] = loaded_data['ladders'][i][j]
+        update_field()
+    formation_config_combobox.bind(
+        "<<ComboboxSelected>>", lambda event, plants=plants_data, ladders=ladders_data: load_formation_config(event, plants, ladders))
+    load_formation_config_button = ttk.Button(
+        formation_config_frame, text='修改配置', bootstyle=WARNING, padding=0, command=lambda: save_formation_config(plants_data, ladders_data))
+    load_formation_config_button.pack(side=LEFT, padx=2)
+
+    def delete_formation_config():
+        config = load_config(config_file_path)
+        if "formation" not in config:
+            config["formation"] = {}
+        if formation_config_combobox.get() not in config["formation"]:
+            Messagebox.show_error("阵型名称不存在", title="删除阵型失败")
+        del config["formation"][formation_config_combobox.get()]
+        save_config(config, config_file_path)
+        Messagebox.show_info(
+            "阵型"+formation_config_combobox.get()+"”已删除", title="删除阵型成功")
+        update_formation_config_combobox()
+    delete_formation_button = ttk.Button(formation_config_frame, text='删除阵型',
+                                         bootstyle=DANGER, padding=0, command=lambda: delete_formation_config())
+    delete_formation_button.pack(side=LEFT, padx=2)
+
+    def clear_grid():
+        clearPlants()
+        clearLadders()
+    clear_game_grid = ttk.Button(formation_config_frame, text='清空游戏场地',
+                                 bootstyle=DARK, padding=0, command=lambda: clear_grid())
+    clear_game_grid.pack(side=LEFT, padx=2)
+
+    def get_game_formation(plants_data, ladders_data):
+        for r in range(0, 6):
+            for c in range(0, 9):
+                plants_data[r][c].clear()
+                ladders_data[r][c] = 0
+        try:
+            plant_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xbc)
+        except:
+            return
+        i = 0
+        j = 0
+        while i < plant_num:
+            plant_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+            plant_exist = data.PVZ_memory.read_bytes(plant_addresss+0x141, 1)
+            if (plant_exist == b'\x00'):
+                p = data.plant(plant_addresss)
+                plants_data[p.row][p.col].append(p.type)
+                i = i+1
+            j = j+1
+        try:
+            item_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x12c)
+        except:
+            return
+        i = 0
+        j = 0
+        while i < item_num:
+            item_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x11c)+0xec*j
+            item_exist = data.PVZ_memory.read_bytes(item_addresss+0x20, 1)
+            if (item_exist == b'\x00'):
+                it = data.item(item_addresss)
+                ladders_data[it.row-1][it.col-1] = 1
+                i = i+1
+            j = j+1
+        update_field()
+    get_game_formation_button = ttk.Button(
+        formation_config_frame, text='从游戏加载', bootstyle=INFO, padding=0, command=lambda: get_game_formation(plants_data, ladders_data))
+    get_game_formation_button.pack(side=LEFT, padx=2)
+
+    def set_game_formation(plants_data, ladders_data):
+        rols = pvz.getMap()
+        if rols == False:
+            Messagebox.show_error("请在关卡内使用", title="应用阵型失败")
+            return
+        for r in range(0, rols):
+            for c in range(0, 9):
+                for p in plants_data[r][c]:
+                    pvz.putPlant(r, c, p)
+                if ladders_data[r][c] == 1:
+                    pvz.putLadder(r, c)
+
+    set_game_formation_button = ttk.Button(
+        formation_config_frame, text='应用到游戏', bootstyle=PRIMARY, padding=0, command=lambda: set_game_formation(plants_data, ladders_data))
+    set_game_formation_button.pack(side=LEFT, padx=2)
 
     slot_page = ttk.Frame(page_tab)
     slot_page.pack()
@@ -2263,6 +2534,7 @@ def mainWindow():
                 Messagebox.show_info(
                     "配置”"+new_solts_config_entry.get()+"”已创建", title="创建配置成功")
                 update_slots_config_combobox()
+                slots_config_combobox.set(new_solts_config_entry.get())
         else:
             Messagebox.show_error("请在配置模式下修改卡槽配置", title="创建配置失败")
     new_solts_config_button = ttk.Button(new_solts_config_frame, text="新建", padding=0, bootstyle=(
@@ -2322,7 +2594,7 @@ def mainWindow():
             del config["slots"][slots_config_combobox.get()]
             save_config(config, config_file_path)
             Messagebox.show_info(
-                "配置”"+slots_config_combobox.get()+"”已删除", title="删除配置成功")
+                "配置"+slots_config_combobox.get()+"”已删除", title="删除配置成功")
             update_slots_config_combobox()
         else:
             Messagebox.show_error("请在配置模式下修改卡槽配置", title="删除配置失败")
