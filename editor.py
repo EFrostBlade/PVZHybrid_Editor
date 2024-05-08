@@ -24,7 +24,7 @@ import win32gui
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-current_version = '0.15'
+current_version = '0.20'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -513,9 +513,99 @@ def mainWindow():
         modify_config(config_file_path, "data", "sunadd", sun_add_value.get())
         resource_modify_frame.focus_set()
     sun_add_entry.bind("<Return>", addSun)
+
+
+    ttk.Label(resource_modify_frame, text="当前银币:", bootstyle=SECONDARY,
+              font=("宋体", 14)).grid(row=3, column=0, sticky=E)
+    silver_value = ttk.IntVar(resource_modify_frame)
+    silver_value_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=silver_value)
+    silver_value_entry.grid(row=3, column=1)
+
+    def setSilver(event):
+        pvz.setSilver(silver_value.get())
+        resource_modify_frame.focus_set()
+    silver_value_entry.bind("<Return>", setSilver)
+    ttk.Label(resource_modify_frame, text="增加银币:", bootstyle=SECONDARY,
+              font=("宋体", 14)).grid(row=4, column=0, sticky=E)
+    silver_add_value = ttk.IntVar(resource_modify_frame)
+    silver_add_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=silver_add_value)
+    silver_add_entry.grid(row=4, column=1)
+    config = load_config(config_file_path)
+    try:
+        silver_add_value.set(config["data"]["silveradd"])
+    except:
+        pass
+
+    def addSilver(event):
+        pvz.addSilver(silver_add_value.get())
+        modify_config(config_file_path, "data", "silveradd", silver_add_value.get())
+        resource_modify_frame.focus_set()
+    silver_add_entry.bind("<Return>", addSilver)
+
+    ttk.Label(resource_modify_frame, text="当前金币:", bootstyle=WARNING,
+              font=("宋体", 14)).grid(row=5, column=0, sticky=E)
+    gold_value = ttk.IntVar(resource_modify_frame)
+    gold_value_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=gold_value)
+    gold_value_entry.grid(row=5, column=1)
+
+    def setGold(event):
+        pvz.setGold(gold_value.get())
+        resource_modify_frame.focus_set()
+    gold_value_entry.bind("<Return>", setGold)
+    ttk.Label(resource_modify_frame, text="增加金币:", bootstyle=WARNING,
+              font=("宋体", 14)).grid(row=6, column=0, sticky=E)
+    gold_add_value = ttk.IntVar(resource_modify_frame)
+    gold_add_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=gold_add_value)
+    gold_add_entry.grid(row=6, column=1)
+    config = load_config(config_file_path)
+    try:
+        gold_add_value.set(config["data"]["goldadd"])
+    except:
+        pass
+
+    def addGold(event):
+        pvz.addGold(gold_add_value.get())
+        modify_config(config_file_path, "data", "goldadd", gold_add_value.get())
+        resource_modify_frame.focus_set()
+    gold_add_entry.bind("<Return>", addGold)
+
+    ttk.Label(resource_modify_frame, text="当前钻石:", bootstyle=PRIMARY,
+              font=("宋体", 14)).grid(row=7, column=0, sticky=E)
+    diamond_value = ttk.IntVar(resource_modify_frame)
+    diamond_value_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=diamond_value)
+    diamond_value_entry.grid(row=7, column=1)
+
+    def setDiamond(event):
+        pvz.setDiamond(diamond_value.get())
+        resource_modify_frame.focus_set()
+    diamond_value_entry.bind("<Return>", setDiamond)
+    ttk.Label(resource_modify_frame, text="增加钻石:", bootstyle=PRIMARY,
+              font=("宋体", 14)).grid(row=8, column=0, sticky=E)
+    diamond_add_value = ttk.IntVar(resource_modify_frame)
+    diamond_add_entry = ttk.Entry(
+        resource_modify_frame, width=8, bootstyle=WARNING, textvariable=diamond_add_value)
+    diamond_add_entry.grid(row=8, column=1)
+    config = load_config(config_file_path)
+    try:
+        diamond_add_value.set(config["data"]["diamondadd"])
+    except:
+        pass
+
+    def addDiamond(event):
+        pvz.addDiamond(diamond_add_value.get())
+        modify_config(config_file_path, "data", "diamondadd", diamond_add_value.get())
+        resource_modify_frame.focus_set()
+    diamond_add_entry.bind("<Return>", addDiamond)
+
+
     quick_start_frame = ttk.LabelFrame(
         common_page, text="快速使用", bootstyle=SUCCESS)
-    quick_start_frame.place(x=0, y=150, relx=0, rely=0, anchor=NW)
+    quick_start_frame.place(x=0, y=0, relx=1, rely=0, anchor=NE)
     over_plant_status = ttk.BooleanVar(quick_start_frame)
     over_plant_check = ttk.Checkbutton(quick_start_frame, text="自由放置", variable=over_plant_status,
                                        bootstyle="success-round-toggle", command=lambda: pvz.overPlant(over_plant_status.get()))
@@ -586,9 +676,9 @@ def mainWindow():
     load_button.grid(row=0, column=1, sticky=W, padx=(10, 0), pady=(2, 2))
 
     game_speed_frame = ttk.LabelFrame(
-        common_page, text="游戏速度", bootstyle=PRIMARY)
-    game_speed_frame.place(x=0, y=100, anchor=NW)
-    game_speed_label = ttk.Label(game_speed_frame, text="1", bootstyle=PRIMARY)
+        common_page, text="游戏速度", bootstyle=DARK)
+    game_speed_frame.place(x=0, y=300, anchor=NW)
+    game_speed_label = ttk.Label(game_speed_frame, text="1", bootstyle=DARK)
     game_speed_label.grid(row=0, column=0)
     game_speed_frame.columnconfigure(0, minsize=30)
     game_speed_value = ttk.DoubleVar(game_speed_frame)
@@ -888,7 +978,7 @@ def mainWindow():
         j = 0
         while i < zombie_num:
             zombie_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x90)+0x15c*j
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x90)+0x204*j
             zombie_exist = data.PVZ_memory.read_bytes(zombie_addresss+0xec, 1)
             if (zombie_exist == b'\x00'):
                 zombie_list.append(data.zombie(zombie_addresss))
@@ -1448,7 +1538,7 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x204*j
             plant_exist = data.PVZ_memory.read_bytes(plant_addresss+0x141, 1)
             if (plant_exist == b'\x00'):
                 plant_list.append(data.plant(plant_addresss))
@@ -1707,7 +1797,7 @@ def mainWindow():
     plantPut_end_col_combobox.grid(row=1, column=3)
     plantPut_end_col_value.set(1)
     ttk.Label(plant_put_frame, text="列").grid(row=1, column=4)
-    plantPut_type_combobox = ttk.Combobox(plant_put_frame, width=10, values=data.plantsType, font=(
+    plantPut_type_combobox = ttk.Combobox(plant_put_frame, width=10, values=data.plantPutType, font=(
         "黑体", 8), bootstyle=SECONDARY, state=READONLY)
     plantPut_type_combobox.grid(row=2, column=0, columnspan=4, sticky=W)
     plantPut_type_combobox.current(0)
@@ -1745,7 +1835,7 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x204*j
             plant_exist = data.PVZ_memory.read_bytes(plant_addresss+0x141, 1)
             if (plant_exist == b'\x00'):
                 data.PVZ_memory.write_bytes(plant_addresss+0x141, b'\x01', 1)
@@ -1800,8 +1890,8 @@ def mainWindow():
     def setPlantCharacteristicAttackInterval(event):
         plant_characteristic_type.setAttackInterval(
             plant_characteristic_attackinterval_value.get())
-        zombie_control_frame.focus_set()
-    zombie_frozen_entry.bind("<Return>", setPlantCharacteristicAttackInterval)
+        plant_characteristic_frame.focus_set()
+    plant_characteristic_attackinterval_entry.bind("<Return>", setPlantCharacteristicAttackInterval)
 
     def get_plant_type(event):
         global plant_characteristic_type
@@ -2301,7 +2391,7 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x14c*j
+                data.PVZ_memory.read_int(data.baseAddress)+0x768)+0xac)+0x204*j
             plant_exist = data.PVZ_memory.read_bytes(plant_addresss+0x141, 1)
             if (plant_exist == b'\x00'):
                 p = data.plant(plant_addresss)
@@ -3051,6 +3141,12 @@ def mainWindow():
                 try:
                     if (main_window.focus_get() != sun_value_entry):
                         sun_value.set(pvz.getSun())
+                    if (main_window.focus_get() != silver_value_entry):
+                        silver_value.set(pvz.getSilver())
+                    if (main_window.focus_get() != gold_value_entry):
+                        gold_value.set(pvz.getGold())
+                    if (main_window.focus_get() != diamond_value_entry):
+                        diamond_value.set(pvz.getDiamond())
                 except:
                     pass
         if (page_tab.index('current') == 1):

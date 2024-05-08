@@ -30,9 +30,9 @@ def getMap():
     try:
         map = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
             data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x554c)
-        if (map == 0 or map == 1 or map == 10 or map == 13 or map == 15 or map == 16 or map == 18 or map == 19):
+        if (map == 0 or map == 1 or map == 10 or map == 13 or map == 15 or map == 16 or map == 18 or map == 19 or map == 21):
             return 5
-        elif (map == 2 or map == 11 or map == 3 or map == 12 or map == 14 or map == 17):
+        elif (map == 2 or map == 11 or map == 3 or map == 12 or map == 14 or map == 17 or map == 20 or map == 22 or map == 23):
             return 6
         else:
             return False
@@ -106,6 +106,62 @@ def setSun(sun):
         data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x5560
     data.PVZ_memory.write_int(sunAddr, int(sun))
 
+def getSilver():
+    silverAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x208
+    silverNow = data.PVZ_memory.read_int(silverAddr)
+    return silverNow
+
+
+def addSilver(silverIncrement):
+    silverAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x208
+    silverNow = data.PVZ_memory.read_int(silverAddr)
+    data.PVZ_memory.write_int(silverAddr, silverNow+int(silverIncrement))
+
+
+def setSilver(silver):
+    silverAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x208
+    data.PVZ_memory.write_int(silverAddr, int(silver))
+
+def getGold():
+    goldAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x20c
+    goldNow = data.PVZ_memory.read_int(goldAddr)
+    return goldNow
+
+
+def addGold(goldIncrement):
+    goldAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x20c
+    goldNow = data.PVZ_memory.read_int(goldAddr)
+    data.PVZ_memory.write_int(goldAddr, goldNow+int(goldIncrement))
+
+
+def setGold(gold):
+    goldAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x20c
+    data.PVZ_memory.write_int(goldAddr, int(gold))
+
+def getDiamond():
+    diamondAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x210
+    diamondNow = data.PVZ_memory.read_int(diamondAddr)
+    return diamondNow
+
+
+def addDiamond(diamondIncrement):
+    diamondAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x210
+    diamondNow = data.PVZ_memory.read_int(diamondAddr)
+    data.PVZ_memory.write_int(diamondAddr, diamondNow+int(diamondIncrement))
+
+
+def setDiamond(diamond):
+    diamondAddr = data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x210
+    data.PVZ_memory.write_int(diamondAddr, int(diamond))
 
 def upperLimit(f):
     if f:
@@ -158,7 +214,7 @@ def killAllZombies():
     j = 0
     while i < zomNum:
         zomAddresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-            data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x90)+0x15c*j
+            data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x90)+0x204*j
         zomExist = data.PVZ_memory.read_bytes(zomAddresss+0xec, 1)
         if (zomExist == b'\x00'):
             data.PVZ_memory.write_int(zomAddresss+0x28, 3)
@@ -209,20 +265,38 @@ def column(f):
 
 
 def unlock():
-    data.PVZ_memory.write_bytes(0x00453b20, b'\x56\x8b\xb7\x2c\x08\x00\x00', 7)
+    addr = int.from_bytes(data.PVZ_memory.read_bytes(0x00453B24, 1)+data.PVZ_memory.read_bytes(0x00453B23, 1) +
+                          data.PVZ_memory.read_bytes(0x00453B22, 1)+data.PVZ_memory.read_bytes(0x00453B21, 1))+0x00453B25
+    newmem_unlock = pymem.memory.allocate_memory(
+        data.PVZ_memory.process_handle, 128)
+    shellcode=asm.Asm(newmem_unlock)
+    shellcode.push_exx(asm.ESI)
+    shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ESI,asm.EDI,0x82c)
+    shellcode.mov_ptr_exx_add_dowrd_dword(asm.ESI,0x1c0,1)
+    shellcode.pop_exx(asm.ESI)
+    shellcode.add_byte(0xb0)
+    shellcode.add_byte(0x01)#mov al,01
+    shellcode.ret()
+    shellcode.jmp(0x00840a77)
+
+    data.PVZ_memory.write_bytes(newmem_unlock, bytes(
+                shellcode.code[:shellcode.index]), shellcode.index)
+    data.PVZ_memory.write_bytes(
+            addr, b'\xe9'+calculate_call_address(newmem_unlock-addr-5)+b'\x90\x90', 7)
+
 
 
 def shovelpro(f):
     global newmem_shovelpro
     addr = int.from_bytes(data.PVZ_memory.read_bytes(0x411141, 1)+data.PVZ_memory.read_bytes(0x411140, 1) +
-                          data.PVZ_memory.read_bytes(0x41113f, 1)+data.PVZ_memory.read_bytes(0x41113e, 1))+0x411142+0x3
+                          data.PVZ_memory.read_bytes(0x41113f, 1)+data.PVZ_memory.read_bytes(0x41113e, 1))+0x411142
     print(hex(addr))
     if f:
         data.PVZ_memory.write_bytes(
-            addr, b'\x90\x90\x90\xeb\x77\x90\x90\x90\x90', 9)
+            addr, b'\x90\x90\x90\xeb\x7c\x90', 6)
         newmem_shovelpro = pymem.memory.allocate_memory(
             data.PVZ_memory.process_handle, 100)
-        print(newmem_shovelpro)
+        print(hex(newmem_shovelpro))
         byte_data = (
             b'\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8'
             + calculate_call_address(0x0041dae0-newmem_shovelpro-0x11) +
@@ -243,7 +317,7 @@ def shovelpro(f):
             0x004111d8, b'\xe9'+calculate_call_address(newmem_shovelpro-0x004111dd)+b'\x90', 6)
     else:
         data.PVZ_memory.write_bytes(
-            addr, b'\x83\xf8\x36\x0f\x84\x64\x00\x00\x00', 9)
+            addr, b'\x8b\x45\x24\x83\xf8\x36', 6)
         data.PVZ_memory.write_bytes(0x004111d8, b'\x01\x9f\x9c\x57\x00\x00', 6)
         pymem.memory.free_memory(
             data.PVZ_memory.process_handle, newmem_shovelpro)
