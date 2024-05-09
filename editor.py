@@ -24,7 +24,7 @@ import win32gui
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-current_version = '0.20'
+current_version = '0.21'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -149,7 +149,7 @@ def load_config(file_path):
     try:
         with open(file_path, 'r', encoding="utf-8") as file:
             return json.load(file)
-    except FileNotFoundError:
+    except:
         return default_config  # 如果文件不存在，返回默认配置
 
 # 修改配置文件的函数
@@ -732,7 +732,21 @@ def mainWindow():
             game_speed_label.config(text="20")
         pvz.changeGameSpeed(game_speed_value.get())
     game_speed_scale.bind("<MouseWheel>", on_mousewheel)
+
+
+    game_difficult_frame = ttk.LabelFrame(
+        common_page, text="游戏难度", bootstyle=DARK)
+    game_difficult_frame.place(x=0, y=350, anchor=NW)
+    gameDifficult=ttk.IntVar(game_difficult_frame)
+    ttk.Radiobutton(game_difficult_frame,text="简单",value=1,variable= gameDifficult,bootstyle=SUCCESS,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=0,padx=5)
+    ttk.Radiobutton(game_difficult_frame,text="普通",value=2,variable= gameDifficult,bootstyle=DARK,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=1,padx=5)
+    ttk.Radiobutton(game_difficult_frame,text="困难",value=3,variable= gameDifficult,bootstyle=DANGER,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=2,padx=5)
+    
+
+
+
     # 读取快捷键配置
+
 
     def get_shortcuts():
         config = load_config(config_file_path)
@@ -2157,6 +2171,87 @@ def mainWindow():
     ttk.Button(ladder_put_frame, text="搭梯", padding=0, bootstyle=(OUTLINE, DARK),
                command=lambda: putLadders()).grid(row=2, column=0, columnspan=5, sticky=E)
 
+
+
+    car_frame = ttk.LabelFrame(grid_page, text="小车", bootstyle=DANGER)
+    car_frame.place(x=330, y=0, anchor=NW, height=90, width=130)
+    start_car_value = ttk.IntVar(ladder_put_frame)
+    start_car_combobox = ttk.Combobox(car_frame, textvariable=start_car_value, width=3, values=[
+                                           1, 2, 3, 4, 5, 6], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    start_car_combobox.grid(row=0,column=0)
+    start_car_combobox.current(0)
+    def startCar():
+        rows=pvz.getMap()
+        if(rows==False):
+            return
+        else:
+            if(start_car_combobox.current()>rows-1):
+                return
+            else:
+                try:
+                    car_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                        data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x110)
+                except:
+                    return
+                i = 0
+                j = 0
+                while i < car_num:
+                    car_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                        data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x100)+0x48*j
+                    car_exist = data.PVZ_memory.read_bytes(car_addresss+0x30, 1)
+                    if (car_exist == b'\x00'):
+                        c=data.car(car_addresss)
+                        if(c.row==start_car_combobox.current()):
+                            pvz.startCar(car_addresss)
+                            return
+                        i = i+1
+                    j = j+1
+    ttk.Button(car_frame, text="启动小车", padding=0, bootstyle=(OUTLINE, DANGER),
+               command=lambda: startCar()).grid(row=0, column=1)
+    recover_car_value = ttk.IntVar(ladder_put_frame)
+    recover_car_combobox = ttk.Combobox(car_frame, textvariable=recover_car_value, width=3, values=[
+                                           1, 2, 3, 4, 5, 6], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    recover_car_combobox.grid(row=1,column=0)
+    recover_car_combobox.current(0)
+    def recoveryCar():
+        rows=pvz.getMap()
+        if(rows==False):
+            return
+        else:
+            if(recover_car_combobox.current()>rows-1):
+                return
+            pvz.recoveryCars()
+            try:
+                car_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                    data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x110)
+            except:
+                return
+            
+            i = 0
+            j = 0
+            delete_car_list=[0]*rows
+            print(delete_car_list)
+            delete_car_list[recover_car_combobox.current()]=1
+            while i < car_num:
+                car_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                    data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x100)+0x48*j
+                car_exist = data.PVZ_memory.read_bytes(car_addresss+0x30, 1)
+                if (car_exist == b'\x00'):
+                    c=data.car(car_addresss)
+                    if(c.row!=recover_car_combobox.current() and delete_car_list[c.row]==0):
+                        print(c.row)
+                        print(delete_car_list)
+                        c.setExist(True)
+                        delete_car_list[c.row]=1
+                    i = i+1
+                j = j+1
+    ttk.Button(car_frame, text="恢复小车", padding=0, bootstyle=(OUTLINE, DANGER),
+               command=lambda: recoveryCar()).grid(row=1, column=1)
+    endless_car_status=ttk.BooleanVar()
+    ttk.Checkbutton(car_frame, text="无尽小车",variable=endless_car_status, padding=0, bootstyle="danger-round-toggle" ,
+               command=lambda: pvz.endlessCar(endless_car_status.get())).grid(row=2, column=1)
+    
+
     def get_item_select(event):
         global item_select
         try:
@@ -2395,6 +2490,8 @@ def mainWindow():
             plant_exist = data.PVZ_memory.read_bytes(plant_addresss+0x141, 1)
             if (plant_exist == b'\x00'):
                 p = data.plant(plant_addresss)
+                if(p.row>5 or p.col>8):
+                    continue
                 plants_data[p.row][p.col].append(p.type)
                 i = i+1
             j = j+1
@@ -2411,7 +2508,8 @@ def mainWindow():
             item_exist = data.PVZ_memory.read_bytes(item_addresss+0x20, 1)
             if (item_exist == b'\x00'):
                 it = data.item(item_addresss)
-                ladders_data[it.row-1][it.col-1] = 1
+                if it.type==3:
+                    ladders_data[it.row-1][it.col-1] = 1
                 i = i+1
             j = j+1
         update_field()
@@ -3137,6 +3235,7 @@ def mainWindow():
 
     def refreshData():
         if (page_tab.index('current') == 0):
+            gameDifficult.set(pvz.getDifficult())
             if (pvz.getMap() != False):
                 try:
                     if (main_window.focus_get() != sun_value_entry):

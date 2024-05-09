@@ -37,6 +37,11 @@ class Asm:
         self.code[self.index:self.index + 4] = val.to_bytes(4, 'little')
         self.index += 4
 
+    def add_exx_dword(self,exx,val):
+        self.add_byte(0x81)
+        self.add_byte(0xc0+exx)
+        self.add_dword(val)
+
     def push_dword(self, val):
         self.add_byte(0x68)
         self.add_dword(val)
@@ -57,10 +62,18 @@ class Asm:
     def mov_exx_dword_ptr_eyy_add_byte(self, exx, eyy, val):
         self.add_byte(0x8b)
         self.add_byte(0x40 + exx * 8 + eyy)
+        if(eyy==ESP):
+            self.add_byte(0x24)
         self.add_byte(val)
 
     def mov_exx_dword_ptr_eyy_add_dword(self, exx, eyy, val):
         self.add_byte(0x8b)
+        self.add_byte(0x80 + exx * 8 + eyy)
+        self.add_dword(val)
+
+    def movzx_exx_dword_ptr_eyy_add_dword(self, exx, eyy, val):
+        self.add_byte(0x0f)
+        self.add_byte(0xb6)
         self.add_byte(0x80 + exx * 8 + eyy)
         self.add_dword(val)
 
@@ -76,6 +89,11 @@ class Asm:
 
     def ret(self):
         self.add_byte(0xc3)
+
+    def ret_word(self,val):
+        self.add_byte(0xc2)
+        self.add_word(val)
+
 
     def call(self, addr):
         # 计算相对偏移量，需要减去当前指令的长度（5字节）
@@ -134,6 +152,12 @@ class Asm:
         self.add_byte(0x78+exx)
         self.add_byte(val)
         self.add_byte(val2)
+
+    def cmp_dword_ptr_exx_add_byte_dword(self, exx, val, val2):
+        self.add_byte(0x81)
+        self.add_byte(0x78+exx)
+        self.add_byte(val)
+        self.add_dword(val2)
 
     def cmp_dword_ptr_exx_add_dword_byte(self, exx, val, val2):
         self.add_byte(0x83)
@@ -219,6 +243,14 @@ class Asm:
     def jne_offset(self, val):
         self.add_byte(0x75)
         self.add_byte(val)
+        
+    def ja_offset(self, val):
+        self.add_byte(0x77)
+        self.add_byte(val)
+
+    def jb_offset(self, val):
+        self.add_byte(0x72)
+        self.add_byte(val)
 
     def jmp_offest(self, val):
         self.add_byte(0xeb)
@@ -230,6 +262,12 @@ class Asm:
         self.add_byte(0x1f)
         self.add_byte(0x44)
         self.add_byte(0x00)
+        self.add_byte(0x00)
+        
+    def nop_4(self):
+        self.add_byte(0x0f)
+        self.add_byte(0x1f)
+        self.add_byte(0x40)
         self.add_byte(0x00)
 
     def pushad(self):

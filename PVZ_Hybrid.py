@@ -16,6 +16,7 @@ newmem_spoils = None
 newmem_spoils2 = None
 newmem_slotKey = None
 newmem_setAllBullet = None
+newmem_endlessCar=None
 
 
 def calculate_call_address(ctypes_obj):
@@ -38,6 +39,27 @@ def getMap():
             return False
     except:
         return False
+
+def getDifficult():
+    difficultAddr=data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x428
+    difficultValue=data.PVZ_memory.read_int(difficultAddr)
+    if(difficultValue==-1):
+        return 1
+    if(difficultValue==0):
+        return 2
+    if(difficultValue==1):
+        return 3
+
+def setDifficult(difficult):
+    difficultAddr=data.PVZ_memory.read_int(
+        data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x428
+    if(difficult==1):
+        data.PVZ_memory.write_int(difficultAddr, 4294967295)
+    if(difficult==2):
+        data.PVZ_memory.write_int(difficultAddr, 0)
+    if(difficult==3):
+        data.PVZ_memory.write_int(difficultAddr, 1)
 
 
 def getState():
@@ -1350,3 +1372,69 @@ def cancelAttackAnimation(f):
         data.PVZ_memory.write_bytes(0x00464A96, b'\x0f\x85\x98\xfe\xff\xff', 6)
         data.PVZ_memory.write_bytes(
             0x00464A62, b'\x83\xbf\x90\x00\x00\x00\x13', 7)
+
+
+def startCar(addr):
+    class carStart:
+        def __init__(self,addr):
+            self.addr=addr
+
+        def creat_asm(self, startAddress):
+            carStart_asm=asm.Asm(startAddress)
+            carStart_asm.mov_exx(asm.ESI, self.addr)
+            carStart_asm.call(0x00458da0)
+            return carStart_asm
+        
+    asm.runThread(carStart(addr))
+        
+
+def recoveryCars():
+    class carsRecovery:
+        def __init__(self) -> None:
+            pass
+            
+        def creat_asm(self, startAddress):
+            carsRecovery_asm=asm.Asm(startAddress)
+            carsRecovery_asm.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
+            carsRecovery_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
+            carsRecovery_asm.push_exx(asm.EAX)
+            carsRecovery_asm.call(0x0040bc70)
+            return carsRecovery_asm
+
+    data.PVZ_memory.write_bytes(0x0040bc98,b'\xeb\x60',2)
+    data.PVZ_memory.write_bytes(0x00458002,b'\xfc\x99',2)
+    data.PVZ_memory.write_bytes(0x0040bd17,b'\x01',1)
+    asm.runThread(carsRecovery())
+    data.PVZ_memory.write_bytes(0x0040bc98,b'\x75\x09',2)
+    data.PVZ_memory.write_bytes(0x00458002,b'\xf8\x9b',2)
+    data.PVZ_memory.write_bytes(0x0040bd17,b'\x00',1)
+
+
+def endlessCar(f):
+    global newmem_endlessCar
+    if(f):
+        newmem_endlessCar = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        shellcode = asm.Asm(newmem_endlessCar)
+        shellcode.add_byte(0xd9)
+        shellcode.add_byte(0x43)
+        shellcode.add_byte(0x08)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX,asm.EBX,0x34)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBX,0x8,0x44480000)
+        shellcode.jb_offset(0x09)
+        shellcode.nop_4()
+        shellcode.jmp(0x00458AF2)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBX,0x8,0x44444000)
+        shellcode.ja_offset(0x9)
+        shellcode.nop_4()
+        shellcode.jmp(0x00458AF2)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.EBX,0x08,0xc2c80000)
+        shellcode.jmp(0x00458AF2)
+        data.PVZ_memory.write_bytes(newmem_endlessCar, bytes(
+            shellcode.code[:shellcode.index]), shellcode.index)
+        data.PVZ_memory.write_bytes(
+            0x00458AEC, b'\xe9'+calculate_call_address(newmem_endlessCar-0x00458AF1)+b'\x90', 6)
+    else:
+        data.PVZ_memory.write_bytes(0x00458AEC, b'\xd9\x43\x08\x8b\x43\x34', 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_endlessCar)
