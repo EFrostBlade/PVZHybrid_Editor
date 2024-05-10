@@ -66,7 +66,7 @@ plantPutType = ['豌豆向日葵', '阳光豆', '阳光炸弹', '火炬坚果', 
                 ]
 bulletType = ['豌豆', '冰豌豆', '卷心菜', '西瓜', '孢子', '冰西瓜', '火球(隐形)', '星星', '仙人掌刺', '篮球',
               '玉米粒', '毁灭菇', '黄油', '僵尸豌豆', '小阳光菇', '大阳光菇', '黑色豌豆', '寒冰刺', '魅惑箭',
-              '银币', '金币', '钻石', '土豆雷', '川菜', '辣椒', '白火球']
+              '银币', '金币', '钻石', '土豆雷', '川菜', '辣椒', '白火球','土豆加农炮(无伤害)','冰孢子',"小阳光"]
 keyTpye = ['无', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
            'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
            '小0', '小1', '小2', '小3', '小4', '小5', '小6',
@@ -92,17 +92,19 @@ class plant:
         self.row = PVZ_memory.read_int(self.addr+0x1c)
         self.col = PVZ_memory.read_int(self.addr+0x28)
         self.type = PVZ_memory.read_int(self.addr+0x24)
+        #2c 抖动倒计时
+        #30 抖动动画索引
         self.state = PVZ_memory.read_int(self.addr+0x3c)
-        self.hp = PVZ_memory.read_int(self.addr+0x40)
+        self.hp = PVZ_memory.read_int(self.addr+0x40)  #血量
         self.maxhp = PVZ_memory.read_int(self.addr+0x44)
         self.dieTime = PVZ_memory.read_int(self.addr+0x4c)
-        self.cinderTime = PVZ_memory.read_int(self.addr+0x50)
-        self.effectTime = PVZ_memory.read_int(self.addr+0x54)  # 蘑菇成长
-        self.productTime = PVZ_memory.read_int(self.addr+0x58)  # 特殊子弹攻击
-        self.attackTime = PVZ_memory.read_int(self.addr+0x90)  # 常规攻击
-        self.productInterval = PVZ_memory.read_int(self.addr+0x5c)
+        self.cinderTime = PVZ_memory.read_int(self.addr+0x50)   
+        self.effectTime = PVZ_memory.read_int(self.addr+0x54)  #阳光豆长大
+        self.productTime = PVZ_memory.read_int(self.addr+0x58)  # 常规攻击
+        self.productInterval = PVZ_memory.read_int(self.addr+0x5c) #常规攻击间隔
+        self.attackTime = PVZ_memory.read_int(self.addr+0x90)  
         self.sunTime = PVZ_memory.read_int(self.addr+0xdc)
-        self.humTime = PVZ_memory.read_int(self.addr+0x128)
+        self.humTime = PVZ_memory.read_int(self.addr+0x128) #阳光生产
         self.mushroomTime = PVZ_memory.read_int(self.addr+0x130)
         self.isVisible = PVZ_memory.read_bool(self.addr+0x18)
         self.isSquash = PVZ_memory.read_bool(self.addr+0x142)
@@ -194,6 +196,7 @@ class zombie:
         self.hatType = PVZ_memory.read_int(self.addr+0xc4)
         self.hatHP = PVZ_memory.read_int(self.addr+0xd0)
         self.maxHatHP = PVZ_memory.read_int(self.addr+0xd4)
+        self.doorType = PVZ_memory.read_int(self.addr+0xd8)
         self.doorHP = PVZ_memory.read_int(self.addr+0xdc)
         self.maxDoorHP = PVZ_memory.read_int(self.addr+0xe0)
         self.slow = PVZ_memory.read_int(self.addr+0xac)

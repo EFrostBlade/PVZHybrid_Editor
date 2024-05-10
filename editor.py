@@ -21,6 +21,11 @@ import re
 import psutil
 import win32process
 import win32gui
+import wmi
+import hashlib
+import pyperclip
+from pyDes import *
+import binascii
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
@@ -279,7 +284,7 @@ def support():
     global main_window
     support_window = ttk.Toplevel(topmost=True)
     support_window.title("关于")
-    support_window.geometry("300x300")
+    support_window.geometry("300x460")
     support_window.iconphoto(False, ttk.PhotoImage(
         file=resource_path((r"res\icon\info.png"))))
     support_window.tk.call('tk', 'scaling', 4/3)
@@ -287,7 +292,36 @@ def support():
     main_window_y = main_window.winfo_y()
     support_window.geometry(f'+{main_window_x+100}+{main_window_y + 100}')
     ttk.Label(support_window, text="本软件完全免费", font=(
-        "黑体", 18), bootstyle=SUCCESS).pack(pady=20)
+        "黑体", 18), bootstyle=SUCCESS).pack(pady=10)
+    def open_qq0():
+        webbrowser.open_new(
+            "https://qm.qq.com/q/arrZGcHwpG")
+    qq0_frame = ttk.Frame(support_window)
+    qq0_frame.pack()
+    ttk.Label(qq0_frame, text="交流群：", font=(
+        "黑体", 8), bootstyle=INFO).pack(side=LEFT)
+    ttk.Button(qq0_frame, text="970286809", padding=0, bootstyle=(
+        PRIMARY, LINK), cursor="hand2", command=open_qq0).pack(side=LEFT)
+    ttk.Label(support_window, text="有问题可以加群反馈",
+              font=("黑体", 8), bootstyle=INFO).pack()
+    text = ttk.Text(support_window,width=50,height=8)
+    scroll = ttk.Scrollbar(support_window)
+    # 放到窗口的右侧, 填充Y竖直方向
+    scroll.place(x=0,y=155,relx=1,anchor=E,height=150)
+    
+    # 两个控件关联
+    scroll.config(command=text.yview)
+    text.config(yscrollcommand=scroll.set)
+    
+    text.pack()
+    str1 = 'b0.22\n' \
+           '修复了僵尸掉落导致闪退的bug\n' \
+           '修复了开启超级铲子情况下铲除墓碑吞噬者产生的土豆雷闪退的bug\n' \
+           '优化了自由放置和柱子模式 \n' \
+           '新增毁灭不留坑、僵尸豆产出魅惑僵尸、传送带无延迟、无尽轮数修改功能，位于暂未分类标签页 \n' 
+           
+    
+    text.insert(INSERT,str1)
     github_frame = ttk.Frame(support_window)
     github_frame.pack()
     ttk.Label(github_frame, text="所有代码开源于", font=(
@@ -3233,6 +3267,40 @@ def mainWindow():
         except:
             pass
 
+
+    other_page = ttk.Frame(page_tab)
+    other_page.pack()
+    page_tab.add(other_page, text="暂未分类")
+    endless_frame=ttk.Frame(other_page)
+    other_toggle_frame=ttk.LabelFrame(other_page,text="未分类开关")
+    other_toggle_frame.pack(anchor=W)
+    
+    doom_no_hole_status = ttk.BooleanVar(other_toggle_frame)
+    doom_no_hole_check = ttk.Checkbutton(other_toggle_frame, text="毁灭不留坑", variable=doom_no_hole_status,
+                                       bootstyle="success-round-toggle", command=lambda: pvz.doomNoHole(doom_no_hole_status.get()))
+    doom_no_hole_check.pack()
+    zombiebean_hpynotized_status = ttk.BooleanVar(other_toggle_frame)
+    zombiebean_hpynotized_check = ttk.Checkbutton(other_toggle_frame, text="僵尸豆魅惑", variable=zombiebean_hpynotized_status,
+                                       bootstyle="success-round-toggle", command=lambda: pvz.zombiebeanHpynotized(zombiebean_hpynotized_status.get()))
+    zombiebean_hpynotized_check.pack()
+    conveyor_belt_full_status = ttk.BooleanVar(other_toggle_frame)
+    conveyor_belt_full_check = ttk.Checkbutton(other_toggle_frame, text="传送带全满", variable=conveyor_belt_full_status,
+                                       bootstyle="success-round-toggle", command=lambda: pvz.conveyorBeltFull(conveyor_belt_full_status.get()))
+    conveyor_belt_full_check.pack()
+    endless_frame.pack(anchor=W)
+    ttk.Label(endless_frame,text="无尽轮数").pack(side=LEFT)
+    endless_round = ttk.IntVar(endless_frame)
+    endless_round_entry = ttk.Entry(endless_frame, width=5, textvariable=endless_round)
+    endless_round_entry.pack(side=LEFT)
+    def setEndlessRound(event):
+        pvz.setEndlessRound(endless_round.get())
+        endless_frame.focus_set()
+    endless_round_entry.bind("<Return>", setEndlessRound)
+
+
+
+
+
     def refreshData():
         if (page_tab.index('current') == 0):
             gameDifficult.set(pvz.getDifficult())
@@ -3264,6 +3332,10 @@ def mainWindow():
             if (slots_configuration_mode.get() == False):
                 refresh_slot_list()
                 get_slot_attribute()
+        if (page_tab.index('current') == 5):
+            if (main_window.focus_get() != endless_round_entry):
+                endless_round.set(pvz.getEndlessRound())
+
         main_window.after(100, refreshData)
 
     def load_plugin(main_window):
@@ -3284,7 +3356,7 @@ def mainWindow():
         PRIMARY, LINK), cursor="hand2", command=lambda: load_plugin(main_window))
     plugin_button.place(x=100, y=0, relx=0, rely=1, anchor=SW)
 
-    support_button = ttk.Button(main_window, text="觉得好用？支持开发者", padding=0, bootstyle=(
+    support_button = ttk.Button(main_window, text="更新公告", padding=0, bootstyle=(
         PRIMARY, LINK), cursor="hand2", command=lambda: support())
     support_button.place(x=0, y=0, relx=1, anchor=NE)
     main_window.after(100, refreshData)

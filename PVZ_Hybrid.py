@@ -17,6 +17,10 @@ newmem_spoils2 = None
 newmem_slotKey = None
 newmem_setAllBullet = None
 newmem_endlessCar=None
+newmem_doomNoHole=None
+newmem_zombiebeanHpynotized=None
+newmem_getZombieAddress=None
+newmem_zombieAddress=None
 
 
 def calculate_call_address(ctypes_obj):
@@ -84,9 +88,9 @@ def overPlant(f):
     if f:
         data.PVZ_memory.write_bytes(0x00425634, b'\xeb\x1b\x0f\x1f\x00', 5)
         data.PVZ_memory.write_bytes(
-            0x0040FE2D, b'\xe9\x22\x09\x00\x00\x0f\x1f', 7)
-        data.PVZ_memory.write_bytes(
             0x0040e3c6, b'\xe9\x94\x00\x00\x00\x0f\x1f\x00', 8)
+        data.PVZ_memory.write_bytes(
+            0x0040FE2D, b'\xe9\x22\x09\x00\x00\x0f\x1f', 7)
         data.PVZ_memory.write_bytes(
             0x0042a2d6, b'\xe9\xe2\x00\x00\x00\x0f\x1f\x00', 8)
         data.PVZ_memory.write_bytes(0x00438e3e, b'\xeb\x34\x66\x90', 4)
@@ -315,7 +319,7 @@ def shovelpro(f):
     print(hex(addr))
     if f:
         data.PVZ_memory.write_bytes(
-            addr, b'\x90\x90\x90\xeb\x7c\x90', 6)
+            addr+0x15, b'\xeb\x6a\x90', 3)
         newmem_shovelpro = pymem.memory.allocate_memory(
             data.PVZ_memory.process_handle, 100)
         print(hex(newmem_shovelpro))
@@ -339,7 +343,7 @@ def shovelpro(f):
             0x004111d8, b'\xe9'+calculate_call_address(newmem_shovelpro-0x004111dd)+b'\x90', 6)
     else:
         data.PVZ_memory.write_bytes(
-            addr, b'\x8b\x45\x24\x83\xf8\x36', 6)
+            addr+0x15, b'\x83\xf8\x17', 3)
         data.PVZ_memory.write_bytes(0x004111d8, b'\x01\x9f\x9c\x57\x00\x00', 6)
         pymem.memory.free_memory(
             data.PVZ_memory.process_handle, newmem_shovelpro)
@@ -420,6 +424,104 @@ def changeGameSpeed(s):
         data.PVZ_memory.write_bytes(0x6A9EAA, b'\x00', 1)
         data.PVZ_memory.write_bytes(0x6A9EAB, b'\x01', 1)
 
+def doomNoHole(f):
+    global newmem_doomNoHole
+    if (f):
+        data.PVZ_memory.write_bytes(0x00466668,b'\x90\x90\xeb\x2e',4)
+        
+        newmem_doomNoHole = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        shellcode = asm.Asm(newmem_doomNoHole)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI,0x18,0)
+        shellcode.jng(0x0041D79E)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI,0x50,0)
+        shellcode.jne_offset(7)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ESI,0x18,0)
+        shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI,0x18,0xff)
+        shellcode.jmp(0x0041D79A)
+        data.PVZ_memory.write_bytes(newmem_doomNoHole, bytes(
+            shellcode.code[:shellcode.index]), shellcode.index)
+        data.PVZ_memory.write_bytes(
+            0x0041D790, b'\xe9'+calculate_call_address(newmem_doomNoHole-0x0041D795)+b'\x90\x90\x90\x90\x90', 10)
+    else:
+        data.PVZ_memory.write_bytes(0x00466668,b'\x84\xc0\x74\x2e',4)
+        data.PVZ_memory.write_bytes(0x0041D790, b'\x83\x7e\x18\x00\x7e\x08\x83\x46\x18\xff', 10)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_doomNoHole)
+
+def zombiebeanHpynotized(f):
+    global newmem_zombiebeanHpynotized
+    global newmem_getZombieAddress
+    global newmem_zombieAddress
+    if f:
+        newmem_zombiebeanHpynotized = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        newmem_getZombieAddress = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        newmem_zombieAddress = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 4)
+        shellcode=asm.Asm(newmem_getZombieAddress)
+        shellcode.mov_dword_ptr_exx(newmem_zombieAddress,asm.EDI)
+        shellcode.push_dword(0x204)
+        shellcode.jmp(0x0041DDDA)
+        data.PVZ_memory.write_bytes(newmem_getZombieAddress, bytes(
+            shellcode.code[:shellcode.index]), shellcode.index)
+        data.PVZ_memory.write_bytes(
+            0x0041DDD5, b'\xe9'+calculate_call_address(newmem_getZombieAddress-0x0041DDDA), 5)
+        
+        shellcode1=asm.Asm(newmem_zombiebeanHpynotized)
+        shellcode1.push_exx(asm.EAX)
+        shellcode1.mov_exx_dword_ptr(asm.EAX,newmem_zombieAddress)
+        shellcode1.cmp_dword_ptr_exx_add_byte_byte(asm.EAX,0x24,0x8)
+        shellcode1.jne_offset(4)
+        shellcode1.mov_byte_ptr_exx_add_byte_byte(asm.EAX,0x51,1)
+        shellcode1.mov_byte_ptr_exx_add_dword_byte(asm.EAX,0xb8,1)
+        shellcode1.pop_exx(asm.EAX)
+        shellcode1.mov_exx_dword_ptr_eyy_add_dword(asm.EAX,asm.EBP,0x138)
+        shellcode1.jmp(0x0084F5E9)
+        data.PVZ_memory.write_bytes(newmem_zombiebeanHpynotized, bytes(
+            shellcode1.code[:shellcode1.index]), shellcode1.index)
+        data.PVZ_memory.write_bytes(
+            0x0084F5E3, b'\xe9'+calculate_call_address(newmem_zombiebeanHpynotized-0x0084F5E8)+b'\x90',6)
+        
+
+    else:
+        data.PVZ_memory.write_bytes(0x0041DDD5, b'\x68\x04\x02\x00\x00', 5)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_getZombieAddress)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_zombieAddress)
+        data.PVZ_memory.write_bytes(0x0084F5E3, b'\x8b\x85\x38\x01\x00\x00', 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized)
+
+def conveyorBeltFull(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x00422D1F,b'\x0f\x80',2)
+        data.PVZ_memory.write_bytes(0x00489CA1,b'\x33\xc0',2)
+    else:
+        data.PVZ_memory.write_bytes(0x00422D1F,b'\x0f\x8f',2)
+        data.PVZ_memory.write_bytes(0x00489CA1,b'\x85\xc0',2)
+
+
+
+
+def getEndlessRound():
+    try:
+        endlessRoundAddr =  data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x160)+0x6c
+        return data.PVZ_memory.read_int(endlessRoundAddr)
+    except:
+        return '未知'
+     
+
+def setEndlessRound(endlessRound):
+    try:
+        endlessRoundAddr =  data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x160)+0x6c
+        data.PVZ_memory.write_int(endlessRoundAddr, endlessRound)
+    except:
+        return
 
 def putLadder(row, col):
     class ladder:
@@ -655,8 +757,7 @@ def spoils(spoils_config):
             shellcode.add_byte(0x05)  # 小于则后移5位
             shellcode.add_byte(0xe9)  # 大于则jmp
             shellcode.add_dword(0x1f)
-            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ESI, asm.ESP, 0x24)
-            shellcode.add_byte(0x0c)  # mov esi,[esp+0c]
+            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ESI, asm.ESP, 0x0c)
             shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ECX, asm.EBX, 0x04)
             shellcode.push_byte(0x03)
             if (spoils_config[0]["type"] <= 6):

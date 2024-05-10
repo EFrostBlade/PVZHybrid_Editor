@@ -42,6 +42,13 @@ class Asm:
         self.add_byte(0xc0+exx)
         self.add_dword(val)
 
+    def add_dword_ptr_exx_add_byte_byte(self,exx,val,val2):
+        self.add_byte(0x83)
+        self.add_byte(0x40+exx)
+        self.add_byte(val)
+        self.add_byte(val2)
+
+
     def push_dword(self, val):
         self.add_byte(0x68)
         self.add_dword(val)
@@ -189,6 +196,18 @@ class Asm:
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
+    def jng(self, addr):
+        relative_offset = addr - (self.startAddress+self.index + 6)
+        # 将相对偏移量转换为32位有符号整数的字节序列
+        # 使用 int.to_bytes 方法，并指定字节长度为4，使用小端字节序
+        # 使用 signed=True 来允许负数的转换
+        offset_bytes = relative_offset.to_bytes(
+            4, byteorder='little', signed=True)
+        self.add_byte(0x0f)
+        self.add_byte(0x8e)
+        self.code[self.index:self.index + 4] = offset_bytes
+        self.index += 4
+
     def random(self, val):  # 取小于val的随机数
         self.add_byte(0x0f)
         self.add_byte(0x31)  # rdtsc读取时间戳计数器的值到 EDX:EAX
@@ -204,6 +223,23 @@ class Asm:
         self.add_byte(0x05)
         self.add_dword(address)
         self.add_dword(val)
+
+    def mov_dword_ptr_exx(self, address, exx):
+        self.add_byte(0x89)
+        self.add_byte(0x5+exx*8)
+        self.add_dword(address)
+
+    def mov_byte_ptr_exx_add_byte_byte(self, exx,val,val2):
+        self.add_byte(0xc6)
+        self.add_byte(0x40+exx*8)
+        self.add_byte(val)
+        self.add_byte(val2)
+
+    def mov_byte_ptr_exx_add_dword_byte(self, exx,val,val2):
+        self.add_byte(0xc6)
+        self.add_byte(0x80+exx*8)
+        self.add_dword(val)
+        self.add_byte(val2)
 
     def mov_ptr_exx_add_byte_eyy(self, exx, val, eyy):
         self.add_byte(0x89)
