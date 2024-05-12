@@ -76,6 +76,8 @@ class Asm:
     def mov_exx_dword_ptr_eyy_add_dword(self, exx, eyy, val):
         self.add_byte(0x8b)
         self.add_byte(0x80 + exx * 8 + eyy)
+        if(eyy==ESP):
+            self.add_byte(0x24)
         self.add_dword(val)
 
     def movzx_exx_dword_ptr_eyy_add_dword(self, exx, eyy, val):
@@ -114,6 +116,10 @@ class Asm:
         self.code[self.index:self.index + 4] = offset_bytes
         self.index += 4
 
+    def call_dword_offset(self, offset):
+        self.add_byte(0xe8)  # call 指令的操作码
+        self.add_dword(offset)
+
     def mov_exx_eyy(self, exx, eyy):
         self.add_byte(0x89)
         self.add_byte(0xc0 + eyy * 8 + exx)
@@ -149,6 +155,10 @@ class Asm:
         self.add_byte(0xf8+exx)
         self.add_dword(val)
 
+    def cmp_exx_eyy(self, exx, eyy):
+        self.add_byte(0x39)
+        self.add_byte(0xc0 + exx  + eyy* 8)
+
     def cmp_ptr_exx_add_byte_eyy(self, exx, val, eyy):
         self.add_byte(0x39)
         self.add_byte(0x40+exx+eyy*8)
@@ -171,6 +181,31 @@ class Asm:
         self.add_byte(0xb8+exx)
         self.add_dword(val)
         self.add_byte(val2)
+
+    def cmp_dword_ptr_address_byte(self, address, val):
+        self.add_byte(0x83)
+        self.add_byte(0x3d)
+        self.add_dword(address)
+        self.add_byte(val)
+
+    def cmp_dword_ptr_address_dword(self, address, val):
+        self.add_byte(0x81)
+        self.add_byte(0x3d)
+        self.add_dword(address)
+        self.add_dword(val)
+
+    def add_dword_ptr_address_byte(self, address, val):
+        self.add_byte(0x83)
+        self.add_byte(0x05)
+        self.add_dword(address)
+        self.add_byte(val)
+
+    def sub_dword_ptr_address_byte(self, address, val):
+        self.add_byte(0x83)
+        self.add_byte(0x2d)
+        self.add_dword(address)
+        self.add_byte(val)
+
 
     def je(self, addr):
         # 计算相对偏移量，需要减去当前指令的长度（5字节）
@@ -258,6 +293,12 @@ class Asm:
         self.add_dword(val)
         self.add_dword(val2)
 
+    def mov_fs_offset_exx(self,offset,exx):
+        self.add_byte(0x64)
+        self.add_byte(0x89)
+        self.add_byte(0x05+exx*8)
+        self.add_dword(offset)
+
     def add_exx_byte(self, exx, val):
         self.add_byte(0x83)
         self.add_byte(0xc0+exx)
@@ -276,6 +317,10 @@ class Asm:
         self.add_byte(0x7c)
         self.add_byte(val)
 
+    def jle_offset(self, val):
+        self.add_byte(0x7e)
+        self.add_byte(val)
+
     def jne_offset(self, val):
         self.add_byte(0x75)
         self.add_byte(val)
@@ -288,8 +333,30 @@ class Asm:
         self.add_byte(0x72)
         self.add_byte(val)
 
+    def jg_offset(self, val):
+        self.add_byte(0x7f)
+        self.add_byte(val)
+
+    def jng_dword_offset(self, val):
+        self.add_byte(0x0f)
+        self.add_byte(0x8e)
+        self.add_dword(val)
+
+
+
     def jmp_offest(self, val):
         self.add_byte(0xeb)
+        self.add_byte(val)
+
+    def jmp_dword_offest(self, val):
+        self.add_byte(0xe9)
+        self.add_dword(val)
+
+
+    def xor_dword_ptr_address_val(self,address,val):
+        self.add_byte(0x83)
+        self.add_byte(0x35)
+        self.add_dword(address)
         self.add_byte(val)
 
     def nop_6(self):

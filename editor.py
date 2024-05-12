@@ -29,7 +29,7 @@ import binascii
 from pymem import Pymem
 from PIL import Image
 Image.CUBIC = Image.BICUBIC
-current_version = '0.21'
+current_version = '0.23'
 version_url = 'https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt'
 main_window = None
 data.update_PVZ_memory(1)
@@ -314,7 +314,13 @@ def support():
     text.config(yscrollcommand=scroll.set)
     
     text.pack()
-    str1 = 'b0.22\n' \
+    str1 = 'b0.23\n' \
+           '修复了毁灭菇不留坑但仍然无法种植的bug\n' \
+           '优化了取消冷却，现在可以在高级暂停时连续种植了\n' \
+           '为高级暂停添加了视觉效果提示，现在高级暂停改为由游戏内快捷键触发 \n' \
+           '新增存档修改功能，可以快速将关卡修改为已通过或未通过 \n' \
+           '推车和补车增加了全部选项，增加了自动补车功能 \n' \
+           'b0.22\n' \
            '修复了僵尸掉落导致闪退的bug\n' \
            '修复了开启超级铲子情况下铲除墓碑吞噬者产生的土豆雷闪退的bug\n' \
            '优化了自由放置和柱子模式 \n' \
@@ -322,6 +328,7 @@ def support():
            
     
     text.insert(INSERT,str1)
+    text.config(state=DISABLED)
     github_frame = ttk.Frame(support_window)
     github_frame.pack()
     ttk.Label(github_frame, text="所有代码开源于", font=(
@@ -678,11 +685,11 @@ def mainWindow():
                                        bootstyle="success-round-toggle", command=lambda: pvz.ignoreZombies(never_fail_status.get()))
     never_fail_check.grid(row=6, column=0, sticky=W)
     ToolTip(never_fail_check, text="僵尸进家不判定游戏失败", bootstyle=(INFO, INVERSE))
-    pause_pro_status = ttk.BooleanVar(quick_start_frame)
-    pause_pro_check = ttk.Checkbutton(quick_start_frame, text="高级暂停", variable=pause_pro_status,
-                                      bootstyle="success-round-toggle", command=lambda: pvz.pausePro(pause_pro_status.get()))
-    pause_pro_check.grid(row=7, column=0, sticky=W)
-    ToolTip(pause_pro_check, text="可以暂停种植植物", bootstyle=(INFO, INVERSE))
+    # pause_pro_status = ttk.BooleanVar(quick_start_frame)
+    # pause_pro_check = ttk.Checkbutton(quick_start_frame, text="高级暂停", variable=pause_pro_status,
+    #                                   bootstyle="success-round-toggle", command=lambda: pvz.pausePro(pause_pro_status.get()))
+    # pause_pro_check.grid(row=7, column=0, sticky=W)
+    # ToolTip(pause_pro_check, text="可以暂停种植植物", bootstyle=(INFO, INVERSE))
     win_button = ttk.Button(quick_start_frame, text="当前关卡胜利", padding=0, bootstyle=(
         SUCCESS, OUTLINE), command=lambda: pvz.win())
     win_button.grid(row=8, column=0, sticky=W, pady=(2, 2))
@@ -708,6 +715,39 @@ def mainWindow():
     load_button = ttk.Button(save_load_frame, text="读档", padding=0, bootstyle=(
         SUCCESS, OUTLINE), command=lambda: pvz.load())
     load_button.grid(row=0, column=1, sticky=W, padx=(10, 0), pady=(2, 2))
+
+    
+    pause_pro_frame = ttk.LabelFrame(
+        common_page, text="高级暂停", bootstyle=SUCCESS)
+    pause_pro_frame.place(x=0, y=300, relx=1, rely=0, anchor=NE)
+    pause_pro_status = ttk.BooleanVar(pause_pro_frame)
+    pause_pro_check = ttk.Checkbutton(pause_pro_frame, text="快捷键高级暂停", variable=pause_pro_status,
+                                      bootstyle="success-round-toggle", command=lambda: setPauseKey())
+    pause_pro_check.grid(row=0, column=0, sticky=W)
+    slot_pause_key = ttk.Combobox(
+        pause_pro_frame, width=5, values=data.keyTpye, font=("黑体", 8), state=READONLY)
+    slot_pause_key.grid(row=1, column=0)
+    slot_pause_key.current(0)
+    def loadPauseKey():
+        config = load_config(config_file_path)        
+        try:
+            slot_pause_key.current(config["slotKeys"]["pause"])
+        except:
+            pass
+    loadPauseKey()
+
+    def setPauseKey():
+        if (pause_pro_status.get()):
+            config = load_config(config_file_path)
+            if "slotKeys" not in config:
+                config["slotKeys"] = {}
+            if (slot_pause_key.current() != -1):
+                    config["slotKeys"]["pause"] = slot_pause_key.current()
+
+            save_config(config, config_file_path)
+            pvz.pauseProKey(slot_pause_key.current())
+        else:
+            pvz.pauseProKey(False)
 
     game_speed_frame = ttk.LabelFrame(
         common_page, text="游戏速度", bootstyle=DARK)
@@ -775,7 +815,61 @@ def mainWindow():
     ttk.Radiobutton(game_difficult_frame,text="简单",value=1,variable= gameDifficult,bootstyle=SUCCESS,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=0,padx=5)
     ttk.Radiobutton(game_difficult_frame,text="普通",value=2,variable= gameDifficult,bootstyle=DARK,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=1,padx=5)
     ttk.Radiobutton(game_difficult_frame,text="困难",value=3,variable= gameDifficult,bootstyle=DANGER,command=lambda:pvz.setDifficult(gameDifficult.get())).grid(row=0,column=2,padx=5)
-    
+ 
+
+    game_save_frame = ttk.LabelFrame(
+        common_page, text="存档修改", bootstyle=DARK)
+    game_save_frame.place(x=0, y=400, anchor=NW)
+    ttk.Label(game_save_frame, text="冒险第").grid(row=0, column=0)
+    adventure_start_level_value = ttk.IntVar(game_save_frame)
+    adventure_start_level_combobox = ttk.Combobox(game_save_frame, textvariable=adventure_start_level_value, width=2, values=
+                                           list(range(1,67+1)), font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    adventure_start_level_combobox.grid(row=0, column=1)
+    adventure_start_level_value.set(1)
+    ttk.Label(game_save_frame, text="关至第").grid(row=0, column=2)
+    adventure_end_level_value = ttk.IntVar(game_save_frame)
+    adventure_end_level_combobox = ttk.Combobox(game_save_frame, textvariable=adventure_end_level_value, width=2, values=
+                                           list(range(1,67+1)), font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    adventure_end_level_combobox.grid(row=0, column=3)
+    adventure_end_level_value.set(67)
+    ttk.Label(game_save_frame, text="关").grid(row=0, column=4)
+    def complete_advantures():
+        for i in range(adventure_start_level_value.get()-1,adventure_end_level_value.get()):
+            pvz.completeAdvanture(i)
+    adventure_complete_button = ttk.Button(
+        game_save_frame, text='已完成', bootstyle=(SUCCESS,OUTLINE), padding=0, command=lambda: complete_advantures())
+    adventure_complete_button.grid(row=0, column=5,padx=2)
+    def lock_advantures():
+        for i in range(adventure_start_level_value.get()-1,adventure_end_level_value.get()):
+            pvz.lockAdvanture(i)
+    adventure_lock_button = ttk.Button(
+        game_save_frame, text='未完成', bootstyle=(DANGER,OUTLINE), padding=0, command=lambda: lock_advantures())
+    adventure_lock_button.grid(row=0, column=6,padx=2)
+    ttk.Label(game_save_frame, text="挑战第").grid(row=1, column=0)
+    challenge_start_level_value = ttk.IntVar(game_save_frame)
+    challenge_start_level_combobox = ttk.Combobox(game_save_frame, textvariable=challenge_start_level_value, width=2, values=
+                                           list(range(1,99+1)), font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    challenge_start_level_combobox.grid(row=1, column=1)
+    challenge_start_level_value.set(1)
+    ttk.Label(game_save_frame, text="关至第").grid(row=1, column=2)
+    challenge_end_level_value = ttk.IntVar(game_save_frame)
+    challenge_end_level_combobox = ttk.Combobox(game_save_frame, textvariable=challenge_end_level_value, width=2, values=
+                                           list(range(1,99+1)), font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    challenge_end_level_combobox.grid(row=1, column=3)
+    challenge_end_level_value.set(99)
+    ttk.Label(game_save_frame, text="关").grid(row=1, column=4)
+    def complete_challenges():
+        for i in range(challenge_start_level_value.get()-1,challenge_end_level_value.get()):
+            pvz.completeChallenge(i)
+    adventure_complete_button = ttk.Button(
+        game_save_frame, text='已完成', bootstyle=(SUCCESS,OUTLINE), padding=0, command=lambda: complete_challenges())
+    adventure_complete_button.grid(row=1, column=5,padx=2)
+    def lock_challenges():
+        for i in range(challenge_start_level_value.get()-1,challenge_end_level_value.get()):
+            pvz.lockChallenge(i)
+    adventure_lock_button = ttk.Button(
+        game_save_frame, text='未完成', bootstyle=(DANGER,OUTLINE), padding=0, command=lambda: lock_challenges())
+    adventure_lock_button.grid(row=1, column=6,padx=2)
 
 
 
@@ -2208,18 +2302,42 @@ def mainWindow():
 
 
     car_frame = ttk.LabelFrame(grid_page, text="小车", bootstyle=DANGER)
-    car_frame.place(x=330, y=0, anchor=NW, height=90, width=130)
+    car_frame.place(x=330, y=0, anchor=NW, height=120, width=160)
     start_car_value = ttk.IntVar(ladder_put_frame)
-    start_car_combobox = ttk.Combobox(car_frame, textvariable=start_car_value, width=3, values=[
-                                           1, 2, 3, 4, 5, 6], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    start_car_combobox = ttk.Combobox(car_frame, textvariable=start_car_value, width=5, values=[
+                                           1, 2, 3, 4, 5, 6,'全部'], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
     start_car_combobox.grid(row=0,column=0)
-    start_car_combobox.current(0)
+    start_car_combobox.current(6)
     def startCar():
         rows=pvz.getMap()
         if(rows==False):
             return
         else:
-            if(start_car_combobox.current()>rows-1):
+            if(start_car_combobox.current()==6):
+                try:
+                    car_num = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                        data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x110)
+                except:
+                    return
+                i = 0
+                j = 0
+                start_car_list=[0]*rows
+                while i < car_num:
+                    car_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                        data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x100)+0x48*j
+                    car_exist = data.PVZ_memory.read_bytes(car_addresss+0x30, 1)
+                    if (car_exist == b'\x00'):
+                        try:
+                            c=data.car(car_addresss)
+                            if(start_car_list[c.row]==0):
+                                pvz.startCar(car_addresss)
+                                start_car_list[c.row]=1
+                        except:
+                            pass
+                        i = i+1
+                    j = j+1
+            
+            elif(start_car_combobox.current()>rows-1):
                 return
             else:
                 try:
@@ -2243,16 +2361,18 @@ def mainWindow():
     ttk.Button(car_frame, text="启动小车", padding=0, bootstyle=(OUTLINE, DANGER),
                command=lambda: startCar()).grid(row=0, column=1)
     recover_car_value = ttk.IntVar(ladder_put_frame)
-    recover_car_combobox = ttk.Combobox(car_frame, textvariable=recover_car_value, width=3, values=[
-                                           1, 2, 3, 4, 5, 6], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
+    recover_car_combobox = ttk.Combobox(car_frame, textvariable=recover_car_value, width=5, values=[
+                                           1, 2, 3, 4, 5, 6,'全部'], font=("黑体", 8), bootstyle=SECONDARY, state=READONLY)
     recover_car_combobox.grid(row=1,column=0)
-    recover_car_combobox.current(0)
+    recover_car_combobox.current(6)
     def recoveryCar():
         rows=pvz.getMap()
         if(rows==False):
             return
         else:
-            if(recover_car_combobox.current()>rows-1):
+            if(recover_car_combobox.current()==6):
+                pass
+            elif(recover_car_combobox.current()>rows-1):
                 return
             pvz.recoveryCars()
             try:
@@ -2260,30 +2380,39 @@ def mainWindow():
                     data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x110)
             except:
                 return
-            
-            i = 0
-            j = 0
-            delete_car_list=[0]*rows
-            print(delete_car_list)
-            delete_car_list[recover_car_combobox.current()]=1
-            while i < car_num:
-                car_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x100)+0x48*j
-                car_exist = data.PVZ_memory.read_bytes(car_addresss+0x30, 1)
-                if (car_exist == b'\x00'):
-                    c=data.car(car_addresss)
-                    if(c.row!=recover_car_combobox.current() and delete_car_list[c.row]==0):
-                        print(c.row)
-                        print(delete_car_list)
-                        c.setExist(True)
-                        delete_car_list[c.row]=1
-                    i = i+1
-                j = j+1
+            if(recover_car_combobox.current()<6):
+                i = 0
+                j = 0
+                delete_car_list=[0]*rows
+                print(delete_car_list)
+                delete_car_list[recover_car_combobox.current()]=1
+                while i < car_num:
+                    car_addresss = data.PVZ_memory.read_int(data.PVZ_memory.read_int(
+                        data.PVZ_memory.read_int(data.baseAddress)+0x768)+0x100)+0x48*j
+                    car_exist = data.PVZ_memory.read_bytes(car_addresss+0x30, 1)
+                    if (car_exist == b'\x00'):
+                        c=data.car(car_addresss)
+                        try:
+                            if(c.row!=recover_car_combobox.current() and delete_car_list[c.row]==0):
+                                print(c.row)
+                                print(delete_car_list)
+                                c.setExist(True)
+                                delete_car_list[c.row]=1
+                        except:
+                            pass
+                        i = i+1
+                    j = j+1
     ttk.Button(car_frame, text="恢复小车", padding=0, bootstyle=(OUTLINE, DANGER),
                command=lambda: recoveryCar()).grid(row=1, column=1)
     endless_car_status=ttk.BooleanVar()
     ttk.Checkbutton(car_frame, text="无尽小车",variable=endless_car_status, padding=0, bootstyle="danger-round-toggle" ,
                command=lambda: pvz.endlessCar(endless_car_status.get())).grid(row=2, column=1)
+    init_car_status=ttk.BooleanVar()
+    ttk.Checkbutton(car_frame, text="初始有车",variable=init_car_status, padding=0, bootstyle="danger-round-toggle" ,
+               command=lambda: pvz.initCar(init_car_status.get())).grid(row=3, column=0)
+    auto_car_status=ttk.BooleanVar()
+    ttk.Checkbutton(car_frame, text="自动补车",variable=auto_car_status, padding=0, bootstyle="danger-round-toggle" ,
+               command=lambda: pvz.autoCar(auto_car_status.get())).grid(row=3, column=1)
     
 
     def get_item_select(event):
@@ -3352,6 +3481,10 @@ def mainWindow():
         plugin = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(plugin)
         plugin.open_plugin_window(main_window)
+        # plugin=ctypes.CDLL(pyc_name)
+        # plugin.open_plugin_window(main_window)
+        # import {pyc_name} as plugin
+    
     plugin_button = ttk.Button(main_window, text="载入插件", padding=0, bootstyle=(
         PRIMARY, LINK), cursor="hand2", command=lambda: load_plugin(main_window))
     plugin_button.place(x=100, y=0, relx=0, rely=1, anchor=SW)

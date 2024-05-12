@@ -21,6 +21,12 @@ newmem_doomNoHole=None
 newmem_zombiebeanHpynotized=None
 newmem_getZombieAddress=None
 newmem_zombieAddress=None
+newmem_autoCar=None
+newmem_pauseProKey=None
+newmem_drawTime=None
+newmem_pause=None
+newmem_draw=None
+newmem_pauseFlag=None
 
 
 def calculate_call_address(ctypes_obj):
@@ -227,10 +233,18 @@ def ignoreSun(f):
 
 
 def cancelCd(f):
+    # if f:
+    #     data.PVZ_memory.write_bytes(0x487293, b'\x3b\x47\x28\x90\x90', 5)
+    # else:
+    #     data.PVZ_memory.write_bytes(0x487296, b'\x7e\x14', 2)
     if f:
-        data.PVZ_memory.write_bytes(0x487293, b'\x3b\x47\x28\x90\x90', 5)
+        data.PVZ_memory.write_bytes(0x487296, b'\x70', 1)
+        data.PVZ_memory.write_bytes(0x00488250, b'\xeb', 1)
+        data.PVZ_memory.write_bytes(0x00488E73, b'\xc6\x45\x48\x01', 4)
     else:
-        data.PVZ_memory.write_bytes(0x487296, b'\x7e\x14', 2)
+        data.PVZ_memory.write_bytes(0x487296, b'\x7e', 1)
+        data.PVZ_memory.write_bytes(0x00488250, b'\x75', 1)
+        data.PVZ_memory.write_bytes(0x00488E73, b'\xc6\x45\x48\x00', 4)
 
 
 def killAllZombies():
@@ -424,6 +438,27 @@ def changeGameSpeed(s):
         data.PVZ_memory.write_bytes(0x6A9EAA, b'\x00', 1)
         data.PVZ_memory.write_bytes(0x6A9EAB, b'\x01', 1)
 
+def completeAdvanture(level):
+    advantureAddr =  data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x42c
+    data.PVZ_memory.write_int(advantureAddr+level*4, 1)
+
+def lockAdvanture(level):
+    advantureAddr =  data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x42c
+    data.PVZ_memory.write_int(advantureAddr+level*4, 0)
+
+def completeChallenge(level):
+    challengeAddr =  data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x82c
+    data.PVZ_memory.write_int(challengeAddr+level*4, 1)
+
+def lockChallenge(level):
+    challengeAddr =  data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.baseAddress)+0x82c)+0x82c
+    data.PVZ_memory.write_int(challengeAddr+level*4, 0)
+
+
 def doomNoHole(f):
     global newmem_doomNoHole
     if (f):
@@ -436,7 +471,7 @@ def doomNoHole(f):
         shellcode.jng(0x0041D79E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI,0x50,0)
         shellcode.jne_offset(7)
-        shellcode.mov_ptr_exx_add_byte_dword(asm.ESI,0x18,0)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ESI,0x20,1)
         shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI,0x18,0xff)
         shellcode.jmp(0x0041D79A)
         data.PVZ_memory.write_bytes(newmem_doomNoHole, bytes(
@@ -1539,3 +1574,163 @@ def endlessCar(f):
         data.PVZ_memory.write_bytes(0x00458AEC, b'\xd9\x43\x08\x8b\x43\x34', 6)
         pymem.memory.free_memory(
             data.PVZ_memory.process_handle, newmem_endlessCar)
+
+def initCar(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0040BCA3,b'\x83\xfa\x14\x7a\x70',5)
+    else:
+        data.PVZ_memory.write_bytes(0x0040BCA3,b'\x83\xfa\x14\x7a\x70',5)
+
+def autoCar(f):
+    global newmem_autoCar  # 声明 newmem 为全局变量
+    if f:
+        # if enable_LawnMowers==1:
+        newmem_autoCar = pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 128)
+        # print(f"无限小车 by 妥妥的 2024-4-9 08:30:45, allocated memory: {hex(newmem)},patch addr: {hex(0x458d99)}")
+        data.PVZ_memory.write_bytes(0x458d99,b'\xe9' + calculate_call_address(newmem_autoCar-0x0458D9E),5)
+        byte_data = (
+        b'\x60\x9C\xBF\x00\x00\x00\x00\x8B\x35\xC0\x9E\x6A\x00\x8B\xAE'
+        b'\x68\x07\x00\x00\x8D\xB5\x00\x01\x00\x00\x89\x7E\x04\x89\x7E'
+        b'\x0C\x89\x7E\x10\xB8\x77\xD1\x00\x00\x01\xF8\x89\x46\x14\xE8'
+        + calculate_call_address(0x41E120 - newmem_autoCar - 0x31) + #pm.write_uint(newmem+45,0x41E120 - newmem - 0x31)
+        b'\x8B\xF0\x56\x8B\xC7\xE8'
+        + calculate_call_address(0x00458000 - newmem_autoCar - 0x3B) +
+        b'\xB8\x00\x00\xA8\xC1\x89\x46\x08\x83\xC7\x01\x83\xC3\x04\x83'
+        b'\xFF\x06\x7C\xB9\x9D\x61\xC3'
+        )
+        data.PVZ_memory.write_bytes(newmem_autoCar,byte_data,81)
+    else:
+        data.PVZ_memory.write_bytes(0x458d99,b'\xC3\xCC\xCC\xCC\xCC',5)
+        # process_handle = pymem.process.open(pid[1])
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_autoCar)
+
+
+def pauseProKey(key):
+    global newmem_pauseProKey
+    global newmem_drawTime
+    global newmem_pause
+    global newmem_pauseFlag
+    global newmem_draw
+    if key!=False:
+        newmem_pauseProKey = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64)
+        print(hex(newmem_pauseProKey))
+        newmem_pause = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 128)
+        print(hex(newmem_pause))
+        newmem_draw = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256)
+        print(hex(newmem_draw))
+        newmem_drawTime = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 4)
+        print(hex(newmem_drawTime))
+        newmem_pauseFlag = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 1)
+        print(hex(newmem_pauseFlag))
+        shell_code_key=asm.Asm(newmem_pauseProKey)
+        shell_code_key.push_exx(asm.EDX)
+        shell_code_key.call(0x0051C5A0)
+        shell_code_key.cmp_exx_byte(asm.EDI,data.keyCode[key])
+        shell_code_key.jne_offset(7)
+        shell_code_key.xor_dword_ptr_address_val(newmem_pauseFlag,1)
+        shell_code_key.jmp(0x0041B2A1)
+        data.PVZ_memory.write_bytes(newmem_pauseProKey, bytes(
+            shell_code_key.code[:shell_code_key.index]), shell_code_key.index)
+        data.PVZ_memory.write_bytes(
+            0x0041B29B, b'\xe9'+calculate_call_address(newmem_pauseProKey-0x0041B2A0)+b'\x90', 6)
+        
+        
+        
+        pause_key=asm.Asm(newmem_pause)
+        pause_key.cmp_dword_ptr_address_byte(newmem_pauseFlag,1)
+        pause_key.jne_offset(0x1f)
+        pause_key.add_dword_ptr_address_byte(newmem_drawTime,24)
+        pause_key.cmp_dword_ptr_address_dword(newmem_drawTime,1000)
+        pause_key.jl_offset(0x29)
+        pause_key.mov_dword_ptr_dword(newmem_drawTime,1000)
+        pause_key.jmp_offest(0x1d)
+        pause_key.sub_dword_ptr_address_byte(newmem_drawTime,32)
+        pause_key.cmp_dword_ptr_address_dword(newmem_drawTime,0)
+        pause_key.jg_offset (0x0a)
+        pause_key.mov_dword_ptr_dword(newmem_drawTime,0)
+        pause_key.cmp_dword_ptr_address_dword(newmem_drawTime,0)
+        pause_key.jle_offset(0x45)
+        pause_key.pushad()
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.ESI,asm.EBP,0x148)
+        pause_key.call(0x00448330)
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.EDI,asm.EBP,0x13c)
+        pause_key.call(0x00438DA0)
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.ESI,asm.EBP,0x138)
+        pause_key.call(0x00438780)
+        pause_key.popad()
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.EDX,asm.EBP,0x13c)
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.EAX,asm.EBP,0x138)
+        pause_key.pop_exx(asm.EBP)
+        pause_key.mov_exx_dword_ptr_eyy_add_dword(asm.ECX,asm.ESP,0x104)
+        pause_key.mov_fs_offset_exx(0,asm.ECX)
+        pause_key.add_exx_dword(asm.ESP,0x110)
+        pause_key.ret()
+        pause_key.cmp_dword_ptr_exx_add_dword_byte(asm.EBP,0x164,1)
+        pause_key.je(0x00415DF9)
+        pause_key.jmp(0x00415E2E)
+        data.PVZ_memory.write_bytes(newmem_pause, bytes(
+            pause_key.code[:pause_key.index]), pause_key.index)
+        data.PVZ_memory.write_bytes(
+            0x00415DF0, b'\xe9'+calculate_call_address(newmem_pause-0x00415DF5)+b'\x90\x90', 7)
+        
+        
+        shellcode_draw=asm.Asm(newmem_draw)
+        shellcode_draw.cmp_dword_ptr_address_byte(newmem_drawTime,0)
+        shellcode_draw.jng_dword_offset(0xb3)
+        shellcode_draw.pushad()
+        shellcode_draw.mov_exx_dword_ptr(asm.EAX,newmem_drawTime)
+        shellcode_draw.mov_ptr_exx_add_byte_dword(asm.EDI,0x30,0x66)
+        shellcode_draw.mov_ptr_exx_add_byte_dword(asm.EDI,0x34,0xcc)
+        shellcode_draw.mov_ptr_exx_add_byte_dword(asm.EDI,0x38,0xff)
+        shellcode_draw.mov_ptr_exx_add_byte_dword(asm.EDI,0x3c,0xaa)
+        shellcode_draw.push_exx(asm.EAX)
+        shellcode_draw.push_dword(300)
+        shellcode_draw.push_dword(400)
+        shellcode_draw.mov_exx_eyy(asm.EAX,asm.EDI)
+        shellcode_draw.call_dword_offset(6)
+        shellcode_draw.popad()
+        shellcode_draw.jmp_dword_offest(0x78)
+        shellcode_draw.pushad()
+        shellcode_draw.code[shellcode_draw.index:shellcode_draw.index + 94] = b'\x8B\xF0\x8B\x44\x24\x24\x8B\x5C\x24\x28\x8B\x4C\x24\x2C\x8D\x2C\x4D\x00\x00\x00\x00\x31\xD2\xDB\x44\x24\x2C\xD8\xC8\xD9\x5C\x24\xFC\x8B\x4C\x24\x2C\x29\xD1\x89\x4C\x24\xF8\xDB\x44\x24\xF8\xD8\xC8\xD9\x5C\x24\xF8\xD9\x44\x24\xFC\xD8\x64\x24\xF8\xD9\xFA\xDB\x5C\x24\xFC\x8B\x44\x24\xFC\x8D\x1C\x45\x00\x00\x00\x00\x8B\x4C\x24\x24\x29\xC1\x8B\x7C\x24\x28\x2B\x7C\x24\x2C\x01\xD7'
+        shellcode_draw.index += 94
+        shellcode_draw.pushad()
+        shellcode_draw.push_byte(1)
+        shellcode_draw.push_exx(asm.EBX)
+        shellcode_draw.push_exx(asm.EDI)
+        shellcode_draw.push_exx(asm.ECX)
+        shellcode_draw.mov_exx_eyy(asm.EAX,asm.ESI)
+        shellcode_draw.call(0x00586D50)
+        shellcode_draw.popad()
+        shellcode_draw.add_exx_byte(asm.EDX,1)
+        shellcode_draw.cmp_exx_eyy(asm.EDX,asm.EBP)
+        shellcode_draw.jle_offset(0xa4)
+        shellcode_draw.popad()
+        shellcode_draw.ret_word(0xc)
+        shellcode_draw.cmp_dword_ptr_exx_add_dword_byte(asm.EBP,0x5748,0)
+        shellcode_draw.jmp(0x0041AAC5)
+        data.PVZ_memory.write_bytes(newmem_draw, bytes(
+            shellcode_draw.code[:shellcode_draw.index]), shellcode_draw.index)
+        data.PVZ_memory.write_bytes(
+            0x0041AABE, b'\xe9'+calculate_call_address(newmem_draw-0x0041AAC3)+b'\x90\x90', 7)
+    else:
+        data.PVZ_memory.write_bytes(
+            0x0041B29B, b'\x52\xe8\xff\x12\x10\x00', 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_pauseProKey)
+        
+        
+        data.PVZ_memory.write_bytes(
+            0x00415DF0, b'\x80\x8d\x64\x01\x00\x00\x00', 7)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_pause)
+        
+        data.PVZ_memory.write_bytes(
+            0x0041AABE, b'\x83\xbd\x48\x57\x00\x00\x00', 7)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_draw)
