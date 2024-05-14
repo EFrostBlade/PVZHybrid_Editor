@@ -20,10 +20,10 @@ zombiesType = ["普僵", "旗帜", "路障", "撑杆", "铁桶", "冰车二爷",
                "舞伴", "泳圈普僵", "潜水", "冰车巨人", "雪橇", "海豚机枪", "小丑", "气球舞王", "矿工",
                "跳跳", "冰车雪人", "飞贼", "扶梯", "篮球", "巨人", "小鬼", "僵王", "豌豆僵尸",
                "坚果僵尸", "辣椒僵尸", "机枪僵尸", "冰窝瓜僵尸", "高冰果僵尸", "红眼", "迪斯科",
-               "舞者", "骷髅","死灵法师","火焰迪斯科","火焰舞者","小黄鸭僵尸","床车僵尸","小摔哥僵尸"]
+               "舞者", "骷髅", "死灵法师", "火焰迪斯科", "火焰舞者", "小黄鸭僵尸", "床车僵尸", "小摔哥僵尸"]
 
 itemType = ["未知0", "墓碑", "坑洞", "梯子", "蓝色传送门", "白色传送门", "未知6", "罐子", "未知8",
-            "未知9", "蜗牛", "钉耙", "脑子","未知13","未知14","小黄鸭"]
+            "未知9", "蜗牛", "钉耙", "脑子", "未知13", "未知14", "小黄鸭"]
 plantsType = ['豌豆向日葵', '阳光豆', '阳光炸弹', '火炬坚果', '阳光土豆雷', '寒冰香蒲', '大蒜花',
               '双发仙人掌', '小盆菇', '阳光向日葵', '冰瓜大喷菇', '墓碑埋雷者', '红眼菇', '阳光胆小菇',
               '雪花寒冰菇', '魅惑毁灭菇', '豌豆睡莲', '冰菇窝瓜', '豌豆许愿池', '毁灭海草', '樱桃辣椒',
@@ -40,15 +40,15 @@ plantsType = ['豌豆向日葵', '阳光豆', '阳光炸弹', '火炬坚果', '�
               '至尊VIP坚果', '僵尸坚果墙', '魅惑菇射手', '财神金盏花', '猫砂盆', '坑洞坚果', 'QQ弹弹大喷菇',
               '寒冰地刺', '土杨桃', '精灵菇', '川菜投手', '坚果模仿者', '窝瓜坚果', '冰冻坚果', '头脑风暴',
               '宝藏吞噬者', '全息卡牌投影', '成长咖啡豆', '寒光菇', '骄阳豌豆射手', '荧光木槌', '狂野机枪射手',
-              '生命重塑者', '双生樱桃', '幸运四叶草', '黄金向日葵','土豆加农炮','惩戒牢笼','备用物资','地刺大嘴花',
-                '僵尸豆','禁忌毁灭菇','消消乐糖果','海冰菇','莲叶壳','小猫向日葵']
-for _ in range(len(plantsType),256):
+              '生命重塑者', '双生樱桃', '幸运四叶草', '黄金向日葵', '土豆加农炮', '惩戒牢笼', '备用物资', '地刺大嘴花',
+              '僵尸豆', '禁忌毁灭菇', '消消乐糖果', '海冰菇', '莲叶壳', '小猫向日葵']
+for _ in range(len(plantsType), 256):
     plantsType.append('占位')
-plantsType=plantsType+["普僵", "旗帜", "路障", "撑杆", "铁桶", "冰车二爷", "铁门", "黑橄榄", "武装舞王",
-               "舞伴", "泳圈普僵", "潜水", "冰车巨人", "雪橇", "海豚机枪", "小丑", "气球舞王", "矿工",
-               "跳跳", "冰车雪人", "飞贼", "扶梯", "篮球", "巨人", "小鬼", "僵王", "豌豆僵尸",
-               "坚果僵尸", "辣椒僵尸", "机枪僵尸", "冰窝瓜僵尸", "高冰果僵尸", "红眼", "迪斯科",
-               "舞者", "骷髅","死灵法师","火焰迪斯科","火焰舞者","小黄鸭僵尸","床车僵尸","小摔哥僵尸"]
+plantsType = plantsType+["普僵", "旗帜", "路障", "撑杆", "铁桶", "冰车二爷", "铁门", "黑橄榄", "武装舞王",
+                         "舞伴", "泳圈普僵", "潜水", "冰车巨人", "雪橇", "海豚机枪", "小丑", "气球舞王", "矿工",
+                         "跳跳", "冰车雪人", "飞贼", "扶梯", "篮球", "巨人", "小鬼", "僵王", "豌豆僵尸",
+                         "坚果僵尸", "辣椒僵尸", "机枪僵尸", "冰窝瓜僵尸", "高冰果僵尸", "红眼", "迪斯科",
+                         "舞者", "骷髅", "死灵法师", "火焰迪斯科", "火焰舞者", "小黄鸭僵尸", "床车僵尸", "小摔哥僵尸"]
 plantPutType = ['豌豆向日葵', '阳光豆', '阳光炸弹', '火炬坚果', '阳光土豆雷', '寒冰香蒲', '大蒜花',
                 '双发仙人掌', '小盆菇', '阳光向日葵', '冰瓜大喷菇', '墓碑埋雷者', '红眼菇', '阳光胆小菇',
                 '雪花寒冰菇', '魅惑毁灭菇', '豌豆睡莲', '冰菇窝瓜', '豌豆许愿池', '毁灭海草', '樱桃辣椒',
@@ -61,12 +61,12 @@ plantPutType = ['豌豆向日葵', '阳光豆', '阳光炸弹', '火炬坚果', 
                 '至尊VIP坚果', '僵尸坚果墙', '魅惑菇射手', '财神金盏花', '猫砂盆', '坑洞坚果', 'QQ弹弹大喷菇',
                 '寒冰地刺', '土杨桃', '精灵菇', '川菜投手', '坚果模仿者', '窝瓜坚果', '冰冻坚果', '头脑风暴',
                 '宝藏吞噬者', '全息卡牌投影', '成长咖啡豆', '寒光菇', '骄阳豌豆射手', '荧光木槌', '狂野机枪射手',
-                '生命重塑者', '双生樱桃', '幸运四叶草', '黄金向日葵','土豆加农炮','惩戒牢笼','备用物资','地刺大嘴花',
-                '僵尸豆','禁忌毁灭菇','消消乐糖果','海冰菇','莲叶壳','小猫向日葵'
+                '生命重塑者', '双生樱桃', '幸运四叶草', '黄金向日葵', '土豆加农炮', '惩戒牢笼', '备用物资', '地刺大嘴花',
+                '僵尸豆', '禁忌毁灭菇', '消消乐糖果', '海冰菇', '莲叶壳', '小猫向日葵'
                 ]
 bulletType = ['豌豆', '冰豌豆', '卷心菜', '西瓜', '孢子', '冰西瓜', '火球(隐形)', '星星', '仙人掌刺', '篮球',
               '玉米粒', '毁灭菇', '黄油', '僵尸豌豆', '小阳光菇', '大阳光菇', '黑色豌豆', '寒冰刺', '魅惑箭',
-              '银币', '金币', '钻石', '土豆雷', '川菜', '辣椒', '白火球','土豆加农炮(无伤害)','冰孢子',"小阳光"]
+              '银币', '金币', '钻石', '土豆雷', '川菜', '辣椒', '白火球', '土豆加农炮(无伤害)', '冰孢子', "小阳光"]
 keyTpye = ['无', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
            'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
            '小0', '小1', '小2', '小3', '小4', '小5', '小6',
@@ -92,19 +92,19 @@ class plant:
         self.row = PVZ_memory.read_int(self.addr+0x1c)
         self.col = PVZ_memory.read_int(self.addr+0x28)
         self.type = PVZ_memory.read_int(self.addr+0x24)
-        #2c 抖动倒计时
-        #30 抖动动画索引
+        # 2c 抖动倒计时
+        # 30 抖动动画索引
         self.state = PVZ_memory.read_int(self.addr+0x3c)
-        self.hp = PVZ_memory.read_int(self.addr+0x40)  #血量
+        self.hp = PVZ_memory.read_int(self.addr+0x40)  # 血量
         self.maxhp = PVZ_memory.read_int(self.addr+0x44)
         self.dieTime = PVZ_memory.read_int(self.addr+0x4c)
-        self.cinderTime = PVZ_memory.read_int(self.addr+0x50)   
-        self.effectTime = PVZ_memory.read_int(self.addr+0x54)  #阳光豆长大
+        self.cinderTime = PVZ_memory.read_int(self.addr+0x50)
+        self.effectTime = PVZ_memory.read_int(self.addr+0x54)  # 阳光豆长大
         self.productTime = PVZ_memory.read_int(self.addr+0x58)  # 常规攻击
-        self.productInterval = PVZ_memory.read_int(self.addr+0x5c) #常规攻击间隔
-        self.attackTime = PVZ_memory.read_int(self.addr+0x90)  
+        self.productInterval = PVZ_memory.read_int(self.addr+0x5c)  # 常规攻击间隔
+        self.attackTime = PVZ_memory.read_int(self.addr+0x90)
         self.sunTime = PVZ_memory.read_int(self.addr+0xdc)
-        self.humTime = PVZ_memory.read_int(self.addr+0x128) #阳光生产
+        self.humTime = PVZ_memory.read_int(self.addr+0x128)  # 阳光生产
         self.mushroomTime = PVZ_memory.read_int(self.addr+0x130)
         self.isVisible = PVZ_memory.read_bool(self.addr+0x18)
         self.isSquash = PVZ_memory.read_bool(self.addr+0x142)
@@ -289,16 +289,17 @@ class item:
     def setTime(self, time):
         PVZ_memory.write_int(self.addr+0x18, time)
 
+
 class car:
-    def __init__(self,addr):
-        self.addr=addr
+    def __init__(self, addr):
+        self.addr = addr
         self.exist = PVZ_memory.read_bool(self.addr+0x30)
         self.no = PVZ_memory.read_ushort(self.addr + 0x44)
         self.row = PVZ_memory.read_int(self.addr + 0x14)
 
-        
     def setExist(self, exist):
         PVZ_memory.write_bool(self.addr + 0x30, exist)
+
 
 class slot:
     def __init__(self, addr):
