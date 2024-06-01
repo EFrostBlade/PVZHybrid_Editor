@@ -3154,7 +3154,7 @@ def mainWindow():
     plant_bullet_frame = ttk.Labelframe(
         plant_page, text="植物子弹修改", bootstyle=SUCCESS
     )
-    plant_bullet_frame.place(x=370, y=0, anchor=NW, height=150, width=100)
+    plant_bullet_frame.place(x=370, y=0, anchor=NW, height=130, width=100)
     plant_type_bullet_combobox = ttk.Combobox(
         plant_bullet_frame,
         width=10,
@@ -3197,7 +3197,6 @@ def mainWindow():
         value=0,
         variable=plantBulletMode,
         bootstyle=PRIMARY,
-        command=lambda: pvz.setDifficult(gameDifficult.get()),
     ).grid(row=0, column=0, padx=2)
     ttk.Radiobutton(
         plant_bullet_mode_frame,
@@ -3205,7 +3204,6 @@ def mainWindow():
         value=8,
         variable=plantBulletMode,
         bootstyle=PRIMARY,
-        command=lambda: pvz.setDifficult(gameDifficult.get()),
     ).grid(row=0, column=1, padx=2)
     ttk.Radiobutton(
         plant_bullet_mode_frame,
@@ -3213,7 +3211,6 @@ def mainWindow():
         value=9,
         variable=plantBulletMode,
         bootstyle=PRIMARY,
-        command=lambda: pvz.setDifficult(gameDifficult.get()),
     ).grid(row=1, column=0, padx=2)
     ttk.Radiobutton(
         plant_bullet_mode_frame,
@@ -3221,9 +3218,40 @@ def mainWindow():
         value=6,
         variable=plantBulletMode,
         bootstyle=PRIMARY,
-        command=lambda: pvz.setDifficult(gameDifficult.get()),
     ).grid(row=1, column=1, padx=2)
     plantBulletMode.set(0)
+
+    # bullet_damage_frame = ttk.Labelframe(
+    #     plant_page, text="简易子弹伤害修改", bootstyle=SUCCESS
+    # )
+    # bullet_damage_frame.place(x=370, y=140, anchor=NW, height=100, width=100)
+    # bullet_type_damage_combobox = ttk.Combobox(
+    #     bullet_damage_frame,
+    #     width=10,
+    #     values=data.bulletType,
+    #     font=("黑体", 8),
+    #     bootstyle=SECONDARY,
+    # )
+    # bullet_type_damage_combobox.pack()
+    # bullet_type_damage_combobox.insert(0, "选择子弹")
+    # bullet_type_damage_combobox.config(state=READONLY)
+    # bullet_damage_status = ttk.BooleanVar(bullet_damage_frame)
+    # bullet_type_damage_value = ttk.IntVar(bullet_damage_frame)
+    # ttk.Checkbutton(
+    #     bullet_damage_frame,
+    #     variable=bullet_damage_status,
+    #     text="修改伤害为",
+    #     bootstyle="success-round-toggle",
+    #     command=lambda: pvz.setBulletDamage(
+    #         bullet_damage_status.get(),
+    #         bullet_type_damage_combobox.current(),
+    #         bullet_type_damage_value.get(),
+    #     ),
+    # ).pack()
+    # bullet_type_damage_entry = ttk.Entry(
+    #     bullet_damage_frame, textvariable=bullet_type_damage_value, width=8
+    # )
+    # bullet_type_damage_entry.pack()
 
     def get_plant_select(event):
         global plant_select
@@ -5266,6 +5294,56 @@ def mainWindow():
         endless_frame.focus_set()
 
     endless_round_entry.bind("<Return>", setEndlessRound)
+    effect_frame = ttk.LabelFrame(other_page, text="生成特效")
+    effect_frame.pack(anchor=W)
+    ttk.Label(effect_frame, text="x").grid(row=0, column=0)
+    effect_x_value = ttk.IntVar(effect_frame)
+    effect_x_combobox = ttk.Combobox(
+        effect_frame,
+        textvariable=effect_x_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    effect_x_combobox.grid(row=0, column=1)
+    effect_x_value.set(300)
+    ttk.Label(effect_frame, text="y").grid(row=0, column=2)
+    effect_y_value = ttk.IntVar(effect_frame)
+    effect_y_combobox = ttk.Combobox(
+        effect_frame,
+        textvariable=effect_y_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    effect_y_combobox.grid(row=0, column=3)
+    effect_y_value.set(150)
+    ttk.Label(effect_frame, text="特效id").grid(row=1, column=0, columnspan=2)
+    effect_id = ttk.IntVar(effect_frame)
+    effect_id_entry = ttk.Spinbox(
+        effect_frame,
+        textvariable=effect_id,
+        font=("黑体", 8),
+        width=7,
+        from_=0,
+        to=100,
+    )
+    effect_id_entry.grid(row=1, column=2, columnspan=2, sticky=W)
+    effect_id.set(1)
+
+    ttk.Button(
+        effect_frame,
+        text="生成",
+        padding=0,
+        bootstyle=(OUTLINE, DANGER),
+        command=lambda: pvz.creatSpecialEffects(
+            effect_id.get(), effect_x_value.get(), effect_y_value.get()
+        ),
+    ).grid(row=1, column=4, sticky=E)
 
     def refreshData():
         if page_tab.index("current") == 0:
@@ -5305,31 +5383,54 @@ def mainWindow():
         main_window.after(100, refreshData)
 
     def load_plugin(main_window):
-        pyc_name = filedialog.askopenfilename(
-            title="选择pyc文件", filetypes=[("PYC files", "*.pyc")]
+        plugin_name = filedialog.askopenfilename(
+            title="选择插件文件",
+            filetypes=[("PVZHybrid_Editor插件文件", "*.pyc *.pyd")],
         )
-        if pyc_name:
-            print(f"选中的文件: {pyc_name}")
-            # 这里可以添加加载和使用pyc文件的代码
+        if plugin_name:
+            global plugin
+            print(f"选中的文件: {plugin_name}")
+            # 根据文件扩展名确定模块加载方式
+            if plugin_name.endswith(".pyc"):
+                spec = importlib.util.spec_from_file_location(
+                    "plugin_module", plugin_name
+                )
+                plugin = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(plugin)
+                # 假设插件有一个名为open_plugin_window的函数
+                plugin.open_plugin_window(main_window)
+            elif plugin_name.endswith(".pyd"):
+                print(plugin_name)
+                filename_with_extension = os.path.basename(plugin_name)
+                filename_without_extension = os.path.splitext(filename_with_extension)[
+                    0
+                ]
+                # # 生成导入语句
+                # import_statement = f"import {ilename_without_extension} as plugin"
+                # print(ilename_without_extension)
+                # 在全局作用域内执行导入语句
+                globals()[filename_without_extension] = __import__(
+                    filename_without_extension
+                )
+                globals()["plugin"] = globals()[filename_without_extension]
+                plugin.open_plugin_window(main_window)
+
+            else:
+                print("不支持的文件类型")
+                return
         else:
             print("没有选择文件")
-        spec = importlib.util.spec_from_file_location("module.name", pyc_name)
-        plugin = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(plugin)
-        plugin.open_plugin_window(main_window)
-        # plugin=ctypes.CDLL(pyc_name)
-        # plugin.open_plugin_window(main_window)
-        # import {pyc_name} as plugin
 
+    # 创建一个按钮，用于加载插件
     plugin_button = ttk.Button(
         main_window,
         text="载入插件",
         padding=0,
-        bootstyle=(PRIMARY, LINK),
+        bootstyle="primary",
         cursor="hand2",
         command=lambda: load_plugin(main_window),
     )
-    plugin_button.place(x=100, y=0, relx=0, rely=1, anchor=SW)
+    plugin_button.place(x=100, y=0, relx=0, rely=1, anchor="sw")
 
     support_button = ttk.Button(
         main_window,

@@ -32,6 +32,8 @@ newmem_setBulletPosition = None
 newmem_setPlantBullet = None
 newmem_caption = None
 newmem_setOneBullet = None
+newmem_setBulletDamage = None
+newmem_globalSpawModify = None
 
 
 def calculate_call_address(ctypes_obj):
@@ -510,9 +512,10 @@ def randomSlots_operstion(randomSlots_event):
             + 0x144
         )
         for i in range(0, 14):
-            plant = random.randint(0, 86)
+            plant = random.randint(0, 297)
             if plant >= 48:
                 plant = plant + 27
+            # plant = random.randint(257, 297)
             data.PVZ_memory.write_int(
                 data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
             )
@@ -2410,3 +2413,100 @@ def morph_all_plant():
             plantType = 78
         putPlant(p.row, p.col, plantType)
         p.setExist(True)
+
+
+def plantInvincible(f):
+    PlantsConotExplodeDeath(f)
+    PlantConnotBurnedDeath(f)
+    PlantConnotBitedDeath(f)
+    PlantConnotCrushedDeath(f)
+    PlantConnotHitedDeath(f)
+    PlantConnotStolen(f)
+
+
+def PlantsConotExplodeDeath(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0041CC2F, b"\xeb", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x0041CC2F, b"\x74", 1)
+
+
+def PlantConnotBurnedDeath(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x005276EA, b"\xeb", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x005276EA, b"\x75", 1)
+
+
+def PlantConnotBitedDeath(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0052FCF3, b"\x00", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x0052FCF3, b"\xfc", 1)
+
+
+def PlantConnotCrushedDeath(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0052E93B, b"\xeb", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x0052E93B, b"\x74", 1)
+
+
+def PlantConnotHitedDeath(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0046CFEB, b"\x90\x90\x90", 3)
+        data.PVZ_memory.write_bytes(0x0046D7A6, b"\x90\x90\x90", 3)
+        data.PVZ_memory.write_bytes(0x0084F15D, b"\x90\x90\x90", 3)
+        data.PVZ_memory.write_bytes(0x0046CFEB, b"\x90\x90\x90", 3)
+    else:
+        data.PVZ_memory.write_bytes(0x0046CFEB, b"\x29\x50\x40", 3)
+        data.PVZ_memory.write_bytes(0x0046D7A6, b"\x29\x50\x40", 3)
+        data.PVZ_memory.write_bytes(0x0084F15D, b"\x29\x50\x40", 3)
+        data.PVZ_memory.write_bytes(0x0046CFEB, b"\x29\x50\x40", 3)
+
+
+def PlantConnotStolen(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x00524D33, b"\xeb", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x00524D33, b"\x74", 1)
+
+
+def fogDraw(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x80", 2)
+    else:
+        data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x84", 2)
+
+
+def globalSpawModify(f, zombieTypes):
+    global newmem_globalSpawModify
+    if f:
+        newmem_globalSpawModify = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_globalSpawModify)
+        for i in range(0, 42):
+            if str(i) in zombieTypes:
+                shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+            else:
+                shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+        shellcode.jmp(0x00425D1D)
+        data.PVZ_memory.write_bytes(
+            newmem_globalSpawModify,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00820CFF,
+            b"\xe9"
+            + calculate_call_address(newmem_globalSpawModify - 0x00820D04)
+            + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x00820CFF, b"\x0f\x85\x21\x00\x00\x00", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_globalSpawModify
+        )

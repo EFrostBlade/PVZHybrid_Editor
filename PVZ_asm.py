@@ -299,7 +299,7 @@ class Asm:
 
     def mov_byte_ptr_exx_add_dword_byte(self, exx, val, val2):
         self.add_byte(0xC6)
-        self.add_byte(0x80 + exx * 8)
+        self.add_byte(0x80 + exx)
         self.add_dword(val)
         self.add_byte(val2)
 

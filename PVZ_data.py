@@ -60,7 +60,12 @@ zombiesType = [
     "床车僵尸",
     "小摔哥僵尸",
 ]
-
+zombieSpaw = zombiesType + [
+    "绿帽概率",
+    "橄榄废稿头",
+    "舞王废稿头",
+    "巨人废稿头",
+]
 itemType = [
     "未知0",
     "墓碑",
@@ -269,7 +274,7 @@ zombies_HP_addresses = {
     "舞王": 0x523530,
     "舞王的黑橄榄帽": 0x0085A501,
     "舞王的废稿头盔": 0x0085A56D,
-    "潜水的黑橄榄帽": 0x0085A025,
+    "潜水和投篮的黑橄榄帽": 0x0085A025,
     "大型冰车": 0x522DE1,
     "雪橇车": 0x523139,
     "雪橇小队": 0x0085AB94,
@@ -928,3 +933,39 @@ class plantCharacteristic:
 
     def setAttackInterval(self, attackInterval):
         PVZ_memory.write_int(self.addr + 0xC, attackInterval)
+
+
+class zombieType:
+    def __init__(self, type):
+        self.type = type
+        if type <= 41:
+            self.addr = 0x007A6000 + type * 0x1C
+            self.anime = PVZ_memory.read_int(self.addr + 0x4)
+            self.level = PVZ_memory.read_int(self.addr + 0x8)
+            self.weight = PVZ_memory.read_int(self.addr + 0x14)
+        elif type == 42:
+            self.weight = PVZ_memory.read_uchar(0x0085A887)
+        elif type == 43:
+            self.weight = PVZ_memory.read_uchar(0x0085A75F)
+        elif type == 44:
+            self.weight = PVZ_memory.read_uchar(0x0085A538)
+        elif type == 45:
+            self.weight = PVZ_memory.read_uchar(0x0085A613)
+
+    def setAnime(self, anime):
+        PVZ_memory.write_int(self.addr + 0x4, anime)
+
+    def setLevel(self, level):
+        PVZ_memory.write_int(self.addr + 0x4, level)
+
+    def setWeight(self, weight):
+        if self.type <= 41:
+            PVZ_memory.write_int(self.addr + 0x14, weight)
+        elif self.type == 42:
+            PVZ_memory.write_uchar(0x0085A887, weight)
+        elif self.type == 43:
+            PVZ_memory.write_uchar(0x0085A75F, weight)
+        elif self.type == 44:
+            PVZ_memory.write_uchar(0x0085A538, weight)
+        elif self.type == 45:
+            PVZ_memory.write_uchar(0x0085A613, weight)
