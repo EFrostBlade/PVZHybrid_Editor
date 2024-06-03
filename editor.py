@@ -8,7 +8,15 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from ttkbootstrap.constants import *
 import ttkbootstrap as ttk
 import tkinter as tk
-from tkinter import messagebox, Toplevel, Listbox, Checkbutton, IntVar, font
+from tkinter import (
+    messagebox,
+    Toplevel,
+    Listbox,
+    Checkbutton,
+    IntVar,
+    font,
+    simpledialog,
+)
 import importlib.util
 import requests
 import keyboard
@@ -29,9 +37,16 @@ from pyDes import *
 import binascii
 from pymem import Pymem
 from PIL import Image
+from Crypto import Random
+from typing import List, Dict
+from datetime import datetime, timedelta
+import base64
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5
+from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.25"
+current_version = "0.26"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -340,6 +355,11 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.26\n"
+        "新增显血修复，可以显示浓雾、隐形僵尸及僵王的血量\n"
+        "新增生成特效，位于暂未分类标签页\n"
+        "新增生成子弹，可以自由编排炫酷的弹幕，位于暂未分类标签页 \n"
+        "新增出怪修改功能，可以修改关卡的出怪\n"
         "b0.25\n"
         "修复了僵尸豆魅惑失效\n"
         "快捷键种植适配2.088的显血并移动到了第一页\n"
@@ -499,7 +519,7 @@ def mainWindow():
 
         update_window = ttk.Toplevel(topmost=True)
         update_window.title("有新版本")
-        update_window.geometry("320x400")
+        update_window.geometry("320x500")
         update_window.iconphoto(
             False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
         )
@@ -515,7 +535,27 @@ def mainWindow():
         ).pack()
         ttk.Label(
             update_window, text="本软件完全免费", font=("黑体", 18), bootstyle=SUCCESS
-        ).pack(pady=20)
+        ).pack(pady=10)
+
+        def open_qq0():
+            webbrowser.open_new("https://qm.qq.com/q/arrZGcHwpG")
+
+        qq0_frame = ttk.Frame(update_window)
+        qq0_frame.pack()
+        ttk.Label(qq0_frame, text="交流群：", font=("黑体", 8), bootstyle=INFO).pack(
+            side=LEFT
+        )
+        ttk.Button(
+            qq0_frame,
+            text="970286809",
+            padding=0,
+            bootstyle=(PRIMARY, LINK),
+            cursor="hand2",
+            command=open_qq0,
+        ).pack(side=LEFT)
+        ttk.Label(
+            update_window, text="有问题可以加群反馈", font=("黑体", 8), bootstyle=INFO
+        ).pack()
         github_frame = ttk.Frame(update_window)
         github_frame.pack()
         ttk.Label(
@@ -1982,19 +2022,21 @@ def mainWindow():
             endCol = zombiePut_end_col_value.get() - 1
             if type == 25:
                 pvz.putBoss()
-            print(startRow, startCol, endRow, endCol, type)
-            if pvz.getMap is not False:
-                rows = pvz.getMap() - 1
-                if startRow > rows:
-                    startRow = rows
-                if endRow > rows:
-                    endRow = rows
-                if startRow > endRow or startCol > endCol:
-                    Messagebox.show_error("起始行列大于终止行列", title="输入错误")
-                else:
-                    for i in range(startRow, endRow + 1):
-                        for j in range(startCol, endCol + 1):
-                            pvz.putZombie(i, j, type)
+                print(type)
+            else:
+                print(startRow, startCol, endRow, endCol, type)
+                if pvz.getMap is not False:
+                    rows = pvz.getMap() - 1
+                    if startRow > rows:
+                        startRow = rows
+                    if endRow > rows:
+                        endRow = rows
+                    if startRow > endRow or startCol > endCol:
+                        Messagebox.show_error("起始行列大于终止行列", title="输入错误")
+                    else:
+                        for i in range(startRow, endRow + 1):
+                            for j in range(startCol, endCol + 1):
+                                pvz.putZombie(i, j, type)
 
     ttk.Button(
         zombie_put_frame,
@@ -4745,6 +4787,7 @@ def mainWindow():
     )
     slot_7_key.grid(row=0, column=13)
     slot_7_key.current(0)
+    ttk.Label(card_select_frame, text="8:").grid(row=1, column=0)
     slot_8_key = ttk.Combobox(
         card_select_frame,
         width=3,
@@ -4852,7 +4895,6 @@ def mainWindow():
     slot_plant_hp_key.grid(row=0, column=5)
     slot_plant_hp_key.current(0)
     # ToolTip(plant_hp_key_label, text="显示僵尸血量", bootstyle=(INFO, INVERSE))
-    ttk.Label(function_key_frame, text="8:").grid(row=1, column=0)
     top_key_label = ttk.Label(function_key_frame, text="卡槽置顶:")
     top_key_label.grid(row=0, column=6)
     slot_top_key = ttk.Combobox(
@@ -5173,6 +5215,36 @@ def mainWindow():
     )
     slot_key_check.grid(row=0, column=8, columnspan=4)
 
+    hp_show_frame = ttk.LabelFrame(common_page, text="显血修复", bootstyle=DANGER)
+    hp_show_frame.place(x=460, y=440, relx=0, anchor=NW)
+    fog_hp_status = ttk.BooleanVar(hp_show_frame)
+    fog_hp_check = ttk.Checkbutton(
+        hp_show_frame,
+        text="浓雾显血",
+        variable=fog_hp_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.fogDraw(fog_hp_status.get()),
+    )
+    fog_hp_check.pack()
+    invisible_hp_status = ttk.BooleanVar(hp_show_frame)
+    invisible_hp_check = ttk.Checkbutton(
+        hp_show_frame,
+        text="隐形显血",
+        variable=invisible_hp_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.invisibleDraw(invisible_hp_status.get()),
+    )
+    invisible_hp_check.pack()
+    boss_hp_status = ttk.BooleanVar(hp_show_frame)
+    boss_hp_check = ttk.Checkbutton(
+        hp_show_frame,
+        text="僵王显血",
+        variable=boss_hp_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.bossHPDraw(boss_hp_status.get()),
+    )
+    boss_hp_check.pack()
+
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
         for index, slot in enumerate(slot_list):
@@ -5298,27 +5370,23 @@ def mainWindow():
     effect_frame.pack(anchor=W)
     ttk.Label(effect_frame, text="x").grid(row=0, column=0)
     effect_x_value = ttk.IntVar(effect_frame)
-    effect_x_combobox = ttk.Combobox(
+    effect_x_combobox = ttk.Entry(
         effect_frame,
         textvariable=effect_x_value,
-        width=2,
-        values=[1, 2, 3, 4, 5, 6],
+        width=4,
         font=("黑体", 8),
         bootstyle=SECONDARY,
-        state=READONLY,
     )
     effect_x_combobox.grid(row=0, column=1)
     effect_x_value.set(300)
     ttk.Label(effect_frame, text="y").grid(row=0, column=2)
     effect_y_value = ttk.IntVar(effect_frame)
-    effect_y_combobox = ttk.Combobox(
+    effect_y_combobox = ttk.Entry(
         effect_frame,
         textvariable=effect_y_value,
-        width=2,
-        values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        width=4,
         font=("黑体", 8),
         bootstyle=SECONDARY,
-        state=READONLY,
     )
     effect_y_combobox.grid(row=0, column=3)
     effect_y_value.set(150)
@@ -5344,6 +5412,234 @@ def mainWindow():
             effect_id.get(), effect_x_value.get(), effect_y_value.get()
         ),
     ).grid(row=1, column=4, sticky=E)
+
+    bullet_creat_frame = ttk.LabelFrame(other_page, text="生成子弹")
+    bullet_creat_frame.pack(anchor=W)
+
+    # 添加子弹到文本框的函数
+    def add_bullet():
+        bullet_type = bullet_type_combobox.get()
+        x = x_entry.get()
+        y = y_entry.get()
+        v_x = vx_entry.get()
+        v_y = vy_entry.get()
+        bullet_list.insert(tk.END, f"{bullet_type}, {x}, {y}, {v_x}, {v_y}\n")
+
+    # 从文本框生成所有子弹的函数
+    def generate_bullets():
+        bullets_list = []
+        bullets = bullet_list.get("1.0", tk.END).strip().split("\n")
+        for bullet in bullets:
+            bullet_type, x, y, v_x, v_y = bullet.split(", ")
+            try:
+                bullet_index = data.bulletType.index(bullet_type)
+                bullets_list.append(
+                    (bullet_index, int(x), int(y), float(v_x), float(v_y))
+                )
+                print(bullets_list)
+            except ValueError:
+                print(f"{bullet_type} 不在列表中。")
+        pvz.creatBullet(bullets_list)
+
+    # 创建下拉框
+    bullet_type_combobox = ttk.Combobox(
+        bullet_creat_frame, values=data.bulletType, width=8
+    )
+    bullet_type_combobox.grid(row=0, column=0, columnspan=2)
+
+    # 创建输入框
+    ttk.Label(bullet_creat_frame, text="x坐标").grid(row=1, column=0)
+    x_entry = ttk.Entry(bullet_creat_frame, width=5)
+    x_entry.grid(row=1, column=1)
+    ttk.Label(bullet_creat_frame, text="y坐标").grid(row=2, column=0)
+    y_entry = ttk.Entry(bullet_creat_frame, width=5)
+    y_entry.grid(row=2, column=1)
+    ttk.Label(bullet_creat_frame, text="x速度").grid(row=3, column=0)
+    vx_entry = ttk.Entry(bullet_creat_frame, width=5)
+    vx_entry.grid(row=3, column=1)
+    ttk.Label(bullet_creat_frame, text="y速度").grid(row=4, column=0)
+    vy_entry = ttk.Entry(bullet_creat_frame, width=5)
+    vy_entry.grid(row=4, column=1)
+
+    # 创建添加按钮
+    add_button = ttk.Button(bullet_creat_frame, text="添加子弹", command=add_bullet)
+    add_button.grid(row=5, column=0, columnspan=2)
+
+    # 创建文本框
+    bullet_list = ttk.Text(bullet_creat_frame, height=10, width=20)
+    bullet_list.grid(row=0, column=2, rowspan=5, padx=10)
+
+    # 创建生成按钮
+    generate_button = ttk.Button(
+        bullet_creat_frame, text="生成子弹", command=generate_bullets
+    )
+    generate_button.grid(row=5, column=2)
+
+    zombie_spaw_page = ttk.Frame(page_tab)
+    zombie_spaw_page.pack()
+    page_tab.add(zombie_spaw_page, text="出怪修改")
+    spaw_multiplier_frame = ttk.Frame(zombie_spaw_page)
+    spaw_multiplier_frame.pack(anchor=W)
+    spaw_multiplier_status = ttk.BooleanVar(spaw_multiplier_frame)
+    spaw_multiplier_value = ttk.IntVar(spaw_multiplier_frame)
+    ttk.Label(spaw_multiplier_frame, text="出怪倍率", font=("黑体", 12)).pack(side=LEFT)
+    ttk.Spinbox(
+        spaw_multiplier_frame,
+        from_=0,
+        to=36,
+        textvariable=spaw_multiplier_value,
+        width=4,
+    ).pack(side=LEFT, padx=5)
+    ttk.Checkbutton(
+        spaw_multiplier_frame,
+        text="修改倍率",
+        variable=spaw_multiplier_status,
+        bootstyle="danger-round-toggle",
+    ).pack(side=LEFT)
+    spaw_num_value = ttk.IntVar(spaw_multiplier_frame)
+    spaw_num_status = ttk.BooleanVar(spaw_multiplier_frame)
+    ttk.Label(spaw_multiplier_frame, text="出怪波数", font=("黑体", 12)).pack(side=LEFT)
+    ttk.Spinbox(
+        spaw_multiplier_frame,
+        from_=0,
+        to=10,
+        textvariable=spaw_num_value,
+        width=4,
+    ).pack(side=LEFT, padx=5)
+    ttk.Checkbutton(
+        spaw_multiplier_frame,
+        text="修改波数",
+        variable=spaw_num_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.modifySpawNum(spaw_num_status.get(), spaw_num_value.get()),
+    ).pack(side=LEFT)
+    spaw_type_frame = ttk.LabelFrame(zombie_spaw_page, text="出怪修改")
+    spaw_type_frame.pack(anchor=W)
+
+    # 存储复选框状态的字典
+    checkboxes = {}
+    # 存储与权重绑定的IntVar对象的字典
+    weight_vars = {}
+    # 存储僵尸类型对象的字典
+    zombies = {}
+
+    def update_weights():
+        for zombie_name in data.zombieSpaw:
+            if checkboxes[zombie_name].get():
+                weight_var = weight_vars[zombie_name]
+                weight = weight_var.get()
+                try:
+                    weight = int(weight)
+                    zombies[zombie_name].setWeight(weight)
+                except ValueError:
+                    messagebox.showerror("错误", f"无效的权重值: {weight}")
+        selected_ids = [
+            str(idx)
+            for idx, zombie_name in enumerate(data.zombieSpaw)
+            if checkboxes[zombie_name].get()
+        ]
+        print(selected_ids)
+        pvz.globalSpawModify(1, selected_ids)
+        messagebox.showinfo("成功", "配置应用成功")
+
+    # 创建界面元素
+    for idx, zombie_name in enumerate(data.zombieSpaw):
+        row = idx // 4
+        col = idx % 4
+        var = ttk.IntVar()
+        chk = ttk.Checkbutton(spaw_type_frame, text=zombie_name + ":", variable=var)
+        chk.grid(row=row, column=col * 2, sticky=W)
+        checkboxes[zombie_name] = var
+
+        zombie = data.zombieType(idx)
+        zombies[zombie_name] = zombie
+        weight_var = ttk.IntVar(value=zombie.weight)
+        weight_vars[zombie_name] = weight_var
+        entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
+        entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
+
+    # 读取配置方案
+    def load_configurations():
+        try:
+            with open(resource_path("configurations.json"), "r") as json_file:
+                return json.load(json_file)
+        except FileNotFoundError:
+            return {}
+
+    # 保存配置方案
+    def save_configurations(configurations):
+        with open(resource_path("configurations.json"), "w") as json_file:
+            json.dump(configurations, json_file, indent=4)
+        messagebox.showinfo("成功", "配置更新成功")
+
+    # 更新下拉框选项
+    def update_combobox_options():
+        configurations = load_configurations()
+        combobox["values"] = list(configurations.keys())
+
+    # 新建配置方案并保存当前数据
+    def create_new_configuration():
+        name = simpledialog.askstring("新建配置", "请输入配置名称")
+        if name:
+            configurations = load_configurations()
+            current_data = {"selected": {}, "weights": {}}
+            for zombie_name in data.zombieSpaw:
+                current_data["selected"][zombie_name] = checkboxes[zombie_name].get()
+                current_data["weights"][zombie_name] = weight_vars[zombie_name].get()
+            configurations[name] = current_data
+            save_configurations(configurations)
+            update_combobox_options()
+            combobox.set(name)  # 设置下拉框为新建的配置名称
+
+    # 修改当前配置方案
+    def modify_current_configuration():
+        name = combobox.get()
+        if name:
+            configurations = load_configurations()
+            for zombie_name in data.zombieSpaw:
+                configurations[name]["selected"][zombie_name] = checkboxes[
+                    zombie_name
+                ].get()
+                configurations[name]["weights"][zombie_name] = weight_vars[
+                    zombie_name
+                ].get()
+            save_configurations(configurations)
+
+    # 应用选定的配置方案
+    def apply_configuration(name):
+        configurations = load_configurations()
+        if name in configurations:
+            for zombie_name in data.zombieSpaw:
+                checkboxes[zombie_name].set(
+                    configurations[name]["selected"].get(zombie_name, False)
+                )
+                weight_vars[zombie_name].set(
+                    configurations[name]["weights"].get(zombie_name, 0)
+                )
+
+    # 添加按钮
+    update_btn = ttk.Button(spaw_type_frame, text="应用配置", command=update_weights)
+    update_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=4)
+
+    # 创建下拉框和按钮
+    combobox = ttk.Combobox(spaw_type_frame, width=12)
+    combobox.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=0, columnspan=2)
+    combobox.bind(
+        "<<ComboboxSelected>>", lambda event: apply_configuration(combobox.get())
+    )
+
+    create_btn = ttk.Button(
+        spaw_type_frame, text="新建配置", command=create_new_configuration
+    )
+    create_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=2)
+
+    modify_btn = ttk.Button(
+        spaw_type_frame, text="保存配置", command=modify_current_configuration
+    )
+    modify_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=3)
+
+    # 初始化下拉框选项
+    update_combobox_options()
 
     def refreshData():
         if page_tab.index("current") == 0:
@@ -5377,8 +5673,11 @@ def mainWindow():
                 refresh_slot_list()
                 get_slot_attribute()
         if page_tab.index("current") == 5:
-            if main_window.focus_get() != endless_round_entry:
-                endless_round.set(pvz.getEndlessRound())
+            try:
+                if main_window.focus_get() != endless_round_entry:
+                    endless_round.set(pvz.getEndlessRound())
+            except:
+                pass
 
         main_window.after(100, refreshData)
 
@@ -5402,6 +5701,7 @@ def mainWindow():
             elif plugin_name.endswith(".pyd"):
                 print(plugin_name)
                 filename_with_extension = os.path.basename(plugin_name)
+                directory_path = os.path.dirname(plugin_name)
                 filename_without_extension = os.path.splitext(filename_with_extension)[
                     0
                 ]
@@ -5409,6 +5709,8 @@ def mainWindow():
                 # import_statement = f"import {ilename_without_extension} as plugin"
                 # print(ilename_without_extension)
                 # 在全局作用域内执行导入语句
+                print(directory_path)
+                sys.path.append(directory_path)
                 globals()[filename_without_extension] = __import__(
                     filename_without_extension
                 )
