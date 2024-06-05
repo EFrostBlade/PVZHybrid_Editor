@@ -916,23 +916,43 @@ class slot:
 
 class plantCharacteristic:
     def __init__(self, type):
-        self.addr = 0x007A2010 + type * 0x24
-        self.sun = PVZ_memory.read_int(self.addr)
-        self.cd = PVZ_memory.read_int(self.addr + 0x4)
-        self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
-        self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+        self.type = type
+        if type < 256:
+            self.addr = 0x007A2010 + type * 0x24
+            self.sun = PVZ_memory.read_int(self.addr)
+            self.cd = PVZ_memory.read_int(self.addr + 0x4)
+            self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
+            self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+        else:
+            self.addr = 0x008452C8 + type - 256
+            self.sun = PVZ_memory.read_uchar(self.addr)
+            self.cd = 0
+            self.canAttack = True
+            self.attackInterval = 0
 
     def setSun(self, sun):
-        PVZ_memory.write_int(self.addr, sun)
+        if self.type < 256:
+            PVZ_memory.write_int(self.addr, sun)
+        else:
+            PVZ_memory.write_uchar(self.addr, sun)
 
     def setCd(self, cd):
-        PVZ_memory.write_int(self.addr + 0x4, cd)
+        if self.type < 256:
+            PVZ_memory.write_int(self.addr + 0x4, cd)
+        else:
+            pass
 
     def setCanAttack(self, canAttack):
-        PVZ_memory.write_bool(self.addr + 0x8, canAttack)
+        if self.type < 256:
+            PVZ_memory.write_bool(self.addr + 0x8, canAttack)
+        else:
+            pass
 
     def setAttackInterval(self, attackInterval):
-        PVZ_memory.write_int(self.addr + 0xC, attackInterval)
+        if self.type < 256:
+            PVZ_memory.write_int(self.addr + 0xC, attackInterval)
+        else:
+            pass
 
 
 class zombieType:

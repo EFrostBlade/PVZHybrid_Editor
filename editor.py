@@ -27,6 +27,7 @@ import sys
 import os
 import time
 import re
+import random
 import psutil
 import win32process
 import win32gui
@@ -46,7 +47,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.26"
+current_version = "0.27"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -355,6 +356,12 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.27\n"
+        "修复了随机卡槽闪退，新增随机僵尸卡槽\n"
+        "植物属性修改里可以修改僵尸卡阳光消耗\n"
+        "修复了一些可能会导致快捷键失效的问题\n"
+        "修复了出怪倍率过高及出怪种类过少可能会不生效或闪退的问题\n"
+        "新增跳关功能，可以进入隐藏关卡，位于暂未分类标签页\n"
         "b0.26\n"
         "新增显血修复，可以显示浓雾、隐形僵尸及僵王的血量\n"
         "新增生成特效，位于暂未分类标签页\n"
@@ -1438,13 +1445,13 @@ def mainWindow():
         elif action == 15:
             clearPlants()
         elif action == 16:
-            putZombies()
+            putZombies(zombiePut_type_combobox.current(), zombiePut_num.get())
         elif action == 17:
-            putZombies(pvz.defeat())
+            pvz.defeat()
         elif action == 18:
-            putZombies(pvz.save())
+            pvz.save()
         elif action == 19:
-            putZombies(pvz.load())
+            pvz.load()
         elif action == 20:
             if game_speed_value.get() < 6:
                 game_speed_value.set(game_speed_value.get() + 1)
@@ -3089,7 +3096,7 @@ def mainWindow():
     all_bullet_frame = ttk.Frame(bullet_frame)
     all_bullet_frame.pack(anchor=W)
     all_bullet_status = ttk.BooleanVar(all_bullet_frame)
-    bullet_type_combobox = ttk.Combobox(
+    bullet_type_modify_combobox = ttk.Combobox(
         all_bullet_frame,
         width=10,
         values=data.bulletType,
@@ -3097,15 +3104,15 @@ def mainWindow():
         bootstyle=SECONDARY,
         state=READONLY,
     )
-    bullet_type_combobox.pack(side=RIGHT)
-    bullet_type_combobox.current(0)
+    bullet_type_modify_combobox.pack(side=RIGHT)
+    bullet_type_modify_combobox.current(0)
     ttk.Checkbutton(
         all_bullet_frame,
         variable=all_bullet_status,
         text="修改所有子弹为",
         bootstyle="success-round-toggle",
         command=lambda: pvz.setAllBullet(
-            all_bullet_status.get(), bullet_type_combobox.current()
+            all_bullet_status.get(), bullet_type_modify_combobox.current()
         ),
     ).pack(side=RIGHT)
     random_bullet_frame = ttk.Frame(bullet_frame)
@@ -4372,14 +4379,23 @@ def mainWindow():
     )
     change_all_combobox.pack()
     random_slots_status = ttk.BooleanVar(slots_config_frame)
+    random_slots_haszombie_status = ttk.BooleanVar(slots_config_frame)
     random_slots_check = ttk.Checkbutton(
         slots_config_frame,
         text="卡槽随机变化",
         variable=random_slots_status,
         bootstyle="success-round-toggle",
-        command=lambda: pvz.randomSlots(random_slots_status.get()),
+        command=lambda: pvz.randomSlots(
+            random_slots_status.get(), random_slots_haszombie_status.get()
+        ),
     )
     random_slots_check.pack(pady=5, anchor=W)
+    random_slots_haszombie_check = ttk.Checkbutton(
+        slots_config_frame,
+        text="僵尸卡槽",
+        variable=random_slots_haszombie_status,
+    )
+    random_slots_haszombie_check.pack()
 
     def change_all_slots(event):
         if slots_configuration_mode.get() is False:
@@ -5285,7 +5301,6 @@ def mainWindow():
     other_page = ttk.Frame(page_tab)
     other_page.pack()
     page_tab.add(other_page, text="暂未分类")
-    endless_frame = ttk.Frame(other_page)
     other_toggle_frame = ttk.LabelFrame(other_page, text="未分类开关")
     other_toggle_frame.pack(anchor=W)
 
@@ -5355,6 +5370,7 @@ def mainWindow():
         command=lambda: pvz.scrapHelmetControlled(scrap_helmet_controlled_status.get()),
     )
     scrap_helmet_controlled_check.pack()
+    endless_frame = ttk.Frame(other_page)
     endless_frame.pack(anchor=W)
     ttk.Label(endless_frame, text="无尽轮数").pack(side=LEFT)
     endless_round = ttk.IntVar(endless_frame)
@@ -5366,6 +5382,23 @@ def mainWindow():
         endless_frame.focus_set()
 
     endless_round_entry.bind("<Return>", setEndlessRound)
+
+    jump_level_frame = ttk.Frame(other_page)
+    jump_level_frame.pack(anchor=W)
+    jump_level_value = ttk.IntVar(jump_level_frame)
+    jump_level_status = ttk.BooleanVar(jump_level_frame)
+    jump_level_entry = ttk.Entry(
+        jump_level_frame, width=5, textvariable=jump_level_value
+    )
+    jump_level_entry.pack(side=LEFT)
+    ttk.Checkbutton(
+        jump_level_frame,
+        text="跳关",
+        bootstyle="success-round-toggle",
+        variable=jump_level_status,
+        command=lambda: pvz.lockLevel(jump_level_status.get(), jump_level_value.get()),
+    ).pack(side=LEFT)
+
     effect_frame = ttk.LabelFrame(other_page, text="生成特效")
     effect_frame.pack(anchor=W)
     ttk.Label(effect_frame, text="x").grid(row=0, column=0)
@@ -5495,6 +5528,9 @@ def mainWindow():
         text="修改倍率",
         variable=spaw_multiplier_status,
         bootstyle="danger-round-toggle",
+        command=lambda: pvz.modifySpawMultiplier(
+            spaw_multiplier_status.get(), spaw_multiplier_value.get()
+        ),
     ).pack(side=LEFT)
     spaw_num_value = ttk.IntVar(spaw_multiplier_frame)
     spaw_num_status = ttk.BooleanVar(spaw_multiplier_frame)
@@ -5678,7 +5714,9 @@ def mainWindow():
                     endless_round.set(pvz.getEndlessRound())
             except:
                 pass
-
+        recruit_button.configure(
+            bootstyle=random.choice(["danger", "success", "warning", "primary"])
+        )
         main_window.after(100, refreshData)
 
     def load_plugin(main_window):
@@ -5733,6 +5771,40 @@ def mainWindow():
         command=lambda: load_plugin(main_window),
     )
     plugin_button.place(x=100, y=0, relx=0, rely=1, anchor="sw")
+
+    def recruit():
+        global main_window
+        recruit_window = ttk.Toplevel(topmost=True)
+        recruit_window.title("主播招募")
+        recruit_window.geometry("300x460")
+        recruit_window.iconphoto(
+            False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
+        )
+        recruit_window.tk.call("tk", "scaling", 4 / 3)
+        main_window_x = main_window.winfo_x()
+        main_window_y = main_window.winfo_y()
+        recruit_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
+        ttk.Label(
+            recruit_window,
+            text="抖音直播工会，不扣点\n提供专业运营，全程跟播\n工会独家起号方法\n免费开权限，新出插件提前尝鲜\n想直播可添加下方微信\nE_FrostBlade",
+            font=("黑体", 14),
+            bootstyle=PRIMARY,
+        ).pack(pady=10)
+
+        WeChat = ttk.PhotoImage(file=resource_path(r"res/support/WeChat.png"))
+        AliPay_image = ttk.Label(recruit_window, image=WeChat)
+        AliPay_image.pack(pady=10)
+        recruit_window.mainloop()
+
+    recruit_button = ttk.Button(
+        main_window,
+        text="想做主播点这里",
+        padding=0,
+        bootstyle="danger",
+        cursor="hand2",
+        command=lambda: recruit(),
+    )
+    recruit_button.place(x=180, y=0, relx=0, rely=1, anchor="sw")
 
     support_button = ttk.Button(
         main_window,

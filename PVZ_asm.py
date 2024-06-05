@@ -238,6 +238,8 @@ class Asm:
     def cmp_dword_ptr_exx_add_byte_byte(self, exx, val, val2):
         self.add_byte(0x83)
         self.add_byte(0x78 + exx)
+        if exx == ESP:
+            self.add_byte(0x24)
         self.add_byte(val)
         self.add_byte(val2)
 
@@ -390,6 +392,13 @@ class Asm:
         if exx == ESP:
             self.add_byte(0x24)
         self.add_byte(val)
+
+    def mov_ptr_exx_add_dword_eyy(self, exx, val, eyy):
+        self.add_byte(0x89)
+        self.add_byte(0x80 + exx + eyy * 8)
+        if exx == ESP:
+            self.add_byte(0x24)
+        self.add_dword(val)
 
     def mov_ptr_exx_add_byte_dword(self, exx, val, val2):
         self.add_byte(0xC7)

@@ -39,6 +39,12 @@ newmem_changeZombieDeadHead = None
 newmem_deathrattleCallZombie = None
 newmem_reserveMaterialDropAllCard = None
 newmem_modifySpawNum = None
+newmem_lockLevel = None
+newmem_divzero = None
+newmem_modifySpawMultiplier = None
+newmem_spawisModified = None
+newmem_bungeeTipFix = None
+newmem_bungeePutFix = None
 
 
 def calculate_call_address(ctypes_obj):
@@ -510,17 +516,19 @@ def shovelpro(f):
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
 
 
-def randomSlots_operstion(randomSlots_event):
+def randomSlots_operstion(randomSlots_event, haszombie):
     while not randomSlots_event.is_set():
         plant1addr = (
             data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress) + 0x768)
             + 0x144
         )
         for i in range(0, 14):
-            plant = random.randint(0, 297)
-            if plant >= 48:
-                plant = plant + 27
-            # plant = random.randint(257, 297)
+            if haszombie is False:
+                plant = random.randint(0, 96)
+                if plant >= 48:
+                    plant = plant + 27
+            else:
+                plant = random.randint(257, 297)
             data.PVZ_memory.write_int(
                 data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
             )
@@ -530,13 +538,13 @@ randomSlots_event = Event()
 randomSlots_thread = None
 
 
-def randomSlots(f):
+def randomSlots(f, haszombie):
     global randomSlots_thread
     if f:
         if not randomSlots_thread or not randomSlots_thread.is_alive():
             randomSlots_event.clear()
             randomSlots_thread = Thread(
-                target=randomSlots_operstion, args=(randomSlots_event,)
+                target=randomSlots_operstion, args=(randomSlots_event, haszombie)
             )
             randomSlots_thread.start()
     else:
@@ -1878,6 +1886,7 @@ def slotKey(slot_key_list):
 def setAllBullet(f, type):
     global newmem_setAllBullet
     if f:
+        print(type)
         newmem_setAllBullet = pymem.memory.allocate_memory(
             data.PVZ_memory.process_handle, 64
         )
@@ -2591,7 +2600,11 @@ def bossHPDraw(f):
 
 def spawisModified():
     global newmem_spawisModified
-    if newmem_modifySpawNum is not None or newmem_globalSpawModify is not None:
+    if (
+        newmem_modifySpawNum is not None
+        or newmem_globalSpawModify is not None
+        or newmem_modifySpawMultiplier is not None
+    ):
         newmem_spawisModified = pymem.memory.allocate_memory(
             data.PVZ_memory.process_handle, 256
         )
@@ -2685,12 +2698,46 @@ def modifySpawNum(f, num):
         data.PVZ_memory.write_bytes(0x0043A254, b"\x8b\x88\x64\x55\x00\x00", 6)
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_modifySpawNum)
         # newmem_modifySpawNum = None
+
+
+def modifySpawMultiplier(f, mult):
+    divzero(1)
+    unlimitedMonsterSpawning(1)
+    global newmem_modifySpawMultiplier
+    if f:
+        newmem_modifySpawMultiplier = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_modifySpawMultiplier)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 0x24, mult)
+        shellcode.jmp(0x00409968)
+        data.PVZ_memory.write_bytes(
+            newmem_modifySpawMultiplier,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00409893,
+            b"\xe9"
+            + calculate_call_address(newmem_modifySpawMultiplier - 0x00409898)
+            + b"\x90",
+            6,
+        )
         spawisModified()
+    else:
+        data.PVZ_memory.write_bytes(0x00409893, b"\xe9\x68\x37\x46\x00\x90", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_modifySpawMultiplier
+        )
 
 
 def globalSpawModify(f, zombieTypes):
+    divzero(1)
+    unlimitedMonsterSpawning(1)
     global newmem_globalSpawModify
     if f:
+        data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+        data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
         newmem_globalSpawModify = pymem.memory.allocate_memory(
             data.PVZ_memory.process_handle, 256
         )
@@ -2716,12 +2763,13 @@ def globalSpawModify(f, zombieTypes):
         )
         spawisModified()
     else:
+        data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+        data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xed\x9f\x42\x00", 5)
         data.PVZ_memory.write_bytes(0x00820CFF, b"\x0f\x85\x21\x00\x00\x00", 6)
         pymem.memory.free_memory(
             data.PVZ_memory.process_handle, newmem_globalSpawModify
         )
         # newmem_globalSpawModify = None
-        spawisModified()
 
 
 def changeZombieHead(f, zombieType):
@@ -2924,6 +2972,8 @@ def reserveMaterialDropAllCard(f, zombieWeight, lmpWeight):
         shellcode.je_offset(0xFFFFFF69)
         shellcode.cmp_exx_byte(asm.EAX, 114)
         shellcode.je_offset(0xFFFFFF60)
+        shellcode.cmp_exx_byte(asm.EAX, 118)
+        shellcode.je_offset(0xFFFFFF57)
         shellcode.mov_ptr_exx_add_byte_eyy(asm.EBX, 0x68, asm.EAX)
         shellcode.popad()
         shellcode.pushad()
@@ -3017,3 +3067,124 @@ def cardsNotDisappear(f):
         data.PVZ_memory.write_bytes(0x00430DD1, b"\x00", 1)
     else:
         data.PVZ_memory.write_bytes(0x00430DD1, b"\x01", 1)
+
+
+def lockLevel(f, level):
+    divzero(1)
+    unlimitedMonsterSpawning(1)
+    global newmem_lockLevel
+    if f:
+        newmem_lockLevel = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_lockLevel)
+        shellcode.mov_exx(asm.EAX, level)
+        shellcode.mov_ptr_exx_add_dword_eyy(asm.ESI, 0x7F8, asm.EAX)
+        shellcode.jmp(0x0044F587)
+        data.PVZ_memory.write_bytes(
+            newmem_lockLevel,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0044F581,
+            b"\xe9" + calculate_call_address(newmem_lockLevel - 0x0044F586) + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x0044F581, b"\x89\x86\xf8\x07\x00\x00", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_lockLevel)
+
+
+def divzero(f):
+    global newmem_divzero
+    if f:
+        print("divzero")
+        newmem_divzero = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode2 = asm.Asm(newmem_divzero)
+        shellcode2.cmp_dword_ptr_exx_add_byte_byte(asm.ESP, 0x4, 0)
+        shellcode2.jne_long_offset(0x8)
+        shellcode2.mov_ptr_exx_add_byte_dword(asm.ESP, 0x4, 1)
+        shellcode2.add_byte(0xF7)
+        shellcode2.add_byte(0x74)
+        shellcode2.add_byte(0x24)
+        shellcode2.add_byte(0x04)  # div [esp+4]
+        shellcode2.mov_exx_eyy(asm.EAX, asm.EDX)
+        shellcode2.jmp(0x005A9A4D)
+        data.PVZ_memory.write_bytes(
+            newmem_divzero,
+            bytes(shellcode2.code[: shellcode2.index]),
+            shellcode2.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x005A9A47,
+            b"\xe9" + calculate_call_address(newmem_divzero - 0x005A9A4C) + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x005A9A47, b"\xf7\x74\x24\x04\x8b\xc2", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_divzero)
+
+
+def unlimitedMonsterSpawning(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0041C078, b"\xeb", 1)
+        data.PVZ_memory.write_bytes(0x0040D91F, b"\xeb", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x0041C078, b"\x74", 1)
+        data.PVZ_memory.write_bytes(0x0040D91F, b"\x74", 1)
+
+
+def bungeeFix(f):
+    global newmem_bungeeTipFix
+    global newmem_bungeePutFix
+    if f:
+        newmem_bungeeTipFix = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_bungeeTipFix)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ECX, 0x28, 276)
+        shellcode.jne(0x0042A35A)
+        shellcode.jmp(0x0042A2F5)
+        data.PVZ_memory.write_bytes(
+            newmem_bungeeTipFix,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0042A2EF,
+            b"\xe9"
+            + calculate_call_address(newmem_bungeeTipFix - 0x0042A2F4)
+            + b"\x90",
+            6,
+        )
+        newmem_bungeePutFix = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode2 = asm.Asm(newmem_bungeePutFix)
+        shellcode2.cmp_exx_dword(asm.EBP, 276)
+        shellcode2.jne(0x004255F2)
+        shellcode2.jmp(0x004255E6)
+        data.PVZ_memory.write_bytes(
+            newmem_bungeePutFix,
+            bytes(shellcode2.code[: shellcode2.index]),
+            shellcode2.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x004255E1,
+            b"\xe9" + calculate_call_address(newmem_bungeePutFix - 0x004255E6),
+            5,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x0042A2EF, b"\x83\x79\x28\x42\x75\x65", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bungeeTipFix)
+        data.PVZ_memory.write_bytes(0x004255E1, b"\x83\xfd\x42\x75\x0c", 5)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bungeePutFix)
+
+
+def setZombieRedLine(row):
+    print(row)
+    data.PVZ_memory.write_int(0x004255DD, row)
+    data.PVZ_memory.write_int(0x004253F7, 20 + row * 80)
