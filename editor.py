@@ -31,6 +31,8 @@ import random
 import psutil
 import win32process
 import win32gui
+import queue
+from threading import Thread, Event
 import wmi
 import hashlib
 import pyperclip
@@ -47,7 +49,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.27"
+current_version = "0.28"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -177,6 +179,38 @@ def modify_config(file_path, section, key, value):
 def save_config(config, file_path):
     with open(file_path, "w") as file:
         json.dump(config, file, indent=4)
+
+
+# 创建一个队列用于线程间通信
+data_queue = queue.Queue()
+result_queue = queue.Queue()
+
+
+def get_intvar_value(intvar):
+    # 将获取IntVar值的请求放入队列
+    data_queue.put(("get", intvar))
+    # 等待并从结果队列中获取IntVar的值
+    return result_queue.get()
+
+
+def set_intvar_value(intvar, value):
+    # 将设置IntVar值的请求放入队列
+    data_queue.put(("set", intvar, value))
+
+
+def process_queue(root):
+    while not data_queue.empty():
+        request = data_queue.get()
+        if request[0] == "get":
+            # 获取IntVar的值并将其放入结果队列
+            intvar = request[1]
+            result_queue.put(intvar.get())
+        elif request[0] == "set":
+            # 设置IntVar的值
+            intvar, value = request[1], request[2]
+            intvar.set(value)
+    # 每隔一段时间再次调用这个函数
+    root.after(100, process_queue, root)
 
 
 def chooseGame():
@@ -356,6 +390,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.28\n"
+        "重写了快捷键的逻辑，修复了多线程时（如加载插件）可能会导致快捷键失效的问题，现在快捷键应该可以在大部分情况下使用了\n"
+        "自由放置新增无视坚果修复术。修复了毁灭加农炮会清除前一格植物的问题，修复了柱子模式下坚果类和南瓜套类只能叠放一格的问题\n"
         "b0.27\n"
         "修复了随机卡槽闪退，新增随机僵尸卡槽\n"
         "植物属性修改里可以修改僵尸卡阳光消耗\n"
@@ -1393,45 +1430,46 @@ def mainWindow():
         update_shortcut_display()
 
     def switch_status(status):
-        if status.get() is True:
-            status.set(False)
-        elif status.get() is False:
-            status.set(True)
-        elif status.get() == 1:
-            status.set(0)
-        elif status.get() == 0:
-            status.set(1)
+        if get_intvar_value(status) is True:
+            set_intvar_value(status, False)
+        elif get_intvar_value(status) is False:
+            set_intvar_value(status, True)
+        elif get_intvar_value(status) == 1:
+            set_intvar_value(status, 0)
+        elif get_intvar_value(status) == 0:
+            set_intvar_value(status, 1)
 
     # 捕获快捷键并在控制台输出
     def on_triggered(action):
         if action == 0:
             switch_status(pause_pro_status)
-            pvz.pausePro(pause_pro_status.get())
+            pvz.pausePro(get_intvar_value(pause_pro_status))
         elif action == 1:
-            pvz.setSun(sun_value.get())
+            pvz.setSun(get_intvar_value(sun_value))
         elif action == 2:
-            pvz.addSun(sun_add_value.get())
+            sun = get_intvar_value(sun_add_value)
+            pvz.addSun(sun)
         elif action == 3:
             switch_status(over_plant_status)
-            pvz.overPlant(over_plant_status.get())
+            pvz.overPlant(get_intvar_value(over_plant_status))
         elif action == 4:
             switch_status(free_plant_status)
-            pvz.ignoreSun(free_plant_status.get())
+            pvz.ignoreSun(get_intvar_value(free_plant_status))
         elif action == 5:
             switch_status(cancel_cd_status)
-            pvz.cancelCd(cancel_cd_status.get())
+            pvz.cancelCd(get_intvar_value(cancel_cd_status))
         elif action == 6:
             switch_status(auto_colect_status)
-            pvz.autoCollect(auto_colect_status.get())
+            pvz.autoCollect(get_intvar_value(auto_colect_status))
         elif action == 7:
             switch_status(column_like_status)
-            pvz.column(column_like_status.get())
+            pvz.column(get_intvar_value(column_like_status))
         elif action == 8:
             switch_status(shovel_pro_status)
-            pvz.shovelpro(shovel_pro_status.get())
+            pvz.shovelpro(get_intvar_value(shovel_pro_status))
         elif action == 9:
             switch_status(never_fail_status)
-            pvz.ignoreZombies(never_fail_status.get())
+            pvz.ignoreZombies(get_intvar_value(never_fail_status))
         elif action == 10:
             pvz.win()
         elif action == 11:
@@ -1445,7 +1483,9 @@ def mainWindow():
         elif action == 15:
             clearPlants()
         elif action == 16:
-            putZombies(zombiePut_type_combobox.current(), zombiePut_num.get())
+            putZombies(
+                zombiePut_type_combobox.current(), get_intvar_value(zombiePut_num)
+            )
         elif action == 17:
             pvz.defeat()
         elif action == 18:
@@ -1453,16 +1493,23 @@ def mainWindow():
         elif action == 19:
             pvz.load()
         elif action == 20:
-            if game_speed_value.get() < 6:
-                game_speed_value.set(game_speed_value.get() + 1)
-                pvz.changeGameSpeed(game_speed_value.get())
+            if get_intvar_value(game_speed_value) < 6:
+                set_intvar_value(
+                    game_speed_value, (get_intvar_value(game_speed_value) + 1)
+                )
+                pvz.changeGameSpeed(get_intvar_value(game_speed_value))
         elif action == 21:
-            if game_speed_value.get() > 0:
-                game_speed_value.set(game_speed_value.get() - 1)
-                pvz.changeGameSpeed(game_speed_value.get())
+            if get_intvar_value(game_speed_value) > 0:
+                set_intvar_value(
+                    game_speed_value, (get_intvar_value(game_speed_value) - 1)
+                )
+                pvz.changeGameSpeed(get_intvar_value(game_speed_value))
         elif action == 22:
             switch_status(random_slots_status)
-            pvz.randomSlots(random_slots_status.get())
+            pvz.randomSlots(
+                get_intvar_value(random_slots_status),
+                get_intvar_value(random_slots_haszombie_status),
+            )
 
     # 修改快捷键的窗口
 
@@ -1592,6 +1639,11 @@ def mainWindow():
             )
     except:
         delete_config()
+    ttk.Label(
+        shortcut_frame,
+        text="如果快捷键无法使用，请尝试使用管理员身份运行修改器\n仍无法使用，请安装3.12.2版本python及keyboard库",
+        font=("宋体", 8),
+    ).grid(row=12, column=0, columnspan=3)
 
     global zombie_select
     zombie_page = ttk.Frame(page_tab)
@@ -5815,6 +5867,7 @@ def mainWindow():
         command=lambda: support(),
     )
     support_button.place(x=0, y=0, relx=1, anchor=NE)
+    main_window.after(100, process_queue, main_window)
     main_window.after(100, refreshData)
 
     main_window.protocol(

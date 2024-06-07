@@ -168,6 +168,19 @@ def overPlant(f):
         data.PVZ_memory.write_bytes(
             addr, b"\x0f\x1f\x00\x8b\x4c\x24\x2c\x66\x0f\x1f\x44\x00\x00", 13
         )
+        data.PVZ_memory.write_bytes(
+            0x00843D50, b"\xeb\x6a\x90\x90\x90\x90\x90\x90\x90", 9
+        )
+        data.PVZ_memory.write_bytes(0x00410908, b"\xeb\x12\x90\x90\x90", 5)
+        data.PVZ_memory.write_bytes(0x00843DEE, b"\xe9\xe1\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00843E23, b"\xe9\xac\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00843E58, b"\xe9\x77\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00410958, b"\xeb\x7a\x90\x90", 4)
+        data.PVZ_memory.write_bytes(0x00410960, b"\xeb\x72", 2)
+        data.PVZ_memory.write_bytes(0x00410B11, b"\x90\x90", 2)
+        data.PVZ_memory.write_bytes(0x00410B16, b"\xeb\x47", 2)
+        data.PVZ_memory.write_bytes(0x0084A3EB, b"\xe9\x6a\x3f\xbc\xff\x90", 6)
+        data.PVZ_memory.write_bytes(0x00410BA2, b"\xeb\x06", 2)
     else:
         data.PVZ_memory.write_bytes(0x00425634, b"\x83\xf8\xff\x74\x18", 5)
         data.PVZ_memory.write_bytes(0x0040FE2D, b"\x85\xc0\x0f\x84\x1f\x09\x00", 7)
@@ -183,6 +196,19 @@ def overPlant(f):
             + calculate_call_address(0x0040E2CD - addr - 0xD),
             13,
         )
+        data.PVZ_memory.write_bytes(
+            0x00843D50, b"\x83\xfb\x4c\x0f\x84\xb4\xcb\xbc\xff", 9
+        )
+        data.PVZ_memory.write_bytes(0x00410908, b"\x83\xfb\x17\x75\x0f", 5)
+        data.PVZ_memory.write_bytes(0x00843DEE, b"\x85\xc0\x0f\x84\xde\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00843E23, b"\x85\xc0\x0f\x84\xa9\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00843E58, b"\x85\xc0\x0f\x84\x74\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00410958, b"\x85\xc0\x73\x78", 4)
+        data.PVZ_memory.write_bytes(0x00410960, b"\x75\x72", 2)
+        data.PVZ_memory.write_bytes(0x00410B11, b"\x74\x05", 2)
+        data.PVZ_memory.write_bytes(0x00410B16, b"\x75\x47", 2)
+        data.PVZ_memory.write_bytes(0x0084A3EB, b"\x0f\x85\x69\x3f\xbc\xff", 6)
+        data.PVZ_memory.write_bytes(0x00410BA2, b"\x75\x06", 2)
 
 
 def getSun():
@@ -3188,3 +3214,47 @@ def setZombieRedLine(row):
     print(row)
     data.PVZ_memory.write_int(0x004255DD, row)
     data.PVZ_memory.write_int(0x004253F7, 20 + row * 80)
+
+
+def findBoss():
+    bossList = []
+    try:
+        zombie_num = data.PVZ_memory.read_int(
+            data.PVZ_memory.read_int(data.PVZ_memory.read_int(data.baseAddress) + 0x768)
+            + 0xA0
+        )
+    except:
+        return
+    i = 0
+    j = 0
+    while i < zombie_num:
+        zombie_addresss = (
+            data.PVZ_memory.read_int(
+                data.PVZ_memory.read_int(
+                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                )
+                + 0x90
+            )
+            + 0x204 * j
+        )
+        zombie_exist = data.PVZ_memory.read_bytes(zombie_addresss + 0xEC, 1)
+        if zombie_exist == b"\x00":
+            z = data.zombie(zombie_addresss)
+            if z.type == 25:
+                bossList.append(z)
+            i = i + 1
+        j = j + 1
+    return bossList
+
+
+def nightSun(f):
+    if f:
+        data.PVZ_memory.write_bytes(0x0040B196, b"\xeb\x14", 2)
+        data.PVZ_memory.write_bytes(
+            0x00413A76, b"\x90\x90\x90\x53\x57\xeb\x28\x90\x90\x90\x90", 11
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x0040B196, b"\x74\x29", 2)
+        data.PVZ_memory.write_bytes(
+            0x00413A76, b"\x83\xf8\x01\x53\x57\x0f\x84\x70\x01\x00\x00", 11
+        )
