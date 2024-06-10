@@ -36,10 +36,12 @@ from threading import Thread, Event
 import wmi
 import hashlib
 import pyperclip
+import struct
+
 from pyDes import *
 import binascii
 from pymem import Pymem
-from PIL import Image
+from PIL import Image, ImageTk
 from Crypto import Random
 from typing import List, Dict
 from datetime import datetime, timedelta
@@ -49,7 +51,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.28"
+current_version = "0.29"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -348,7 +350,7 @@ def support():
     global main_window
     support_window = ttk.Toplevel(topmost=True)
     support_window.title("关于")
-    support_window.geometry("300x460")
+    support_window.geometry("300x480")
     support_window.iconphoto(
         False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
     )
@@ -361,7 +363,9 @@ def support():
     ).pack(pady=10)
 
     def open_qq0():
-        webbrowser.open_new("https://qm.qq.com/q/arrZGcHwpG")
+        webbrowser.open_new(
+            r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=MiNaJQYA-UtmWE3Gb2DejwzY4C-9G-Be&authKey=Q%2FuS%2B%2F4qS9Olws%2FZqTeuuU01xCUAFay8Sk5l1uW1RIZl74vN5p5QhkwSpNCn4Jjv&noverify=0&group_code=522376997"
+        )
 
     qq0_frame = ttk.Frame(support_window)
     qq0_frame.pack()
@@ -370,7 +374,7 @@ def support():
     )
     ttk.Button(
         qq0_frame,
-        text="970286809",
+        text="522376997",
         padding=0,
         bootstyle=(PRIMARY, LINK),
         cursor="hand2",
@@ -390,6 +394,10 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.29\n"
+        "新增僵王绘制矫正功能，支持多僵王共存\n"
+        "重写了植物选择，现在选择植物时会弹出图鉴进行选择了\n"
+        "修复了开启自由放置时毁灭加农炮和西瓜香蒲会使身下的植物消失的问题\n"
         "b0.28\n"
         "重写了快捷键的逻辑，修复了多线程时（如加载插件）可能会导致快捷键失效的问题，现在快捷键应该可以在大部分情况下使用了\n"
         "自由放置新增无视坚果修复术。修复了毁灭加农炮会清除前一格植物的问题，修复了柱子模式下坚果类和南瓜套类只能叠放一格的问题\n"
@@ -456,24 +464,36 @@ def support():
 
     def open_qq():
         webbrowser.open_new(
-            "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NXcD3BMkaDeyysTJYZZvJnl7xDZEL7et&authKey=rRxScaHQ7BDXklafDeSFtMLVgXRK8%2Bkd0PdQ2sssDv9AtnJE4HATLSbAjTxJKRGR&noverify=0&group_code=678474090"
+            r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d2041551741"
         )
 
     qq_frame = ttk.Frame(support_window)
+    ttk.Label(
+        support_window,
+        text="赞助任意金额后即可加入赞助群：",
+        font=("黑体", 8),
+        bootstyle=WARNING,
+    ).pack()
     qq_frame.pack()
     ttk.Label(
         qq_frame,
-        text="赞助任意金额后即可加入赞助群：",
+        text="添加qq",
         font=("黑体", 8),
         bootstyle=WARNING,
     ).pack(side=LEFT)
     ttk.Button(
         qq_frame,
-        text="678474090",
+        text="2041551741",
         padding=0,
         bootstyle=(PRIMARY, LINK),
         cursor="hand2",
         command=open_qq,
+    ).pack(side=LEFT)
+    ttk.Label(
+        qq_frame,
+        text="发送赞助截图后拉进群",
+        font=("黑体", 8),
+        bootstyle=WARNING,
     ).pack(side=LEFT)
     ttk.Label(
         support_window,
@@ -531,6 +551,54 @@ def delete_config():
     deete_config_window.mainloop()
 
 
+def on_card_image_click(event, window, combobox):
+    index = int(event.widget.cget("text"))
+    if 256 >= index >= 48:
+        index = index + 27
+    combobox.current(index)
+    window.destroy()
+
+
+def open_card_select_window(combobox):
+    global card_select_window
+    card_select_window = tk.Toplevel()
+    card_select_window.title("选择植物卡片")
+    main_window_x = main_window.winfo_x()
+    main_window_y = main_window.winfo_y()
+    card_select_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
+
+    images = os.listdir(resource_path("res/cards/pvzhe_plants"))
+    r = 0
+    for i, image_file in enumerate(images):
+        image = Image.open(resource_path(f"res/cards/pvzhe_plants/{image_file}"))
+        photo = ImageTk.PhotoImage(image)
+        label = tk.Label(card_select_window, image=photo, text=str(i))
+        label.image = photo  # keep a reference to the image
+        label.bind(
+            "<Button-1>",
+            lambda event: on_card_image_click(event, card_select_window, combobox),
+        )
+        label.grid(row=i // 11, column=i % 11)
+        r = i // 11
+
+    images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    for i, image_file in enumerate(images):
+        image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
+        photo = ImageTk.PhotoImage(image)
+        label = tk.Label(card_select_window, image=photo, text=str(i + 256))
+        label.image = photo  # keep a reference to the image
+        label.bind(
+            "<Button-1>",
+            lambda event: on_card_image_click(event, card_select_window, combobox),
+        )
+        label.grid(row=r + 1 + i // 11, column=i % 11)
+
+    def closeCombobox(combobox):
+        combobox.event_generate("<Escape>")
+
+    card_select_window.after(100, lambda: closeCombobox(combobox))
+
+
 def mainWindow():
     global main_window
     main_window = ttk.Window()
@@ -563,7 +631,7 @@ def mainWindow():
 
         update_window = ttk.Toplevel(topmost=True)
         update_window.title("有新版本")
-        update_window.geometry("320x500")
+        update_window.geometry("320x520")
         update_window.iconphoto(
             False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
         )
@@ -582,7 +650,9 @@ def mainWindow():
         ).pack(pady=10)
 
         def open_qq0():
-            webbrowser.open_new("https://qm.qq.com/q/arrZGcHwpG")
+            webbrowser.open_new(
+                r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=MiNaJQYA-UtmWE3Gb2DejwzY4C-9G-Be&authKey=Q%2FuS%2B%2F4qS9Olws%2FZqTeuuU01xCUAFay8Sk5l1uW1RIZl74vN5p5QhkwSpNCn4Jjv&noverify=0&group_code=522376997"
+            )
 
         qq0_frame = ttk.Frame(update_window)
         qq0_frame.pack()
@@ -591,7 +661,7 @@ def mainWindow():
         )
         ttk.Button(
             qq0_frame,
-            text="970286809",
+            text="522376997",
             padding=0,
             bootstyle=(PRIMARY, LINK),
             cursor="hand2",
@@ -628,24 +698,36 @@ def mainWindow():
 
         def open_qq():
             webbrowser.open_new(
-                "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=NXcD3BMkaDeyysTJYZZvJnl7xDZEL7et&authKey=rRxScaHQ7BDXklafDeSFtMLVgXRK8%2Bkd0PdQ2sssDv9AtnJE4HATLSbAjTxJKRGR&noverify=0&group_code=678474090"
+                r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d2041551741"
             )
 
         qq_frame = ttk.Frame(update_window)
+        ttk.Label(
+            update_window,
+            text="赞助任意金额后即可加入赞助群：",
+            font=("黑体", 8),
+            bootstyle=WARNING,
+        ).pack()
         qq_frame.pack()
         ttk.Label(
             qq_frame,
-            text="赞助任意金额后即可加入赞助群：",
+            text="添加qq",
             font=("黑体", 8),
             bootstyle=WARNING,
         ).pack(side=LEFT)
         ttk.Button(
             qq_frame,
-            text="678474090",
+            text="2041551741",
             padding=0,
             bootstyle=(PRIMARY, LINK),
             cursor="hand2",
             command=open_qq,
+        ).pack(side=LEFT)
+        ttk.Label(
+            qq_frame,
+            text="发送赞助截图后拉进群",
+            font=("黑体", 8),
+            bootstyle=WARNING,
         ).pack(side=LEFT)
         ttk.Label(
             update_window,
@@ -2154,6 +2236,7 @@ def mainWindow():
     spoil_1_card.insert(0, "选择植物")
     spoil_1_card.configure(state=DISABLED)
     spoil_1_card.grid(row=1, column=3)
+    spoil_1_card.bind("<Button-1>", lambda event: open_card_select_window(spoil_1_card))
 
     def setCard1(event):
         if spoil_1_combobox.current() == 9:
@@ -2192,6 +2275,7 @@ def mainWindow():
     spoil_2_card.insert(0, "选择植物")
     spoil_2_card.configure(state=DISABLED)
     spoil_2_card.grid(row=2, column=3)
+    spoil_2_card.bind("<Button-1>", lambda event: open_card_select_window(spoil_2_card))
 
     def setCard2(event):
         if spoil_2_combobox.current() == 9:
@@ -2230,6 +2314,7 @@ def mainWindow():
     spoil_3_card.insert(0, "选择植物")
     spoil_3_card.configure(state=DISABLED)
     spoil_3_card.grid(row=3, column=3)
+    spoil_3_card.bind("<Button-1>", lambda event: open_card_select_window(spoil_3_card))
 
     def setCard3(event):
         if spoil_3_combobox.current() == 9:
@@ -2268,6 +2353,7 @@ def mainWindow():
     spoil_4_card.insert(0, "选择植物")
     spoil_4_card.configure(state=DISABLED)
     spoil_4_card.grid(row=4, column=3)
+    spoil_4_card.bind("<Button-1>", lambda event: open_card_select_window(spoil_4_card))
 
     def setCard4(event):
         if spoil_4_combobox.current() == 9:
@@ -2974,21 +3060,22 @@ def mainWindow():
     plantPut_type_combobox = ttk.Combobox(
         plant_put_frame,
         width=10,
-        values=data.plantPutType,
+        values=data.plantsType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
     )
     plantPut_type_combobox.grid(row=2, column=0, columnspan=4, sticky=W)
     plantPut_type_combobox.current(0)
+    plantPut_type_combobox.bind(
+        "<Button-1>", lambda event: open_card_select_window(plantPut_type_combobox)
+    )
 
     def putPlants(type):
         startRow = plantPut_start_row_value.get() - 1
         startCol = plantPut_start_col_value.get() - 1
         endRow = plantPut_end_row_value.get() - 1
         endCol = plantPut_end_col_value.get() - 1
-        if type >= 52:
-            type = type + 23
         print(startRow, startCol, endRow, endCol, type)
         if pvz.getMap is not False:
             rows = pvz.getMap() - 1
@@ -3059,6 +3146,21 @@ def mainWindow():
         bootstyle=SECONDARY,
         state=READONLY,
     )
+
+    def wait_select_plant_characteristic_card(event, plant_type_combobox):
+        open_card_select_window(plant_type_combobox)
+        card_select_window.wait_window()
+        get_plant_type()
+
+        def closeCombobox(plant_type_combobox):
+            plant_type_combobox.event_generate("<Escape>")
+
+        plant_type_combobox.after(100, lambda: closeCombobox(plant_type_combobox))
+
+    plant_type_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_plant_characteristic_card(event, plant_type_combobox),
+    )
     plant_type_combobox.grid(row=0, column=0, columnspan=4, sticky=W)
     ttk.Label(plant_characteristic_frame, text="阳光:").grid(row=1, column=0)
     plant_characteristic_sun_value = ttk.IntVar(plant_characteristic_frame)
@@ -3128,7 +3230,7 @@ def mainWindow():
         "<Return>", setPlantCharacteristicAttackInterval
     )
 
-    def get_plant_type(event):
+    def get_plant_type():
         global plant_characteristic_type
         plant_characteristic_type = data.plantCharacteristic(
             plant_type_combobox.current()
@@ -3140,8 +3242,6 @@ def mainWindow():
         )
         plant_characteristic_canAttack_flag.set(plant_characteristic_type.canAttack)
         plant_characteristic_frame.focus_set()
-
-    plant_type_combobox.bind("<<ComboboxSelected>>", get_plant_type)
 
     bullet_frame = ttk.Labelframe(plant_page, text="子弹修改", bootstyle=SUCCESS)
     bullet_frame.place(x=0, y=390, anchor=NW, height=120, width=300)
@@ -3264,6 +3364,9 @@ def mainWindow():
         bootstyle=SECONDARY,
     )
     plant_type_bullet_combobox.pack()
+    plant_type_bullet_combobox.bind(
+        "<Button-1>", lambda event: open_card_select_window(plant_type_bullet_combobox)
+    )
     plant_type_bullet_combobox.insert(0, "选择植物")
     plant_type_bullet_combobox.config(state=READONLY)
     plant_bullet_status = ttk.BooleanVar(plant_bullet_frame)
@@ -3923,6 +4026,7 @@ def mainWindow():
             formation_plant_window, values=data.plantsType, font=small_font
         )
         combobox.pack()
+        combobox.bind("<Button-1>", lambda event: open_card_select_window(combobox))
 
         # 梯子属性复选框
         ladder_check = IntVar(value=ladders_data[i][j])
@@ -4282,14 +4386,27 @@ def mainWindow():
             bootstyle="secondary",
         )
         slot_type_combobox.grid(row=slot_number - 1, column=2, sticky=W)
+
+        def wait_select_slot_plant(event, slot_type_combobox):
+            open_card_select_window(slot_type_combobox)
+            card_select_window.wait_window()
+            set_slot_type()
+
+            def closeCombobox(slot_type_combobox):
+                slot_type_combobox.event_generate("<Escape>")
+
+            slot_type_combobox.after(100, lambda: closeCombobox(slot_type_combobox))
+
+        slot_type_combobox.bind(
+            "<Button-1>",
+            lambda event: wait_select_slot_plant(event, slot_type_combobox),
+        )
         slot_type_comboboxes.append(slot_type_combobox)
 
-        def set_slot_type(event, index=slot_number - 1):
+        def set_slot_type(index=slot_number - 1):
             if slots_configuration_mode.get() is False:
                 slot_list[index].setType(slot_type_combobox.current())
                 slots_frame.focus_set()
-
-        slot_type_combobox.bind("<<ComboboxSelected>>", set_slot_type)
 
         slot_elapsed_value = ttk.IntVar()
         slot_elapsed_values.append(slot_elapsed_value)
@@ -4430,6 +4547,22 @@ def mainWindow():
         bootstyle="secondary",
     )
     change_all_combobox.pack()
+
+    def wait_select_all_slot_plant(event, change_all_combobox):
+        open_card_select_window(change_all_combobox)
+        card_select_window.wait_window()
+        for slot in slot_list:
+            slot.setType(change_all_combobox.current())
+
+        def closeCombobox(change_all_combobox):
+            change_all_combobox.event_generate("<Escape>")
+
+        change_all_combobox.after(100, lambda: closeCombobox(change_all_combobox))
+
+    change_all_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_all_slot_plant(event, change_all_combobox),
+    )
     random_slots_status = ttk.BooleanVar(slots_config_frame)
     random_slots_haszombie_status = ttk.BooleanVar(slots_config_frame)
     random_slots_check = ttk.Checkbutton(
@@ -4448,13 +4581,6 @@ def mainWindow():
         variable=random_slots_haszombie_status,
     )
     random_slots_haszombie_check.pack()
-
-    def change_all_slots(event):
-        if slots_configuration_mode.get() is False:
-            for slot in slot_list:
-                slot.setType(change_all_combobox.current())
-
-    change_all_combobox.bind("<<ComboboxSelected>>", change_all_slots)
 
     card_select_frame = ttk.LabelFrame(slot_page, text="选卡配置", bootstyle=DARK)
     card_select_frame.place(x=0, y=180, relx=1, anchor=NE)
@@ -5312,6 +5438,16 @@ def mainWindow():
         command=lambda: pvz.bossHPDraw(boss_hp_status.get()),
     )
     boss_hp_check.pack()
+
+    boss_correct_status = ttk.BooleanVar(common_page)
+    boss_correct_check = ttk.Checkbutton(
+        common_page,
+        text="僵王绘制矫正",
+        variable=boss_correct_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.bossCorrect(boss_correct_status.get()),
+    )
+    boss_correct_check.place(x=460, y=515, relx=0, anchor=NW)
 
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():

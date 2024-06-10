@@ -9,6 +9,9 @@ from threading import Thread, Event
 import random
 import time
 import PVZ_asm as asm
+import os
+import struct
+
 
 column1addr = None
 column2addr = None
@@ -181,6 +184,8 @@ def overPlant(f):
         data.PVZ_memory.write_bytes(0x00410B16, b"\xeb\x47", 2)
         data.PVZ_memory.write_bytes(0x0084A3EB, b"\xe9\x6a\x3f\xbc\xff\x90", 6)
         data.PVZ_memory.write_bytes(0x00410BA2, b"\xeb\x06", 2)
+        data.PVZ_memory.write_bytes(0x00410967, b"\xeb\x39", 2)
+        data.PVZ_memory.write_bytes(0x004109D4, b"\xeb\x2d", 2)
     else:
         data.PVZ_memory.write_bytes(0x00425634, b"\x83\xf8\xff\x74\x18", 5)
         data.PVZ_memory.write_bytes(0x0040FE2D, b"\x85\xc0\x0f\x84\x1f\x09\x00", 7)
@@ -209,6 +214,8 @@ def overPlant(f):
         data.PVZ_memory.write_bytes(0x00410B16, b"\x75\x47", 2)
         data.PVZ_memory.write_bytes(0x0084A3EB, b"\x0f\x85\x69\x3f\xbc\xff", 6)
         data.PVZ_memory.write_bytes(0x00410BA2, b"\x75\x06", 2)
+        data.PVZ_memory.write_bytes(0x00410967, b"\x75\x39", 2)
+        data.PVZ_memory.write_bytes(0x004109D4, b"\x75\x2d", 2)
 
 
 def getSun():
@@ -667,7 +674,7 @@ def noHole(d, t, b):
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0)
         shellcode.jng(0x0041D79E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x50, 0)
-        shellcode.jne_offset(7)
+        shellcode.jne_short_offset(7)
         shellcode.mov_ptr_exx_add_byte_dword(asm.ESI, 0x20, 1)
         shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0xFF)
         shellcode.jmp(0x0041D79A)
@@ -734,7 +741,7 @@ def noHole(d, t, b):
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0)
         shellcode.jng(0x0041D79E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x50, 1)
-        shellcode.jne_offset(7)
+        shellcode.jne_short_offset(7)
         shellcode.mov_ptr_exx_add_byte_dword(asm.ESI, 0x20, 1)
         shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0xFF)
         shellcode.jmp(0x0041D79A)
@@ -778,7 +785,7 @@ def noHole(d, t, b):
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0)
         shellcode.jng(0x0041D79E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x50, 2)
-        shellcode.jne_offset(7)
+        shellcode.jne_short_offset(7)
         shellcode.mov_ptr_exx_add_byte_dword(asm.ESI, 0x20, 1)
         shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x18, 0xFF)
         shellcode.jmp(0x0041D79A)
@@ -1523,11 +1530,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1547,11 +1554,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1571,11 +1578,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1595,11 +1602,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1619,11 +1626,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1643,11 +1650,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1667,11 +1674,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1691,11 +1698,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1715,11 +1722,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1739,11 +1746,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1763,11 +1770,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1787,11 +1794,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1811,11 +1818,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1835,11 +1842,11 @@ def slotKey(slot_key_list):
         shellcode.jl_offset(0x3A)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
-        shellcode.jne_offset(0x2E)
+        shellcode.jne_short_offset(0x2E)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
-        shellcode.jne_offset(0x28)
+        shellcode.jne_short_offset(0x28)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
-        shellcode.jne_offset(0x22)
+        shellcode.jne_short_offset(0x22)
         shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
@@ -1866,7 +1873,7 @@ def slotKey(slot_key_list):
         shellcode.je_offset(0x10)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1CA0, 0x1)
         shellcode.popad()
-        shellcode.jmp_dword_offest(0xB)
+        shellcode.jmp_dword_offset(0xB)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1CA0, 0x0)
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
@@ -1876,7 +1883,7 @@ def slotKey(slot_key_list):
         shellcode.cmp_dword_ptr_exx_add_dword_byte(asm.EDX, 0x57BC, 0x1)
         shellcode.je_offset(0xC)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x57BC, 0x1)
-        shellcode.jmp_offest(0x0A)
+        shellcode.jmp_short_offset(0x0A)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x57BC, 0x0)
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
@@ -1887,7 +1894,7 @@ def slotKey(slot_key_list):
         shellcode.je_offset(0x10)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1CA4, 0x1)
         shellcode.popad()
-        shellcode.jmp_dword_offest(0xB)
+        shellcode.jmp_dword_offset(0xB)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1CA4, 0x0)
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
@@ -2099,7 +2106,7 @@ def setPlantBullet(f, plantType, bulletType, mode):
         )
         shellcode = asm.Asm(newmem_setPlantBullet)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBP, 0x24, plantType)
-        shellcode.jne_offset(0xE)
+        shellcode.jne_short_offset(0xE)
         shellcode.mov_ptr_exx_add_byte_dword(asm.EAX, 0x5C, bulletType)
         shellcode.mov_ptr_exx_add_byte_dword(asm.EAX, 0x58, mode)
         shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ESP, 0x3C)
@@ -2270,7 +2277,7 @@ def pauseProKey(key, r, g, b, a):
         shell_code_key.push_exx(asm.EDX)
         shell_code_key.call(0x0051C5A0)
         shell_code_key.cmp_exx_byte(asm.EDI, data.keyCode[key])
-        shell_code_key.jne_offset(7)
+        shell_code_key.jne_short_offset(7)
         shell_code_key.xor_dword_ptr_address_val(newmem_pauseFlag, 1)
         shell_code_key.jmp(0x0041B2A1)
         data.PVZ_memory.write_bytes(
@@ -2286,12 +2293,12 @@ def pauseProKey(key, r, g, b, a):
 
         pause_key = asm.Asm(newmem_pause)
         pause_key.cmp_dword_ptr_address_byte(newmem_pauseFlag, 1)
-        pause_key.jne_offset(0x1F)
+        pause_key.jne_short_offset(0x1F)
         pause_key.add_dword_ptr_address_byte(newmem_drawTime, 24)
         pause_key.cmp_dword_ptr_address_dword(newmem_drawTime, 1000)
         pause_key.jl_offset(0x29)
         pause_key.mov_dword_ptr_dword(newmem_drawTime, 1000)
-        pause_key.jmp_offest(0x1D)
+        pause_key.jmp_short_offset(0x1D)
         pause_key.sub_dword_ptr_address_byte(newmem_drawTime, 32)
         pause_key.cmp_dword_ptr_address_dword(newmem_drawTime, 0)
         pause_key.jg_offset(0x0A)
@@ -2340,7 +2347,7 @@ def pauseProKey(key, r, g, b, a):
         shellcode_draw.mov_exx_eyy(asm.EAX, asm.EDI)
         shellcode_draw.call_dword_offset(6)
         shellcode_draw.popad()
-        shellcode_draw.jmp_dword_offest(0x78)
+        shellcode_draw.jmp_dword_offset(0x78)
         shellcode_draw.pushad()
         shellcode_draw.code[shellcode_draw.index : shellcode_draw.index + 94] = (
             b"\x8b\xf0\x8b\x44\x24\x24\x8b\x5c\x24\x28\x8b\x4c\x24\x2c\x8d\x2c\x4d\x00\x00\x00\x00\x31\xd2\xdb\x44\x24\x2c\xd8\xc8\xd9\x5c\x24\xfc\x8b\x4c\x24\x2c\x29\xd1\x89\x4c\x24\xf8\xdb\x44\x24\xf8\xd8\xc8\xd9\x5c\x24\xf8\xd9\x44\x24\xfc\xd8\x64\x24\xf8\xd9\xfa\xdb\x5c\x24\xfc\x8b\x44\x24\xfc\x8d\x1c\x45\x00\x00\x00\x00\x8b\x4c\x24\x24\x29\xc1\x8b\x7c\x24\x28\x2b\x7c\x24\x2c\x01\xd7"
@@ -2659,7 +2666,7 @@ def spawisModified():
         shellcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x3C, 0xFF)
         shellcode.call(0x00587120)
         shellcode.popad()
-        shellcode.jmp_dword_offest(0)
+        shellcode.jmp_dword_offset(0)
         shellcode.push_exx(asm.EDI)
         shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 0x7C, 0xF)
         shellcode.jmp(0x00417DC9)
@@ -2922,7 +2929,7 @@ def deathrattleCallZombie(f, deadZombieType):
         shellcode.mov_exx(asm.EAX, 42)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
-        shellcode.je_offset(0x1C)
+        shellcode.nop_6()
         shellcode.push_ptr_exx_add_byte(asm.EDI, 0x1C)
         shellcode.push_exx(asm.EAX)
         shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.EDI, 4)
@@ -2975,10 +2982,10 @@ def reserveMaterialDropAllCard(f, zombieWeight, lmpWeight):
         shellcode.mov_exx(asm.EAX, 49)
         shellcode.call(0x005AF400)
         shellcode.add_exx_byte(asm.EAX, 75)
-        shellcode.jmp_dword_offest(0x3B)
+        shellcode.jmp_dword_offset(0x3B)
         shellcode.mov_exx(asm.EAX, 48)
         shellcode.call(0x005AF400)
-        shellcode.jmp_dword_offest(0x2C)
+        shellcode.jmp_dword_offset(0x2C)
         shellcode.mov_exx(asm.EAX, 99)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, lmpWeight)
@@ -2986,7 +2993,7 @@ def reserveMaterialDropAllCard(f, zombieWeight, lmpWeight):
         shellcode.mov_exx(asm.EAX, 42)
         shellcode.call(0x005AF400)
         shellcode.add_exx_dword(asm.EAX, 0x100)
-        shellcode.jmp_dword_offest(0x5)
+        shellcode.jmp_dword_offset(0x5)
         shellcode.mov_exx(asm.EAX, 0x118)
         shellcode.cmp_exx_byte(asm.EAX, 18)
         shellcode.je_offset(0xFFFFFF84)
@@ -3258,3 +3265,733 @@ def nightSun(f):
         data.PVZ_memory.write_bytes(
             0x00413A76, b"\x83\xf8\x01\x53\x57\x0f\x84\x70\x01\x00\x00", 11
         )
+
+
+newmem_bossCorrect_Outerleg = None
+
+
+def bossCorrect_Outerleg(f):
+    global newmem_bossCorrect_Outerleg
+    if f:
+        newmem_bossCorrect_Outerleg = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_Outerleg)
+        shellcode.mov_ptr_exx_add_eyy_times_add_byte_doword(asm.EBX, asm.ECX, 4, 8, 0)
+        shellcode.add_ptr_exx_add_eyy_times_add_byte_ezz(
+            asm.EBX, asm.ECX, 4, 8, asm.EBP
+        )
+        shellcode.lea_exx_ptr_eyy_add_ezz_times(asm.ECX, asm.EBX, asm.ECX, 4)
+        shellcode.push_dword(0x004167B1)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_Outerleg,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x004167A8,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_Outerleg - 0x004167AD)
+            + b"\x90\x90\x90\x90\x90\x90",
+            11,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x004167A8, b"\xc7\x44\x8b\x08\x00\x00\x00\x00\x8d\x0c\x8b", 11
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_Outerleg
+        )
+
+
+newmem_bossCorrect_body = None
+
+
+def bossCorrect_body(f):
+    global newmem_bossCorrect_body
+    if f:
+        newmem_bossCorrect_body = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 128
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_body)
+        shellcode.mov_ptr_exx_add_eyy_times_add_byte_doword(asm.EBX, asm.ECX, 4, 8, 1)
+        shellcode.add_ptr_exx_add_eyy_times_add_byte_ezz(
+            asm.EBX, asm.ECX, 4, 8, asm.EBP
+        )
+        shellcode.lea_exx_ptr_eyy_add_ezz_times(asm.ECX, asm.EBX, asm.ECX, 4)
+        shellcode.push_dword(0x004167DC)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_body,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x004167D1,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_body - 0x004167D6)
+            + b"\x90\x90\x90\x90\x90\x90",
+            11,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x004167D1, b"\xc7\x44\x8b\x08\x01\x00\x00\x00\x8d\x0c\x8b", 11
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_body
+        )
+
+
+newmem_bossCorrect_Innerleg = None
+
+
+def bossCorrect_Innerleg(f):
+    global newmem_bossCorrect_Innerleg
+    if f:
+        newmem_bossCorrect_Innerleg = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 128
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_Innerleg)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ECX, 0x08, 0x02)
+        shellcode.add_ptr_exx_add_byte_eyy(asm.ECX, 0x08, asm.EBP)
+        shellcode.lea_exx_ptr_eyy_add_ezz_times_add_byte(
+            asm.ECX, asm.EAX, asm.EAX, 2, 9
+        )
+        shellcode.push_dword(0x004167FE)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_Innerleg,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x004167F4,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_Innerleg - 0x004167F9)
+            + b"\x90\x90\x90\x90\x90\x90",
+            11,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x004167F4, b"\xc7\x41\x08\x02\x00\x00\x00\x8d\x4c\x40\x09", 11
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_Innerleg
+        )
+
+
+newmem_bossCorrect_Innerarm = None
+
+
+def bossCorrect_Innerarm(f):
+    global newmem_bossCorrect_Innerarm
+    # mov [ecx+08],00000003
+    # add [ecx+08],ebp
+    # mov edx,[edx+0000008C]
+    # push 00416821
+    # ret
+    if f:
+        newmem_bossCorrect_Innerarm = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 128
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_Innerarm)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ECX, 0x08, 0x03)
+        shellcode.add_ptr_exx_add_byte_eyy(asm.ECX, 0x08, asm.EBP)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x8C)
+        shellcode.push_dword(0x00416821)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_Innerarm,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00416815,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_Innerarm - 0x0041681A)
+            + b"\x90\x90\x90\x90\x90\x90\x90\x90",
+            13,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x00416815, b"\xc7\x41\x08\x03\x00\x00\x00\x8b\x92\x8c\x00\x00\x00", 13
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_Innerarm
+        )
+
+
+newmem_bossCorrect_Ball = None
+
+
+def bossCorrect_Ball(f):
+    global newmem_bossCorrect_Ball
+    # mov [ebx+08],00000004
+    # add [ebx+08],ebp
+    # mov [edi],eax
+    # push 00416870
+    # ret
+    if f:
+        newmem_bossCorrect_Ball = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_Ball)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.EBX, 0x08, 0x04)
+        shellcode.add_ptr_exx_add_byte_eyy(asm.EBX, 0x08, asm.EBP)
+        shellcode.mov_ptr_exx_eyy(asm.EDI, asm.EAX)
+        shellcode.push_dword(0x00416870)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_Ball,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00416867,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_Ball - 0x0041686C)
+            + b"\x90\x90\x90\x90",
+            9,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x00416867, b"\xc7\x43\x08\x04\x00\x00\x00\x89\x07", 9
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_Ball
+        )
+
+
+newmem_bossCorrect_iterate = None
+
+
+def bossCorrect_iterate(f):
+    global newmem_bossCorrect_iterate
+    # mov edx,[ebx]
+    # mov edi,edx
+    # mov eax,[ebp+08]
+    # mov eax,[eax+00000090]
+    # cmp edx,eax
+    # db 7D 06
+    # push 0041732E
+    # ret
+    # sub edx,eax
+    # mov cx,[0041C911]
+    # xchg eax,edx
+    # cdq
+    # sub eax,edx
+    # idiv cx
+    # sub edi,edx
+    # mov [ebx],edx
+    # mov eax,edi
+    # push 00417124
+    # ret
+
+    if f:
+        newmem_bossCorrect_iterate = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_iterate)
+        shellcode.mov_exx_dword_ptr_eyy(asm.EDX, asm.EBX)
+        shellcode.mov_exx_eyy(asm.EDI, asm.EDX)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.EBP, 0x8)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x90)
+        shellcode.cmp_exx_eyy(asm.EDX, asm.EAX)
+        shellcode.jnl_offset(0x06)
+        shellcode.push_dword(0x0041732E)
+        shellcode.ret()
+        shellcode.sub_exx_eyy(asm.EDX, asm.EAX)
+        shellcode.mov_ex_ptr_dword(asm.CX, 0x0041C911)
+        shellcode.xchg_exx_eyy(asm.EAX, asm.EDX)
+        shellcode.cdq()
+        shellcode.sub_exx_eyy(asm.EAX, asm.EDX)
+        shellcode.idiv_ex(asm.CX)
+        shellcode.sub_exx_eyy(asm.EDI, asm.EDX)
+        shellcode.mov_ptr_exx_eyy(asm.EBX, asm.EDX)
+        shellcode.mov_exx_eyy(asm.EAX, asm.EDI)
+        shellcode.push_dword(0x00417124)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_iterate,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0041711A,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_iterate - 0x0041711F)
+            + b"\x90\x90\x90\x90\x90",
+            10,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x0041711A, b"\x8b\x55\x08\xe8\x6e\x62\x00\x00\x8b\xf8", 10
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_iterate
+        )
+
+
+newmem_bossCorrect_Coordinate = None
+
+
+def bossCorrect_Coordinate(f):
+    global newmem_bossCorrect_Coordinate
+    # fldz
+    # fstp dword ptr [edi+30]
+    # mov ecx,edi
+    # db E8 26 00 00 00
+    # test al,al
+    # db 74 0E
+    # fld dword ptr [00679FE4]
+    # fadd dword ptr [00679498]
+    # db EB 02
+    # fldz
+    # fstp dword ptr [edi+2C]
+    # fild dword ptr [edi+08]
+    # mov esi,[ebp+0C]
+    # mov edx,[ebx]
+    # push edx
+    # push 0041713F
+    # ret
+    # push 0052BEE0
+    # ret
+
+    if f:
+        newmem_bossCorrect_Coordinate = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 128
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_Coordinate)
+        shellcode.fldz()
+        shellcode.fstp_dword_ptr_exx_add_byte(asm.EDI, 0x30)
+        shellcode.mov_exx_eyy(asm.ECX, asm.EDI)
+        shellcode.call(newmem_bossCorrect_Coordinate + 0x32)
+        shellcode.test_8(asm.AL, asm.AL)
+        shellcode.je_short_offset(0x0E)
+        shellcode.fld_dword_ptr_address(0x00679FE4)
+        shellcode.fadd_dword_ptr_address(0x00679498)
+        shellcode.jmp_short_offset(2)
+        shellcode.fldz()
+        shellcode.fstp_dword_ptr_exx_add_byte(asm.EDI, 0x2C)
+        shellcode.fild_dword_ptr_exx_add_byte(asm.EDI, 0x08)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.ESI, asm.EBP, 0x0C)
+        shellcode.mov_exx_dword_ptr_eyy(asm.EDX, asm.EBX)
+        shellcode.push_exx(asm.EDX)
+        shellcode.push_dword(0x0041713F)
+        shellcode.ret()
+        shellcode.push_dword(0x0052BEE0)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_Coordinate,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00417136,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_Coordinate - 0x0041713B)
+            + b"\x90\x90\x90\x90",
+            9,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x00417136, b"\xdb\x47\x08\x8b\x75\x0c\x8b\x13\x52", 9
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_Coordinate
+        )
+
+
+newmem_bossCorrect_fire_melting_iceBall = None
+
+
+def bossCorrect_fire_melting_iceBall(f):
+    global newmem_bossCorrect_fire_melting_iceBall
+    # pushad
+    # push 00
+    # mov esi,esp
+    # mov edx,[edi+04]
+    # db E8 27 00 00 00
+    # test al,al
+    # db 74 19
+    # mov esi,[esi]
+    # cmp dword ptr [esi+24],19
+    # db 75 EA
+    # cmp byte ptr [esi+000000B8],01
+    # db 74 E1
+    # push esi
+    # db E8 12 00 00 00
+    # db EB D9
+    # add esp,04
+    # popad
+    # push 004664A5
+    # ret
+    # push 0041C8F0
+    # ret
+    # push 005356D0
+    # ret
+
+    if f:
+        newmem_bossCorrect_fire_melting_iceBall = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 2048
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_fire_melting_iceBall)
+        shellcode.pushad()
+        shellcode.push_byte(0)
+        shellcode.mov_exx_eyy(asm.ESI, asm.ESP)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.EDI, 0x04)
+        shellcode.call(newmem_bossCorrect_fire_melting_iceBall + 0x34)
+        shellcode.test_8(asm.AL, asm.AL)
+        shellcode.je_short_offset(0x19)
+        shellcode.mov_exx_dword_ptr_eyy(asm.ESI, asm.ESI)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, 0x19)
+        shellcode.jne_short_offset(0xEA)
+        shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.ESI, 0xB8, 0x01)
+        shellcode.je_short_offset(0xE1)
+        shellcode.push_exx(asm.ESI)
+        shellcode.call(newmem_bossCorrect_fire_melting_iceBall + 0x3A)
+        shellcode.jmp_short_offset(0xD9)
+        shellcode.add_exx_byte(asm.ESP, 0x04)
+        shellcode.popad()
+        shellcode.push_dword(0x004664A5)
+        shellcode.ret()
+        shellcode.push_dword(0x0041C8F0)
+        shellcode.ret()
+        shellcode.push_dword(0x005356D0)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_fire_melting_iceBall,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00466493,
+            b"\xe9"
+            + calculate_call_address(
+                newmem_bossCorrect_fire_melting_iceBall - 0x00466498
+            )
+            + b"\x90\x90\x90\x90\x90",
+            10,
+        )
+    else:
+        data.PVZ_memory.write_bytes(
+            0x00466493, b"\x8b\x57\x04\xe8\xf5\x6e\xfb\xff\x85\xc0", 10
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_fire_melting_iceBall
+        )
+
+
+newmem_bossCorrect_ice_melting_fireBall = None
+
+
+def bossCorrect_ice_melting_fireBall(f):
+    global newmem_bossCorrect_ice_melting_fireBall
+    # [ENABLE]
+    # //code from here to '[DISABLE]' will be used to enable the cheat
+    # alloc(newmem,2048)
+    # label(returnhere)
+    #
+    # newmem: //this is allocated memory, you have read,write,execute access
+    # //place your code here
+    # mov ebx,[esp+14]
+    # pushad
+    # push 00
+    # mov esi,esp
+    # mov edx,[edi+04]
+    # db E8 30 00 00 00
+    # test al,al
+    # db 74 22
+    # mov esi,[esi]
+    # cmp dword ptr [esi+24],19
+    # db 75 EA
+    # cmp byte ptr [esi+000000B8],01
+    # db 74 E1
+    # cmp ebx,[esi+00000148]
+    # db 75 D9
+    # mov eax,esi
+    # db E8 12 00 00 00
+    # db EB D0
+    # add esp,04
+    # popad
+    # push 004665A4
+    # ret
+    # push 0041C8F0
+    # ret
+    # push 00535630
+    # ret
+    #
+    #
+    # "PlantsVsZombies.exe"+66587:
+    # jmp newmem
+    # nop
+    # nop
+    # nop
+    # returnhere:
+    #
+    #
+    #
+    #
+    # [DISABLE]
+    # //code from here till the end of the code will be used to disable the cheat
+    # dealloc(newmem)
+    # "PlantsVsZombies.exe"+66587:
+    # db 8B 57 04 E8 01 6E FB FF
+    # //mov edx,[edi+04]
+    # //call 0041D390
+    if f:
+        newmem_bossCorrect_ice_melting_fireBall = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 2048
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_ice_melting_fireBall)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EBX, asm.ESP, 0x14)
+        shellcode.pushad()
+        shellcode.push_byte(0)
+        shellcode.mov_exx_eyy(asm.ESI, asm.ESP)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.EDI, 0x04)
+        shellcode.call(newmem_bossCorrect_ice_melting_fireBall + 0x41)
+        shellcode.test_8(asm.AL, asm.AL)
+        shellcode.je_short_offset(0x22)
+        shellcode.mov_exx_dword_ptr_eyy(asm.ESI, asm.ESI)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, 0x19)
+        shellcode.jne_short_offset(0xEA)
+        shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.ESI, 0xB8, 0x01)
+        shellcode.je_short_offset(0xE1)
+        shellcode.cmp_exx_ptr_eyy_add_dword(asm.EBX, asm.ESI, 0x148)
+        shellcode.jne_short_offset(0xD9)
+        shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+        shellcode.call(newmem_bossCorrect_ice_melting_fireBall + 0x47)
+        shellcode.jmp_short_offset(0xD0)
+        shellcode.add_exx_byte(asm.ESP, 0x04)
+        shellcode.popad()
+        shellcode.push_dword(0x004665A4)
+        shellcode.ret()
+        shellcode.push_dword(0x0041C8F0)
+        shellcode.ret()
+        shellcode.push_dword(0x00535630)
+        shellcode.ret()
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_ice_melting_fireBall,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00466587,
+            b"\xe9"
+            + calculate_call_address(
+                newmem_bossCorrect_ice_melting_fireBall - 0x0046658C
+            )
+            + b"\x90\x90\x90\x90",
+            9,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x00466587, b"\x8b\x57\x04\xe8\x01\x6e\xfb\xff", 9)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_ice_melting_fireBall
+        )
+
+
+newmem_bossCorrect_dead = None
+
+
+def bossCorrect_dead(f):
+    global newmem_bossCorrect_dead
+    # [ENABLE]
+    # //code from here to '[DISABLE]' will be used to enable the cheat
+    # alloc(newmem,2048)
+    # label(returnhere)
+    # label(originalcode)
+    # label(exit)
+    #
+    # newmem: //this is allocated memory, you have read,write,execute access
+    # //place your code here
+    # push ecx
+    # mov ecx,edi
+    # call 530510
+    # pop ecx
+    #
+    # originalcode:
+    # cmp dword ptr [ebx+5C],00
+    # jle 00533D7A
+    #
+    # exit:
+    # jmp returnhere
+    #
+    # "PlantsVsZombies.exe"+133D6D:
+    # jmp newmem
+    # nop
+    # returnhere:
+    #
+    #
+    #
+    #
+    # [DISABLE]
+    # //code from here till the end of the code will be used to disable the cheat
+    # dealloc(newmem)
+    # "PlantsVsZombies.exe"+133D6D:
+    # db 83 7B 5C 00 7E 07
+    # //cmp dword ptr [ebx+5C],00
+    # //jle 00533D7A
+    if f:
+        newmem_bossCorrect_dead = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 2048
+        )
+        shellcode = asm.Asm(newmem_bossCorrect_dead)
+        shellcode.push_exx(asm.ECX)
+        shellcode.mov_exx_eyy(asm.ECX, asm.EDI)
+        shellcode.call(0x00530510)
+        shellcode.pop_exx(asm.ECX)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x5C, 0)
+        shellcode.jng(0x00533D7A)
+        shellcode.jmp(0x00533D73)
+
+        data.PVZ_memory.write_bytes(
+            newmem_bossCorrect_dead,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00533D6D,
+            b"\xe9"
+            + calculate_call_address(newmem_bossCorrect_dead - 0x00533D72)
+            + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x00533D6D, b"\x83\x7b\x5c\x00\x7e\x07", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_bossCorrect_dead
+        )
+
+
+def bossCorrect(f):
+    bossCorrect_Outerleg(f)
+    bossCorrect_body(f)
+    bossCorrect_Innerleg(f)
+    bossCorrect_Innerarm(f)
+    bossCorrect_Ball(f)
+    bossCorrect_iterate(f)
+    bossCorrect_Coordinate(f)
+    bossCorrect_fire_melting_iceBall(f)
+    bossCorrect_ice_melting_fireBall(f)
+    bossCorrect_dead(f)
+
+
+def unpack(src_file, dst_dir):
+    try:
+        with open(src_file, "rb") as f:
+            data = f.read()
+    except FileNotFoundError:
+        return "UNPACK_SRC_NOT_EXIST"
+
+    # 整个文件与 0xF7 异或
+    data = bytes([b ^ 0xF7 for b in data])
+
+    # 文件偏移量
+    offset = 0
+
+    # 检查文件头
+    file_header_magic, file_header_version = struct.unpack_from("<II", data, offset)
+    offset += 8
+
+    if file_header_magic != 0xBAC04AC0 or file_header_version > 0x00000000:
+        return "UNPACK_SRC_HEADER_ERROR"
+
+    # 索引区域数据结构
+    files_count = 0
+    files_name = []
+    files_size = []
+
+    while True:
+        (eof_flag,) = struct.unpack_from("<B", data, offset)
+        offset += 1
+
+        if eof_flag != 0x00 or eof_flag == 0x80:
+            break
+
+        (name_width,) = struct.unpack_from("<B", data, offset)
+        offset += 1
+
+        file_name = data[offset : offset + name_width].decode("utf-8", errors="ignore")
+        offset += name_width
+
+        (file_size,) = struct.unpack_from("<I", data, offset)
+        offset += 4
+
+        offset += 8  # skip file_time
+
+        files_name.append(file_name)
+        files_size.append(file_size)
+        files_count += 1
+
+    # 提取数据区所有文件
+    for i in range(files_count):
+        output_path = os.path.join(dst_dir, files_name[i])
+        output_size = files_size[i]
+
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+        with open(output_path, "wb") as f:
+            f.write(data[offset : offset + output_size])
+
+        offset += output_size
+
+    return "UNPACK_SUCCESS"
+
+
+def pack(src_dir, dst_file):
+    # 获取源目录下的所有文件
+    files = [
+        os.path.join(root, file)
+        for root, dirs, files in os.walk(src_dir)
+        for file in files
+    ]
+
+    # 创建一个临时的二进制数据列表
+    data = bytearray()
+
+    # 写入文件头
+    data.extend(struct.pack("<II", 0xBAC04AC0, 0x00000000))
+
+    # 写入索引区域
+    for file in files:
+        # 获取文件名和大小
+        name = os.path.relpath(file, src_dir)
+        size = os.path.getsize(file)
+
+        # 写入文件名长度和文件名
+        name_utf8 = name.encode("utf-8")
+        data.extend(struct.pack("<B", len(name_utf8)))
+        data.extend(name_utf8)
+
+        # 写入文件大小
+        data.extend(struct.pack("<I", size))
+
+        # 写入文件时间（这里简化为0）
+        data.extend(struct.pack("<Q", 0))
+
+    # 写入结束标志
+    data.extend(struct.pack("<B", 0x80))
+
+    # 写入数据区域
+    for file in files:
+        # 读取并写入文件内容
+        with open(file, "rb") as src_f:
+            data.extend(src_f.read())
+
+    # 对整个文件进行异或操作
+    data = bytearray([b ^ 0xF7 for b in data])
+
+    # 写入目标文件
+    with open(dst_file, "wb") as f:
+        f.write(data)

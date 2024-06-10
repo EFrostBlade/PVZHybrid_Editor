@@ -1,44 +1,38 @@
-import tkinter as tk
-from threading import Thread
-import queue
+# ruff: noqa: F401,F403,F405,E402,F541,E722
+from keystone import *
 
+CODE = [
+    "fldz",
+    "fstp dword ptr [edi+30]",
+    "mov ecx,edi",
+    "call 013C0032",
+    "test al,al",
+    "je 013C001E",
+    "fld dword ptr [00679FE4]",
+    "fadd dword ptr [00679498]",
+    "jmp 013C0020",
+    "fldz",
+    "fstp dword ptr [edi+2C]",
+    "fild dword ptr [edi+08]",
+    "mov esi,[ebp+0C]",
+    "mov edx,[ebx]",
+    "push edx",
+    "push 0041713F",
+    "ret",
+    "push 0052BEE0",
+    "ret",
+]
 
-class ThreadSafeIntVar:
-    def __init__(self, master):
-        self.master = master
-        self.queue = queue.Queue()
-        self.intvar = tk.IntVar(master)
+ks = Ks(KS_ARCH_X86, KS_MODE_64)
 
-    def get(self):
-        self.master.after(0, self._get_from_queue)
-        return self.queue.get()
-
-    def set(self, value):
-        self.master.after(0, self._set_from_queue, value)
-
-    def _get_from_queue(self):
-        self.queue.put(self.intvar.get())
-
-    def _set_from_queue(self, value):
-        self.intvar.set(value)
-
-
-# 使用示例
-def worker(ts_intvar):
-    # 获取IntVar的值
-    current_value = ts_intvar.get()
-    print("Current value:", current_value)
-    # 更新IntVar的值
-    ts_intvar.set(current_value + 10)
-    print("Current value:", current_value)
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    ts_intvar = ThreadSafeIntVar(root)
-    ts_intvar.set(100)  # 初始设置一个值
-
-    t = Thread(target=worker, args=(ts_intvar,))
-    t.start()
-
-    root.mainloop()
+for i, line in enumerate(CODE, 1):
+    try:
+        encoding, count = ks.asm(line)
+        print(f"Line {i}: {line}")
+        print("Byte array: ", end="")
+        for byte in encoding:
+            print(f"{byte:02x} ", end="")
+        print("\n")
+    except KsError as e:
+        print(f"Keystone error at line {i}: {e}")
+        break

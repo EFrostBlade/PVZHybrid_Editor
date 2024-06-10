@@ -17,6 +17,22 @@ ESP = 4
 EBP = 5
 ESI = 6
 EDI = 7
+AX = 0
+CX = 1
+DX = 2
+BX = 3
+SP = 4
+BP = 5
+SI = 6
+DI = 7
+AL = 0
+CL = 1
+DL = 2
+BL = 3
+AH = 4
+CH = 5
+DH = 6
+BH = 7
 
 
 class Asm:
@@ -57,6 +73,17 @@ class Asm:
         self.add_byte(val)
         self.add_byte(val2)
 
+    def add_ptr_exx_add_byte_eyy(self, exx, val, eyy):
+        self.add_byte(0x01)
+        self.add_byte(0x40 + exx + eyy * 8)
+        self.add_byte(val)
+
+    def add_ptr_exx_add_eyy_times_add_byte_ezz(self, exx, eyy, times, val, ezz):
+        self.add_byte(0x01)
+        self.add_byte(0x44 + ezz * 8)
+        self.add_byte(exx + eyy * 8 + times * 0x20)
+        self.add_byte(val)
+
     def push_dword(self, val):
         self.add_byte(0x68)
         self.add_dword(val)
@@ -80,6 +107,10 @@ class Asm:
         self.add_byte(0x70 + exx)
         self.add_byte(val)
 
+    def fldz(self):
+        self.add_byte(0xD9)
+        self.add_byte(0xEE)
+
     def fild_dword_ptr_address(self, address):
         self.add_byte(0xDB)
         self.add_byte(0x05)
@@ -89,6 +120,16 @@ class Asm:
         self.add_byte(0xDB)
         self.add_byte(0x40 + exx)
         self.add_byte(val)
+
+    def fld_dword_ptr_address(self, address):
+        self.add_byte(0xD9)
+        self.add_byte(0x05)
+        self.add_dword(address)
+
+    def fadd_dword_ptr_address(self, address):
+        self.add_byte(0xD8)
+        self.add_byte(0x05)
+        self.add_dword(address)
 
     def fld_dword_ptr_exx_add_byte(self, exx, val):
         self.add_byte(0xD9)
@@ -122,6 +163,16 @@ class Asm:
     def mov_exx_dword_ptr(self, exx, val):
         self.add_byte(0x8B)
         self.add_byte(0x05 + exx * 8)
+        self.add_dword(val)
+
+    def mov_ex_ptr_dword(self, ex, val):
+        if ex == AX:
+            self.add_byte(0x66)
+            self.add_byte(0xA1)
+        else:
+            self.add_byte(0x66)
+            self.add_byte(0x8B)
+            self.add_byte(0x05 + ex * 8)
         self.add_dword(val)
 
     def mov_exx_dword_ptr_eyy_add_byte(self, exx, eyy, val):
@@ -180,6 +231,16 @@ class Asm:
         self.add_byte(0x89)
         self.add_byte(0xC0 + eyy * 8 + exx)
 
+    def xchg_exx_eyy(self, exx, eyy):
+        if exx == EAX:
+            self.add_byte(0x90 + eyy)
+        else:
+            self.add_byte(0x87)
+            self.add_byte(0xC0 + eyy * 8 + exx)
+
+    def cdq(self):
+        self.add_byte(0x99)
+
     def imul_exx_eyy(self, exx, eyy):
         self.add_byte(0x0F)
         self.add_byte(0xAF)
@@ -200,6 +261,24 @@ class Asm:
         self.add_byte(0x84 + exx * 8)
         self.add_byte(exy)  # exx+(eyy)*8
         self.add_dword(val)
+
+    def lea_exx_ptr_eyy_add_byte(self, exx, eyy, val):
+        self.add_byte(0x8D)
+        self.add_byte(0x40 + exx * 8 + eyy)
+        if eyy == ESP:
+            self.add_byte(0x24)
+        self.add_byte(val)
+
+    def lea_exx_ptr_eyy_add_ezz_times(self, exx, eyy, ezz, times):
+        self.add_byte(0x8D)
+        self.add_byte(0x04 + exx * 8)
+        self.add_byte(eyy + ezz * 8 + times * 0x20)
+
+    def lea_exx_ptr_eyy_add_ezz_times_add_byte(self, exx, eyy, ezz, times, val):
+        self.add_byte(0x8D)
+        self.add_byte(0x44 + exx * 8)
+        self.add_byte(eyy + ezz * 8 + times * 0x20)
+        self.add_byte(val)
 
     def lea_exx_dword_ptr(self, exx, val):
         self.add_byte(0x8D)
@@ -229,6 +308,11 @@ class Asm:
     def cmp_exx_eyy(self, exx, eyy):
         self.add_byte(0x39)
         self.add_byte(0xC0 + exx + eyy * 8)
+
+    def cmp_exx_ptr_eyy_add_dword(self, exx, eyy, val):
+        self.add_byte(0x3B)
+        self.add_byte(0x80 + exx * 8 + eyy)
+        self.add_dword(val)
 
     def cmp_ptr_exx_add_byte_eyy(self, exx, val, eyy):
         self.add_byte(0x39)
@@ -296,6 +380,10 @@ class Asm:
         self.add_byte(0xE8 + exx)
         self.add_byte(val)
 
+    def sub_exx_eyy(self, exx, eyy):
+        self.add_byte(0x29)
+        self.add_byte(0xC0 + exx + eyy * 8)
+
     def sub_exx_ptr_dword(self, exx, val):
         self.add_byte(0x2B)
         self.add_byte(0x05 + exx * 8)
@@ -352,6 +440,11 @@ class Asm:
         self.add_byte(0xF1)  # div ecx   EAX = EAX / ECX，EDX = EAX % ECX
         # 现在 EDX 寄存器中的值是0到val的随机数
 
+    def idiv_ex(self, ex):
+        self.add_byte(0x66)
+        self.add_byte(0xF7)
+        self.add_byte(0xF8 + ex)
+
     def mov_dword_ptr_dword(self, address, val):
         self.add_byte(0xC7)
         self.add_byte(0x05)
@@ -386,6 +479,10 @@ class Asm:
             self.add_byte(0x24)
         self.add_dword(val)
 
+    def mov_ptr_exx_eyy(self, exx, eyy):
+        self.add_byte(0x89)
+        self.add_byte(0x00 + exx + eyy * 8)
+
     def mov_ptr_exx_add_byte_eyy(self, exx, val, eyy):
         self.add_byte(0x89)
         self.add_byte(0x40 + exx + eyy * 8)
@@ -405,6 +502,13 @@ class Asm:
         self.add_byte(0x40 + exx)
         if exx == ESP:
             self.add_byte(0x24)
+        self.add_byte(val)
+        self.add_dword(val2)
+
+    def mov_ptr_exx_add_eyy_times_add_byte_doword(self, exx, eyy, times, val, val2):
+        self.add_byte(0xC7)
+        self.add_byte(0x44)
+        self.add_byte(exx + eyy * 8 + times * 0x20)
         self.add_byte(val)
         self.add_dword(val2)
 
@@ -449,6 +553,10 @@ class Asm:
         self.add_byte(0x84)
         self.add_dword(val)
 
+    def je_short_offset(self, val):
+        self.add_byte(0x74)
+        self.add_byte(val)
+
     def jl_offset(self, val):
         self.add_byte(0x7C)
         self.add_byte(val)
@@ -462,6 +570,10 @@ class Asm:
         self.add_byte(0x7E)
         self.add_byte(val)
 
+    def jnl_offset(self, val):
+        self.add_byte(0x7D)
+        self.add_byte(val)
+
     def jne(self, address):
         relative_offset = address - (self.startAddress + self.index + 6)
         # 将相对偏移量转换为32位有符号整数的字节序列
@@ -473,7 +585,7 @@ class Asm:
         self.code[self.index : self.index + 4] = offset_bytes
         self.index += 4
 
-    def jne_offset(self, val):
+    def jne_short_offset(self, val):
         self.add_byte(0x75)
         self.add_byte(val)
 
@@ -499,11 +611,11 @@ class Asm:
         self.add_byte(0x8E)
         self.add_dword(val)
 
-    def jmp_offest(self, val):
+    def jmp_short_offset(self, val):
         self.add_byte(0xEB)
         self.add_byte(val)
 
-    def jmp_dword_offest(self, val):
+    def jmp_dword_offset(self, val):
         self.add_byte(0xE9)
         self.add_dword(val)
 
@@ -544,6 +656,10 @@ class Asm:
 
     def inc_exx(self, exx):
         self.add_byte(0x40 + exx)
+
+    def test_8(self, x, y):
+        self.add_byte(0x84)
+        self.add_byte(0xC0 + x * 8 + y)
 
 
 def runThread(cla):
