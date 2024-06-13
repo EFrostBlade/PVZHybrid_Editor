@@ -156,6 +156,16 @@ class Asm:
             self.add_byte(0x24)
         self.add_byte(val)
 
+    def fistp_dword_ptr_exx(self, exx):
+        self.add_byte(0xDB)
+        self.add_byte(0x18 + exx)
+        if exx == ESP:
+            self.add_byte(0x24)
+
+    def mov_e(self, e, val):
+        self.add_byte(0xB0 + e)
+        self.add_byte(val)
+
     def mov_exx(self, exx, val):
         self.add_byte(0xB8 + exx)
         self.add_dword(val)
@@ -226,6 +236,10 @@ class Asm:
     def call_dword_offset(self, offset):
         self.add_byte(0xE8)  # call 指令的操作码
         self.add_dword(offset)
+
+    def call_exx(self, exx):
+        self.add_byte(0xFF)
+        self.add_byte(0xD0 + exx)
 
     def mov_exx_eyy(self, exx, eyy):
         self.add_byte(0x89)
@@ -301,8 +315,11 @@ class Asm:
         self.add_byte(val)
 
     def cmp_exx_dword(self, exx, val):
-        self.add_byte(0x81)
-        self.add_byte(0xF8 + exx)
+        if exx == EAX:
+            self.add_byte(0x3D)
+        else:
+            self.add_byte(0x81)
+            self.add_byte(0xF8 + exx)
         self.add_dword(val)
 
     def cmp_exx_eyy(self, exx, eyy):
@@ -353,6 +370,12 @@ class Asm:
 
     def cmp_dword_ptr_address_byte(self, address, val):
         self.add_byte(0x83)
+        self.add_byte(0x3D)
+        self.add_dword(address)
+        self.add_byte(val)
+
+    def cmp_byte_ptr_address_byte(self, address, val):
+        self.add_byte(0x80)
         self.add_byte(0x3D)
         self.add_dword(address)
         self.add_byte(val)
@@ -472,6 +495,18 @@ class Asm:
         self.add_dword(val)
         self.add_byte(val2)
 
+    def mov_dword_ptr_exx_add_dword_dowrd(self, exx, val, val2):
+        self.add_byte(0xC7)
+        self.add_byte(0x80 + exx)
+        self.add_dword(val)
+        self.add_dword(val2)
+
+    def mov_byte_ptr_address_byte(self, address, val):
+        self.add_byte(0xC6)
+        self.add_byte(0x05)
+        self.add_dword(address)
+        self.add_byte(val)
+
     def mov_ptr_exx_dword(self, exx, val):
         self.add_byte(0xC7)
         self.add_byte(exx)
@@ -528,6 +563,12 @@ class Asm:
         self.add_byte(val)
         self.code[self.index : self.index + 4] = struct.pack("f", val2)
         self.index += 4
+
+    def mov_ptr_dword_dword(self, address, val):
+        self.add_byte(0xC7)
+        self.add_byte(0x05)
+        self.add_dword(address)
+        self.add_dword(val)
 
     def mov_fs_offset_exx(self, offset, exx):
         self.add_byte(0x64)
@@ -606,6 +647,11 @@ class Asm:
         self.add_byte(0x7F)
         self.add_byte(val)
 
+    def jg_long_offset(self, val):
+        self.add_byte(0x0F)
+        self.add_byte(0x8F)
+        self.add_dword(val)
+
     def jng_dword_offset(self, val):
         self.add_byte(0x0F)
         self.add_byte(0x8E)
@@ -649,6 +695,11 @@ class Asm:
         self.add_byte(0x25)
         self.add_dword(val)
 
+    def and_exx_byte(self, exx, val):
+        self.add_byte(0x83)
+        self.add_byte(0xE0 + exx)
+        self.add_byte(val)
+
     def shl_exx_byte(self, exx, val):
         self.add_byte(0xC1)
         self.add_byte(0xE0 + exx)
@@ -665,7 +716,7 @@ class Asm:
 def runThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
     startAddress = pymem.memory.allocate_memory(process_handle, 65536)
-    print(hex(startAddress))
+    # print(hex(startAddress))
     asm = cla.creat_asm(startAddress + 1)
     shellcode = b"\x60" + bytes(asm.code[: asm.index]) + b"\x61\xc3"
     data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index + 3)

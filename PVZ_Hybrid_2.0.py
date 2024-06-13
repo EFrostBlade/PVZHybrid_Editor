@@ -74,7 +74,6 @@ def getMap():
             or map == 18
             or map == 19
             or map == 21
-            or map == 24
         ):
             return 5
         elif (
@@ -87,8 +86,6 @@ def getMap():
             or map == 20
             or map == 22
             or map == 23
-            or map == 25
-            or map == 26
         ):
             return 6
         else:
@@ -174,18 +171,18 @@ def overPlant(f):
         data.PVZ_memory.write_bytes(
             addr, b"\x0f\x1f\x00\x8b\x4c\x24\x2c\x66\x0f\x1f\x44\x00\x00", 13
         )
-        # data.PVZ_memory.write_bytes(
-        #     0x00843D50, b"\xeb\x6a\x90\x90\x90\x90\x90\x90\x90", 9
-        # )
+        data.PVZ_memory.write_bytes(
+            0x00843D50, b"\xeb\x6a\x90\x90\x90\x90\x90\x90\x90", 9
+        )
         data.PVZ_memory.write_bytes(0x00410908, b"\xeb\x12\x90\x90\x90", 5)
-        # data.PVZ_memory.write_bytes(0x00843DEE, b"\xe9\xe1\xcb\xbc\xff\x0f\x1f\x00", 8)
-        # data.PVZ_memory.write_bytes(0x00843E23, b"\xe9\xac\xcb\xbc\xff\x0f\x1f\x00", 8)
-        # data.PVZ_memory.write_bytes(0x00843E58, b"\xe9\x77\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00843DEE, b"\xe9\xe1\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00843E23, b"\xe9\xac\xcb\xbc\xff\x0f\x1f\x00", 8)
+        data.PVZ_memory.write_bytes(0x00843E58, b"\xe9\x77\xcb\xbc\xff\x0f\x1f\x00", 8)
         data.PVZ_memory.write_bytes(0x00410958, b"\xeb\x7a\x90\x90", 4)
         data.PVZ_memory.write_bytes(0x00410960, b"\xeb\x72", 2)
         data.PVZ_memory.write_bytes(0x00410B11, b"\x90\x90", 2)
         data.PVZ_memory.write_bytes(0x00410B16, b"\xeb\x47", 2)
-        # data.PVZ_memory.write_bytes(0x0084A3EB, b"\xe9\x6a\x3f\xbc\xff\x90", 6)
+        data.PVZ_memory.write_bytes(0x0084A3EB, b"\xe9\x6a\x3f\xbc\xff\x90", 6)
         data.PVZ_memory.write_bytes(0x00410BA2, b"\xeb\x06", 2)
         data.PVZ_memory.write_bytes(0x00410967, b"\xeb\x39", 2)
         data.PVZ_memory.write_bytes(0x004109A5, b"\xeb\x2d", 2)
@@ -204,18 +201,18 @@ def overPlant(f):
             + calculate_call_address(0x0040E2CD - addr - 0xD),
             13,
         )
-        # data.PVZ_memory.write_bytes(
-        #     0x00843D50, b"\x83\xfb\x4c\x0f\x84\xb4\xcb\xbc\xff", 9
-        # )
+        data.PVZ_memory.write_bytes(
+            0x00843D50, b"\x83\xfb\x4c\x0f\x84\xb4\xcb\xbc\xff", 9
+        )
         data.PVZ_memory.write_bytes(0x00410908, b"\x83\xfb\x17\x75\x0f", 5)
-        # data.PVZ_memory.write_bytes(0x00843DEE, b"\x85\xc0\x0f\x84\xde\xcb\xbc\xff", 8)
-        # data.PVZ_memory.write_bytes(0x00843E23, b"\x85\xc0\x0f\x84\xa9\xcb\xbc\xff", 8)
-        # data.PVZ_memory.write_bytes(0x00843E58, b"\x85\xc0\x0f\x84\x74\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00843DEE, b"\x85\xc0\x0f\x84\xde\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00843E23, b"\x85\xc0\x0f\x84\xa9\xcb\xbc\xff", 8)
+        data.PVZ_memory.write_bytes(0x00843E58, b"\x85\xc0\x0f\x84\x74\xcb\xbc\xff", 8)
         data.PVZ_memory.write_bytes(0x00410958, b"\x85\xc0\x73\x78", 4)
         data.PVZ_memory.write_bytes(0x00410960, b"\x75\x72", 2)
         data.PVZ_memory.write_bytes(0x00410B11, b"\x74\x05", 2)
         data.PVZ_memory.write_bytes(0x00410B16, b"\x75\x47", 2)
-        # data.PVZ_memory.write_bytes(0x0084A3EB, b"\x0f\x85\x69\x3f\xbc\xff", 6)
+        data.PVZ_memory.write_bytes(0x0084A3EB, b"\x0f\x85\x69\x3f\xbc\xff", 6)
         data.PVZ_memory.write_bytes(0x00410BA2, b"\x75\x06", 2)
         data.PVZ_memory.write_bytes(0x00410967, b"\x75\x39", 2)
         data.PVZ_memory.write_bytes(0x004109A5, b"\x75\x2d", 2)
@@ -477,126 +474,79 @@ def column(f):
 
 
 def unlock():
-    # [ENABLE]
-    # //code from here to '[DISABLE]' will be used to enable the cheat
-    # alloc(newmem,2048)
-    # label(returnhere)
-    # label(originalcode)
-    # label(exit)
-
-    # newmem: //this is allocated memory, you have read,write,execute access
-    # //place your code here
-
-    # mov al,1
-    # ret
-
-    # originalcode:
-    # jmp 87AE00
-
-    # exit:
-    # jmp returnhere
-
-    # "PlantsVsZombies.exe"+53B20:
-    # jmp newmem
-    # returnhere:
-
-    # [DISABLE]
-    # //code from here till the end of the code will be used to disable the cheat
-    # dealloc(newmem)
-    # "PlantsVsZombies.exe"+53B20:
-    # jmp 87AE00
-    # //Alt: db E9 4B CF 3E 00
-    newmem_unlock = pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 64)
+    addr = (
+        int.from_bytes(
+            data.PVZ_memory.read_bytes(0x00453B24, 1)
+            + data.PVZ_memory.read_bytes(0x00453B23, 1)
+            + data.PVZ_memory.read_bytes(0x00453B22, 1)
+            + data.PVZ_memory.read_bytes(0x00453B21, 1)
+        )
+        + 0x00453B25
+    )
+    newmem_unlock = pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 128)
     shellcode = asm.Asm(newmem_unlock)
-    shellcode.mov_e(asm.AL, 1)
+    shellcode.push_exx(asm.ESI)
+    shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ESI, asm.EDI, 0x82C)
+    shellcode.mov_ptr_exx_add_dword_dword(asm.ESI, 0x1C0, 1)
+    shellcode.pop_exx(asm.ESI)
+    shellcode.add_byte(0xB0)
+    shellcode.add_byte(0x01)  # mov al,01
     shellcode.ret()
+    shellcode.jmp(0x00840A77)
+
     data.PVZ_memory.write_bytes(
-        newmem_unlock, shellcode.get_code(), shellcode.get_code_len()
+        newmem_unlock, bytes(shellcode.code[: shellcode.index]), shellcode.index
     )
     data.PVZ_memory.write_bytes(
-        0x00453B20, b"\xe9" + calculate_call_address(newmem_unlock - 0x00453B25), 5
+        addr,
+        b"\xe9" + calculate_call_address(newmem_unlock - addr - 5) + b"\x90\x90",
+        7,
     )
 
 
 def shovelpro(f):
     global newmem_shovelpro
-    if data.PVZ_version == 2.0:
-        addr = (
-            int.from_bytes(
-                data.PVZ_memory.read_bytes(0x411141, 1)
-                + data.PVZ_memory.read_bytes(0x411140, 1)
-                + data.PVZ_memory.read_bytes(0x41113F, 1)
-                + data.PVZ_memory.read_bytes(0x41113E, 1)
-            )
-            + 0x411142
+    addr = (
+        int.from_bytes(
+            data.PVZ_memory.read_bytes(0x411141, 1)
+            + data.PVZ_memory.read_bytes(0x411140, 1)
+            + data.PVZ_memory.read_bytes(0x41113F, 1)
+            + data.PVZ_memory.read_bytes(0x41113E, 1)
         )
-        if f:
-            data.PVZ_memory.write_bytes(addr + 0x15, b"\xeb\x6a\x90", 3)
-            newmem_shovelpro = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 100
-            )
-            print(hex(newmem_shovelpro))
-            byte_data = (
-                b"\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8"
-                + calculate_call_address(0x0041DAE0 - newmem_shovelpro - 0x11)
-                + b"\x01\x85\x2c\x01\x00\x00\x61\x83\xbd\x2c\x01\x00\x00\x32\x7c\x1d\x83\xad\x2c\x01\x00\x00\x32"
-                b"\x60\x8b\x4d\x04\x6a\x02\x6a\x06\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x3B)
-                + b"\x61\xeb\xda\x83\xbd\x2c\x01\x00\x00\x19\x7c\x1d\x83\xad\x2c\x01\x00\x00\x19\x60\x8b\x4d\x04"
-                b"\x6a\x02\x6a\x04\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x61)
-                + b"\x61\xeb\xb4\x83\xbd\x2c\x01\x00\x00\x0f\x7c\x1d\x83\xad\x2c\x01\x00\x00\x0f\x60\x8b\x4d\x04"
-                b"\x6a\x02\x6a\x05\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x87)
-                + b"\x61\xeb\x8e\x01\x9f\x9c\x57\x00\x00\xe9"
-                + calculate_call_address(0x004111DE - newmem_shovelpro - 0x95)
-            )
-            data.PVZ_memory.write_bytes(newmem_shovelpro, byte_data, 149)
-            data.PVZ_memory.write_bytes(
-                0x004111D8,
-                b"\xe9"
-                + calculate_call_address(newmem_shovelpro - 0x004111DD)
-                + b"\x90",
-                6,
-            )
-        else:
-            data.PVZ_memory.write_bytes(addr + 0x15, b"\x83\xf8\x17", 3)
-            data.PVZ_memory.write_bytes(0x004111D8, b"\x01\x9f\x9c\x57\x00\x00", 6)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
-    elif data.PVZ_version == 2.1:
-        if f:
-            data.PVZ_memory.write_bytes(0x008E0460, b"\xe9\x7f\x00\x00\x00\x90", 6)
-            newmem_shovelpro = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 100
-            )
-            print(hex(newmem_shovelpro))
-            byte_data = (
-                b"\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8"
-                + calculate_call_address(0x0041DAE0 - newmem_shovelpro - 0x11)
-                + b"\x01\x85\x2c\x01\x00\x00\x61\x83\xbd\x2c\x01\x00\x00\x32\x7c\x1d\x83\xad\x2c\x01\x00\x00\x32"
-                b"\x60\x8b\x4d\x04\x6a\x02\x6a\x06\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x3B)
-                + b"\x61\xeb\xda\x83\xbd\x2c\x01\x00\x00\x19\x7c\x1d\x83\xad\x2c\x01\x00\x00\x19\x60\x8b\x4d\x04"
-                b"\x6a\x02\x6a\x04\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x61)
-                + b"\x61\xeb\xb4\x83\xbd\x2c\x01\x00\x00\x0f\x7c\x1d\x83\xad\x2c\x01\x00\x00\x0f\x60\x8b\x4d\x04"
-                b"\x6a\x02\x6a\x05\xff\x75\x0c\xff\x75\x08\xe8"
-                + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x87)
-                + b"\x61\xeb\x8e\x01\x9f\x9c\x57\x00\x00\xe9"
-                + calculate_call_address(0x004111DE - newmem_shovelpro - 0x95)
-            )
-            data.PVZ_memory.write_bytes(newmem_shovelpro, byte_data, 149)
-            data.PVZ_memory.write_bytes(
-                0x004111D8,
-                b"\xe9"
-                + calculate_call_address(newmem_shovelpro - 0x004111DD)
-                + b"\x90",
-                6,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x008E0460, b"\x0f\x84\x88\x00\x00\x00", 6)
-            data.PVZ_memory.write_bytes(0x004111D8, b"\x01\x9f\x9c\x57\x00\x00", 6)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
+        + 0x411142
+    )
+    print(hex(addr))
+    if f:
+        data.PVZ_memory.write_bytes(addr + 0x15, b"\xeb\x6a\x90", 3)
+        newmem_shovelpro = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 100
+        )
+        print(hex(newmem_shovelpro))
+        byte_data = (
+            b"\x60\x8b\x45\x24\x8b\x7d\x04\xba\xff\xff\xff\xff\xe8"
+            + calculate_call_address(0x0041DAE0 - newmem_shovelpro - 0x11)
+            + b"\x01\x85\x2c\x01\x00\x00\x61\x83\xbd\x2c\x01\x00\x00\x32\x7c\x1d\x83\xad\x2c\x01\x00\x00\x32"
+            b"\x60\x8b\x4d\x04\x6a\x02\x6a\x06\xff\x75\x0c\xff\x75\x08\xe8"
+            + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x3B)
+            + b"\x61\xeb\xda\x83\xbd\x2c\x01\x00\x00\x19\x7c\x1d\x83\xad\x2c\x01\x00\x00\x19\x60\x8b\x4d\x04"
+            b"\x6a\x02\x6a\x04\xff\x75\x0c\xff\x75\x08\xe8"
+            + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x61)
+            + b"\x61\xeb\xb4\x83\xbd\x2c\x01\x00\x00\x0f\x7c\x1d\x83\xad\x2c\x01\x00\x00\x0f\x60\x8b\x4d\x04"
+            b"\x6a\x02\x6a\x05\xff\x75\x0c\xff\x75\x08\xe8"
+            + calculate_call_address(0x0040CB10 - newmem_shovelpro - 0x87)
+            + b"\x61\xeb\x8e\x01\x9f\x9c\x57\x00\x00\xe9"
+            + calculate_call_address(0x004111DE - newmem_shovelpro - 0x95)
+        )
+        data.PVZ_memory.write_bytes(newmem_shovelpro, byte_data, 149)
+        data.PVZ_memory.write_bytes(
+            0x004111D8,
+            b"\xe9" + calculate_call_address(newmem_shovelpro - 0x004111DD) + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(addr + 0x15, b"\x83\xf8\x17", 3)
+        data.PVZ_memory.write_bytes(0x004111D8, b"\x01\x9f\x9c\x57\x00\x00", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
 
 
 def randomSlots_operstion(randomSlots_event, haszombie):
@@ -607,17 +557,11 @@ def randomSlots_operstion(randomSlots_event, haszombie):
         )
         for i in range(0, 14):
             if haszombie is False:
-                if data.PVZ_version == 2.1:
-                    plant = random.randint(0, 102)
-                elif data.PVZ_version == 2.0:
-                    plant = random.randint(0, 96)
+                plant = random.randint(0, 96)
                 if plant >= 48:
                     plant = plant + 27
             else:
-                if data.PVZ_version == 2.0:
-                    plant = random.randint(257, 297)
-                elif data.PVZ_version == 2.1:
-                    plant = random.randint(257, 300)
+                plant = random.randint(257, 297)
             data.PVZ_memory.write_int(
                 data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
             )
@@ -888,104 +832,62 @@ def noHole(d, t, b):
 def zombiebeanHpynotized(f):
     global newmem_zombiebeanHpynotized1
     global newmem_zombiebeanHpynotized
-    if data.PVZ_version == 2.0:
-        if f:
-            newmem_zombiebeanHpynotized1 = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 64
-            )
-            newmem_zombiebeanHpynotized = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 64
-            )
-            shellcode = asm.Asm(newmem_zombiebeanHpynotized)
-            shellcode.jmp(0x0086E267)
-            data.PVZ_memory.write_bytes(
-                newmem_zombiebeanHpynotized,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0086E243,
-                b"\xe9"
-                + calculate_call_address(newmem_zombiebeanHpynotized - 0x0086E248)
-                + b"\x90",
-                6,
-            )
+    if f:
+        newmem_zombiebeanHpynotized1 = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64
+        )
+        newmem_zombiebeanHpynotized = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64
+        )
+        shellcode = asm.Asm(newmem_zombiebeanHpynotized)
+        shellcode.jmp(0x0086E267)
+        data.PVZ_memory.write_bytes(
+            newmem_zombiebeanHpynotized,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0086E243,
+            b"\xe9"
+            + calculate_call_address(newmem_zombiebeanHpynotized - 0x0086E248)
+            + b"\x90",
+            6,
+        )
 
-            shellcode1 = asm.Asm(newmem_zombiebeanHpynotized1)
-            shellcode1.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 4)
-            shellcode1.call(0x0040DDC0)
-            shellcode1.mov_byte_ptr_exx_add_dword_byte(asm.EAX, 0xB8, 1)
-            shellcode1.jmp(0x0084F687)
-            data.PVZ_memory.write_bytes(
-                newmem_zombiebeanHpynotized1,
-                bytes(shellcode1.code[: shellcode1.index]),
-                shellcode1.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0084F684,
-                b"\xe9"
-                + calculate_call_address(newmem_zombiebeanHpynotized1 - 0x0084F689)
-                + b"\x90\x90\x90",
-                8,
-            )
+        shellcode1 = asm.Asm(newmem_zombiebeanHpynotized1)
+        shellcode1.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 4)
+        shellcode1.call(0x0040DDC0)
+        shellcode1.mov_byte_ptr_exx_add_dword_byte(asm.EAX, 0xB8, 1)
+        shellcode1.jmp(0x0084F687)
+        data.PVZ_memory.write_bytes(
+            newmem_zombiebeanHpynotized1,
+            bytes(shellcode1.code[: shellcode1.index]),
+            shellcode1.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0084F684,
+            b"\xe9"
+            + calculate_call_address(newmem_zombiebeanHpynotized1 - 0x0084F689)
+            + b"\x90\x90\x90",
+            8,
+        )
 
-        else:
-            data.PVZ_memory.write_bytes(
-                0x084F684, b"\x8b\x46\x04\xe8\x34\xe7\xbb\xff", 8
-            )
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized
-            )
-            data.PVZ_memory.write_bytes(0x0086E243, b"\x0f\x84\x1e\x00\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized1
-            )
-    elif data.PVZ_version == 2.1:
-        if f:
-            newmem_zombiebeanHpynotized1 = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 64
-            )
-            data.PVZ_memory.write_bytes(0x008AF243, b"\xeb\x22\x90\x90\x90\x90", 6)
-
-            shellcode1 = asm.Asm(newmem_zombiebeanHpynotized1)
-            shellcode1.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 4)
-            shellcode1.call(0x0040DDC0)
-            shellcode1.mov_byte_ptr_exx_add_dword_byte(asm.EAX, 0xB8, 1)
-            shellcode1.jmp(0x008AF43C)
-            data.PVZ_memory.write_bytes(
-                newmem_zombiebeanHpynotized1,
-                bytes(shellcode1.code[: shellcode1.index]),
-                shellcode1.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x008AF434,
-                b"\xe9"
-                + calculate_call_address(newmem_zombiebeanHpynotized1 - 0x008AF439)
-                + b"\x90\x90\x90",
-                8,
-            )
-
-        else:
-            data.PVZ_memory.write_bytes(
-                0x008AF434, b"\x8b\x46\x04\xe8\x34\xe7\xbb\xff", 8
-            )
-            data.PVZ_memory.write_bytes(0x008AF243, b"\x0f\x84\x1e\x00\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized1
-            )
+    else:
+        data.PVZ_memory.write_bytes(0x084F684, b"\x8b\x46\x04\xe8\x34\xe7\xbb\xff", 8)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized
+        )
+        data.PVZ_memory.write_bytes(0x0086E243, b"\x0f\x84\x1e\x00\x00\x00", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized1
+        )
 
 
 def scrapHelmetControlled(f):
-    if data.PVZ_version == 2.0:
-        if f:
-            data.PVZ_memory.write_bytes(0x0084AB3F, b"\x90\xe9", 2)
-        else:
-            data.PVZ_memory.write_bytes(0x0084AB3F, b"\x0f\x85", 2)
-    elif data.PVZ_version == 2.1:
-        if f:
-            data.PVZ_memory.write_bytes(0x0089A03F, b"\x90\xe9", 2)
-        else:
-            data.PVZ_memory.write_bytes(0x0089A03F, b"\x0f\x85", 2)
+    if f:
+        data.PVZ_memory.write_bytes(0x0084AB3F, b"\x90\xe9", 2)
+    else:
+        data.PVZ_memory.write_bytes(0x0084AB3F, b"\x0f\x85", 2)
 
 
 def conveyorBeltFull(f):
@@ -1511,141 +1413,112 @@ def slotKey(slot_key_list):
         shellcode.pushad()
         if slot_key_list["1"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["1"]])
-            shellcode.je_offset(0x150)
+            shellcode.je_offset(0xD8)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["2"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["2"]])
-            shellcode.je_offset(0x150 + 0x56)
+            shellcode.je_offset(0xD8 + 0x56)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["3"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["3"]])
-            shellcode.je_offset(0x150 + 0x56 * 2)
+            shellcode.je_offset(0xD8 + 0x56 * 2)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["4"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["4"]])
-            shellcode.je_offset(0x150 + 0x56 * 3)
+            shellcode.je_offset(0xD8 + 0x56 * 3)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["5"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["5"]])
-            shellcode.je_offset(0x150 + 0x56 * 4)
+            shellcode.je_offset(0xD8 + 0x56 * 4)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["6"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["6"]])
-            shellcode.je_offset(0x150 + 0x56 * 5)
+            shellcode.je_offset(0xD8 + 0x56 * 5)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["7"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["7"]])
-            shellcode.je_offset(0x150 + 0x56 * 6)
+            shellcode.je_offset(0xD8 + 0x56 * 6)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["8"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["8"]])
-            shellcode.je_offset(0x150 + 0x56 * 7)
+            shellcode.je_offset(0xD8 + 0x56 * 7)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["9"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["9"]])
-            shellcode.je_offset(0x150 + 0x56 * 8)
+            shellcode.je_offset(0xD8 + 0x56 * 8)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["10"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["10"]])
-            shellcode.je_offset(0x150 + 0x56 * 9)
+            shellcode.je_offset(0xD8 + 0x56 * 9)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["11"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["11"]])
-            shellcode.je_offset(0x150 + 0x56 * 10)
+            shellcode.je_offset(0xD8 + 0x56 * 10)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["12"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["12"]])
-            shellcode.je_offset(0x150 + 0x56 * 11)
+            shellcode.je_offset(0xD8 + 0x56 * 11)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["13"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["13"]])
-            shellcode.je_offset(0x150 + 0x56 * 12)
+            shellcode.je_offset(0xD8 + 0x56 * 12)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["14"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["14"]])
-            shellcode.je_offset(0x150 + 0x56 * 13)
+            shellcode.je_offset(0xD8 + 0x56 * 13)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["shovel"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["shovel"]])
-            shellcode.je_offset(0x150 + 0x56 * 14)
+            shellcode.je_offset(0xD8 + 0x56 * 14)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["zombie_hp"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["zombie_hp"]])
-            shellcode.je_offset(0x624)
+            shellcode.je_offset(0x5AC)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["top"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["top"]])
-            shellcode.je_offset(0x657)
+            shellcode.je_offset(0x5DF)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
         if slot_key_list["plant_hp"] > 0:
             shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["plant_hp"]])
-            shellcode.je_offset(0x686)
+            shellcode.je_offset(0x60E)
         else:
             shellcode.nop_6()
             shellcode.nop_6()
-        if slot_key_list["speed"] > 0:
-            shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["speed"]])
-            shellcode.je_offset(0x6B9)
-        else:
-            shellcode.nop_6()
-            shellcode.nop_6()
-        if slot_key_list["bag"] > 0:
-            shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["bag"]])
-            shellcode.je_offset(0x6EC)
-        else:
-            shellcode.nop_6()
-            shellcode.nop_6()
-        # 预留快捷键
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
         shellcode.jmp(0x0041B278)
@@ -2026,97 +1899,6 @@ def slotKey(slot_key_list):
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
         shellcode.jmp(0x0041B278)
-        # mov edx,[006A9EC0]
-        # mov edx,[edx+0000082C]
-        # cmp dword ptr [edx+00001C9C],01
-        # je 0089F347
-        # mov [edx+00001C9C],00000001
-        # popad
-        # jmp 0089F352
-        # mov [edx+00001C9C],00000000
-        # popad
-        shellcode.mov_exx_dword_ptr(asm.EDX, 0x006A9EC0)
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x82C)
-        shellcode.cmp_dword_ptr_exx_add_dword_byte(asm.EDX, 0x1C9C, 0x1)
-        shellcode.je_offset(0x10)
-        shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1C9C, 0x1)
-        shellcode.popad()
-        shellcode.jmp_dword_offset(0xB)
-        shellcode.mov_ptr_exx_add_dword_dword(asm.EDX, 0x1C9C, 0x0)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        # mov ecx,[006A9EC0]
-        # cmp dword ptr [ecx+000007FC],03
-        # jne 0089F3B9
-        # call 0044F410
-        # test al,al
-        # je 0089F3B9
-        # mov edi,[006A9EC0]
-        # mov ebx,FFFFFFFF
-        # call 00450180
-        # mov ebx,eax
-        # mov ecx,eax
-        # mov eax,0000000A
-        # call 00401BE0
-        # mov edx,[ebx]
-        # mov ecx,ebx
-        # mov eax,[edx+0000012C]
-        # push 01
-        # call eax
-        # mov eax,[006A9EC0]
-        # mov eax,[eax+0000083C]
-        # call 0045B770
-        # popad
-        shellcode.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
-        shellcode.cmp_dword_ptr_exx_add_dword_byte(asm.ECX, 0x7FC, 0x3)
-        shellcode.jne_long_offset(0x4A)
-        shellcode.call(0x0044F410)
-        shellcode.test_8(asm.AL, asm.AL)
-        shellcode.je_offset(0x3D)
-        shellcode.mov_exx_dword_ptr(asm.EDI, 0x006A9EC0)
-        shellcode.mov_exx(asm.EBX, 0xFFFFFFFF)
-        shellcode.call(0x00450180)
-        shellcode.mov_exx_eyy(asm.EBX, asm.EAX)
-        shellcode.mov_exx_eyy(asm.ECX, asm.EAX)
-        shellcode.mov_exx(asm.EAX, 0xA)
-        shellcode.call(0x00401BE0)
-        shellcode.mov_exx_dword_ptr_eyy(asm.EDX, asm.EBX)
-        shellcode.mov_exx_eyy(asm.ECX, asm.EBX)
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EDX, 0x12C)
-        shellcode.push_byte(0x1)
-        shellcode.call_exx(asm.EAX)
-        shellcode.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x83C)
-        shellcode.call(0x0045B770)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        # 预留快捷键
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
-        shellcode.popad()
-        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
-        shellcode.jmp(0x0041B278)
 
         data.PVZ_memory.write_bytes(
             newmem_slotKey, bytes(shellcode.code[: shellcode.index]), shellcode.index
@@ -2131,10 +1913,7 @@ def slotKey(slot_key_list):
     else:
         data.PVZ_memory.write_bytes(0x0041B272, b"\x8b\x96\x8c\x00\x00\x00", 6)
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_slotKey)
-        if data.PVZ_version == 2.0:
-            data.PVZ_memory.write_bytes(0x00539660, b"\xe9\x9b\x5c\x33\x00\x90", 6)
-        elif data.PVZ_version == 2.1:
-            data.PVZ_memory.write_bytes(0x00539660, b"\xe9\x9b\x5b\x36\x00\x90", 6)
+        data.PVZ_memory.write_bytes(0x00539660, b"\xe9\x9b\x5c\x33\x00\x90", 6)
 
 
 def setAllBullet(f, type):
@@ -2660,10 +2439,7 @@ def morph_all_plant():
             i = i + 1
         j = j + 1
     for p in plant_list:
-        if data.PVZ_version == 2.1:
-            plantType = random.randint(0, 102)
-        elif data.PVZ_version == 2.0:
-            plantType = random.randint(0, 96)
+        plantType = random.randint(0, 96)
         if plantType >= 48:
             plantType = plantType + 27
         if plantType == 118:
@@ -2727,18 +2503,12 @@ def PlantConnotHitedDeath(f):
     if f:
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x90\x90\x90", 3)
         data.PVZ_memory.write_bytes(0x0046D7A6, b"\x90\x90\x90", 3)
-        if data.PVZ_version == 2.1:
-            data.PVZ_memory.write_bytes(0x008AD752, b"\x90\x90\x90", 3)
-        elif data.PVZ_version == 2.0:
-            data.PVZ_memory.write_bytes(0x0084F15D, b"\x90\x90\x90", 3)
+        data.PVZ_memory.write_bytes(0x0084F15D, b"\x90\x90\x90", 3)
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x90\x90\x90", 3)
     else:
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x29\x50\x40", 3)
         data.PVZ_memory.write_bytes(0x0046D7A6, b"\x29\x50\x40", 3)
-        if data.PVZ_version == 2.1:
-            data.PVZ_memory.write_bytes(0x008AD752, b"\x29\x50\x40", 3)
-        elif data.PVZ_version == 2.0:
-            data.PVZ_memory.write_bytes(0x0084F15D, b"\x29\x50\x40", 3)
+        data.PVZ_memory.write_bytes(0x0084F15D, b"\x29\x50\x40", 3)
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x29\x50\x40", 3)
 
 
@@ -2750,233 +2520,115 @@ def PlantConnotStolen(f):
 
 
 def fogDraw(f):
-    if data.PVZ_version == 2.0:
-        if f:
-            data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x80", 2)
-        else:
-            data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x84", 2)
-    elif data.PVZ_version == 2.1:
-        if f:
-            data.PVZ_memory.write_bytes(0x008A7821, b"\x0f\x80", 2)
-        else:
-            data.PVZ_memory.write_bytes(0x008A7821, b"\x0f\x84", 2)
+    if f:
+        data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x80", 2)
+    else:
+        data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x84", 2)
 
 
 def invisibleDraw(f):
-    if data.PVZ_version == 2.0:
-        if f:
-            data.PVZ_memory.write_bytes(0x0086E56C, b"\x70", 1)
-        else:
-            data.PVZ_memory.write_bytes(0x0086E56C, b"\x74", 1)
-    elif data.PVZ_version == 2.1:
-        if f:
-            data.PVZ_memory.write_bytes(0x008A786C, b"\x70", 1)
-        else:
-            data.PVZ_memory.write_bytes(0x008A786C, b"\x74", 1)
+    if f:
+        data.PVZ_memory.write_bytes(0x0086E56C, b"\x70", 1)
+    else:
+        data.PVZ_memory.write_bytes(0x0086E56C, b"\x74", 1)
 
 
 def bossHPDraw(f):
     global newmem_resetBossNum
     global newmem_bossNum
     global newmem_bossHPDraw
-    if data.PVZ_version == 2.0:
-        if f:
-            newmem_resetBossNum = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 64
-            )
-            newmem_bossNum = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 4
-            )
-            newmem_bossHPDraw = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 512
-            )
-            resetBossNumcode = asm.Asm(newmem_resetBossNum)
-            resetBossNumcode.mov_dword_ptr_dword(newmem_bossNum, 0)
-            resetBossNumcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
-            resetBossNumcode.jmp(0x0086E553)
-            data.PVZ_memory.write_bytes(
-                newmem_resetBossNum,
-                bytes(resetBossNumcode.code[: resetBossNumcode.index]),
-                resetBossNumcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0086E54D,
-                b"\xe9"
-                + calculate_call_address(newmem_resetBossNum - 0x0086E552)
-                + b"\x90",
-                6,
-            )
-            bossHPDrawcode = asm.Asm(newmem_bossHPDraw)
-            bossHPDrawcode.jne_long_offset(0x95)
-            bossHPDrawcode.push_exx(asm.EAX)
-            bossHPDrawcode.mov_exx(asm.EAX, 0)
-            bossHPDrawcode.add_exx_ptr_dword(asm.EAX, 0x00700104)
-            bossHPDrawcode.sub_exx_ptr_dword(asm.EAX, 0x00700100)
-            bossHPDrawcode.mov_dword_ptr_exx(0x00700B40, asm.EAX)
-            bossHPDrawcode.pop_exx(asm.EAX)
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0xC8)
-            bossHPDrawcode.mov_exx_eyy(asm.ECX, asm.EAX)
-            bossHPDrawcode.lea_exx_dword_ptr(asm.EDX, newmem_bossHPDraw + 0xA9)
-            bossHPDrawcode.call(0x5B0280)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.push_dword(newmem_bossHPDraw + 0xA4)
-            bossHPDrawcode.mov_exx(asm.ECX, 0x00700B00)
-            bossHPDrawcode.call(0x00404300)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.mov_exx_dword_ptr(asm.EAX, newmem_bossNum)
-            bossHPDrawcode.inc_exx(asm.EAX)
-            bossHPDrawcode.mov_dword_ptr_exx(newmem_bossNum, asm.EAX)
-            bossHPDrawcode.mov_exx_eyy(asm.EBX, asm.EAX)
-            bossHPDrawcode.mov_exx_eyy(asm.EDX, asm.EBX)
-            bossHPDrawcode.imul_exx_eyy_byte(asm.EDX, asm.EDX, 20)
-            bossHPDrawcode.add_exx_dword(asm.EDX, 250)
-            bossHPDrawcode.push_exx(asm.EDX)
-            bossHPDrawcode.push_dword(640)
-            bossHPDrawcode.push_dword(0x00700B00)
-            bossHPDrawcode.mov_exx_eyy(asm.EAX, asm.EDI)
-            bossHPDrawcode.mov_exx_dword_ptr(asm.EBX, 0x006A7314)
-            bossHPDrawcode.mov_ptr_exx_add_byte_eyy(asm.EDI, 0x40, asm.EBX)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x30, 0xFF)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x34, 0x00)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x38, 0x00)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x3C, 0xFF)
-            bossHPDrawcode.call(0x00587120)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.jmp(0x0086E553)
-            bossHPDrawcode.cmp_byte_ptr_exx_add_byte_byte(asm.EBX, 0x18, 0)
-            bossHPDrawcode.jmp(0x0086E56C)
-            bossHPDrawcode.add_byte(0xBD)
-            bossHPDrawcode.add_byte(0xA9)
-            bossHPDrawcode.add_byte(0xCD)
-            bossHPDrawcode.add_byte(0xF5)
-            bossHPDrawcode.add_byte(0xD1)
-            bossHPDrawcode.add_byte(0xAA)
-            bossHPDrawcode.add_byte(0xC1)
-            bossHPDrawcode.add_byte(0xBF)
-            bossHPDrawcode.add_byte(0x3A)
-            bossHPDrawcode.add_byte(0x00)
-            data.PVZ_memory.write_bytes(
-                newmem_bossHPDraw,
-                bytes(bossHPDrawcode.code[: bossHPDrawcode.index]),
-                bossHPDrawcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0086E566,
-                b"\xe9"
-                + calculate_call_address(newmem_bossHPDraw - 0x0086E56B)
-                + b"\x90",
-                6,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x0086E54D, b"\x8b\x92\x68\x07\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_resetBossNum
-            )
-            data.PVZ_memory.write_bytes(0x0086E566, b"\x74\xeb\x80\x7b\x18\x00", 6)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossHPDraw)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossNum)
-    elif data.PVZ_version == 2.1:
-        if f:
-            newmem_resetBossNum = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 64
-            )
-            newmem_bossNum = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 4
-            )
-            newmem_bossHPDraw = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 512
-            )
-            resetBossNumcode = asm.Asm(newmem_resetBossNum)
-            resetBossNumcode.mov_dword_ptr_dword(newmem_bossNum, 0)
-            resetBossNumcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
-            resetBossNumcode.jmp(0x008A7853)
-            data.PVZ_memory.write_bytes(
-                newmem_resetBossNum,
-                bytes(resetBossNumcode.code[: resetBossNumcode.index]),
-                resetBossNumcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x008A784D,
-                b"\xe9"
-                + calculate_call_address(newmem_resetBossNum - 0x008A7852)
-                + b"\x90",
-                6,
-            )
-            bossHPDrawcode = asm.Asm(newmem_bossHPDraw)
-            bossHPDrawcode.jne_long_offset(0x95)
-            bossHPDrawcode.push_exx(asm.EAX)
-            bossHPDrawcode.mov_exx(asm.EAX, 0)
-            bossHPDrawcode.add_exx_ptr_dword(asm.EAX, 0x00700104)
-            bossHPDrawcode.sub_exx_ptr_dword(asm.EAX, 0x00700100)
-            bossHPDrawcode.mov_dword_ptr_exx(0x00700B40, asm.EAX)
-            bossHPDrawcode.pop_exx(asm.EAX)
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0xC8)
-            bossHPDrawcode.mov_exx_eyy(asm.ECX, asm.EAX)
-            bossHPDrawcode.lea_exx_dword_ptr(asm.EDX, newmem_bossHPDraw + 0xA9)
-            bossHPDrawcode.call(0x5B0280)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.push_dword(newmem_bossHPDraw + 0xA4)
-            bossHPDrawcode.mov_exx(asm.ECX, 0x00700B00)
-            bossHPDrawcode.call(0x00404300)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.pushad()
-            bossHPDrawcode.mov_exx_dword_ptr(asm.EAX, newmem_bossNum)
-            bossHPDrawcode.inc_exx(asm.EAX)
-            bossHPDrawcode.mov_dword_ptr_exx(newmem_bossNum, asm.EAX)
-            bossHPDrawcode.mov_exx_eyy(asm.EBX, asm.EAX)
-            bossHPDrawcode.mov_exx_eyy(asm.EDX, asm.EBX)
-            bossHPDrawcode.imul_exx_eyy_byte(asm.EDX, asm.EDX, 20)
-            bossHPDrawcode.add_exx_dword(asm.EDX, 250)
-            bossHPDrawcode.push_exx(asm.EDX)
-            bossHPDrawcode.push_dword(640)
-            bossHPDrawcode.push_dword(0x00700B00)
-            bossHPDrawcode.mov_exx_eyy(asm.EAX, asm.EDI)
-            bossHPDrawcode.mov_exx_dword_ptr(asm.EBX, 0x006A7314)
-            bossHPDrawcode.mov_ptr_exx_add_byte_eyy(asm.EDI, 0x40, asm.EBX)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x30, 0xFF)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x34, 0x00)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x38, 0x00)
-            bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x3C, 0xFF)
-            bossHPDrawcode.call(0x00587120)
-            bossHPDrawcode.popad()
-            bossHPDrawcode.jmp(0x008A7853)
-            bossHPDrawcode.cmp_byte_ptr_exx_add_byte_byte(asm.EBX, 0x18, 0)
-            bossHPDrawcode.jmp(0x008A786C)
-            bossHPDrawcode.add_byte(0xBD)
-            bossHPDrawcode.add_byte(0xA9)
-            bossHPDrawcode.add_byte(0xCD)
-            bossHPDrawcode.add_byte(0xF5)
-            bossHPDrawcode.add_byte(0xD1)
-            bossHPDrawcode.add_byte(0xAA)
-            bossHPDrawcode.add_byte(0xC1)
-            bossHPDrawcode.add_byte(0xBF)
-            bossHPDrawcode.add_byte(0x3A)
-            bossHPDrawcode.add_byte(0x00)
-            data.PVZ_memory.write_bytes(
-                newmem_bossHPDraw,
-                bytes(bossHPDrawcode.code[: bossHPDrawcode.index]),
-                bossHPDrawcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x008A7866,
-                b"\xe9"
-                + calculate_call_address(newmem_bossHPDraw - 0x008A786B)
-                + b"\x90",
-                6,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x008A784D, b"\x8b\x92\x68\x07\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_resetBossNum
-            )
-            data.PVZ_memory.write_bytes(0x008A7866, b"\x74\xeb\x80\x7b\x18\x00", 6)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossHPDraw)
-            pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossNum)
+    if f:
+        newmem_resetBossNum = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 64
+        )
+        newmem_bossNum = pymem.memory.allocate_memory(data.PVZ_memory.process_handle, 4)
+        newmem_bossHPDraw = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 512
+        )
+        resetBossNumcode = asm.Asm(newmem_resetBossNum)
+        resetBossNumcode.mov_dword_ptr_dword(newmem_bossNum, 0)
+        resetBossNumcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
+        resetBossNumcode.jmp(0x0086E553)
+        data.PVZ_memory.write_bytes(
+            newmem_resetBossNum,
+            bytes(resetBossNumcode.code[: resetBossNumcode.index]),
+            resetBossNumcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0086E54D,
+            b"\xe9"
+            + calculate_call_address(newmem_resetBossNum - 0x0086E552)
+            + b"\x90",
+            6,
+        )
+        bossHPDrawcode = asm.Asm(newmem_bossHPDraw)
+        bossHPDrawcode.jne_long_offset(0x95)
+        bossHPDrawcode.push_exx(asm.EAX)
+        bossHPDrawcode.mov_exx(asm.EAX, 0)
+        bossHPDrawcode.add_exx_ptr_dword(asm.EAX, 0x00700104)
+        bossHPDrawcode.sub_exx_ptr_dword(asm.EAX, 0x00700100)
+        bossHPDrawcode.mov_dword_ptr_exx(0x00700B40, asm.EAX)
+        bossHPDrawcode.pop_exx(asm.EAX)
+        bossHPDrawcode.pushad()
+        bossHPDrawcode.pushad()
+        bossHPDrawcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0xC8)
+        bossHPDrawcode.mov_exx_eyy(asm.ECX, asm.EAX)
+        bossHPDrawcode.lea_exx_dword_ptr(asm.EDX, newmem_bossHPDraw + 0xA9)
+        bossHPDrawcode.call(0x5B0280)
+        bossHPDrawcode.popad()
+        bossHPDrawcode.push_dword(newmem_bossHPDraw + 0xA4)
+        bossHPDrawcode.mov_exx(asm.ECX, 0x00700B00)
+        bossHPDrawcode.call(0x00404300)
+        bossHPDrawcode.popad()
+        bossHPDrawcode.pushad()
+        bossHPDrawcode.mov_exx_dword_ptr(asm.EAX, newmem_bossNum)
+        bossHPDrawcode.inc_exx(asm.EAX)
+        bossHPDrawcode.mov_dword_ptr_exx(newmem_bossNum, asm.EAX)
+        bossHPDrawcode.mov_exx_eyy(asm.EBX, asm.EAX)
+        bossHPDrawcode.mov_exx_eyy(asm.EDX, asm.EBX)
+        bossHPDrawcode.imul_exx_eyy_byte(asm.EDX, asm.EDX, 20)
+        bossHPDrawcode.add_exx_dword(asm.EDX, 250)
+        bossHPDrawcode.push_exx(asm.EDX)
+        bossHPDrawcode.push_dword(640)
+        bossHPDrawcode.push_dword(0x00700B00)
+        bossHPDrawcode.mov_exx_eyy(asm.EAX, asm.EDI)
+        bossHPDrawcode.mov_exx_dword_ptr(asm.EBX, 0x006A7314)
+        bossHPDrawcode.mov_ptr_exx_add_byte_eyy(asm.EDI, 0x40, asm.EBX)
+        bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x30, 0xFF)
+        bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x34, 0x00)
+        bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x38, 0x00)
+        bossHPDrawcode.mov_ptr_exx_add_byte_dword(asm.EDI, 0x3C, 0xFF)
+        bossHPDrawcode.call(0x00587120)
+        bossHPDrawcode.popad()
+        bossHPDrawcode.jmp(0x0086E553)
+        bossHPDrawcode.cmp_byte_ptr_exx_add_byte_byte(asm.EBX, 0x18, 0)
+        bossHPDrawcode.jmp(0x0086E56C)
+        bossHPDrawcode.add_byte(0xBD)
+        bossHPDrawcode.add_byte(0xA9)
+        bossHPDrawcode.add_byte(0xCD)
+        bossHPDrawcode.add_byte(0xF5)
+        bossHPDrawcode.add_byte(0xD1)
+        bossHPDrawcode.add_byte(0xAA)
+        bossHPDrawcode.add_byte(0xC1)
+        bossHPDrawcode.add_byte(0xBF)
+        bossHPDrawcode.add_byte(0x3A)
+        bossHPDrawcode.add_byte(0x00)
+        data.PVZ_memory.write_bytes(
+            newmem_bossHPDraw,
+            bytes(bossHPDrawcode.code[: bossHPDrawcode.index]),
+            bossHPDrawcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0086E566,
+            b"\xe9" + calculate_call_address(newmem_bossHPDraw - 0x0086E56B) + b"\x90",
+            6,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x0086E54D, b"\x8b\x92\x68\x07\x00\x00", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_resetBossNum)
+        data.PVZ_memory.write_bytes(0x0086E566, b"\x74\xeb\x80\x7b\x18\x00", 6)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossHPDraw)
+        pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_bossNum)
 
 
 def spawisModified():
@@ -3113,298 +2765,156 @@ def modifySpawMultiplier(f, mult):
     divzero(1)
     unlimitedMonsterSpawning(1)
     global newmem_modifySpawMultiplier
-    if data.PVZ_version == 2.0:
-        if f:
-            newmem_modifySpawMultiplier = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_modifySpawMultiplier)
-            shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 0x24, mult)
-            shellcode.jmp(0x00409968)
-            data.PVZ_memory.write_bytes(
-                newmem_modifySpawMultiplier,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x00409893,
-                b"\xe9"
-                + calculate_call_address(newmem_modifySpawMultiplier - 0x00409898)
-                + b"\x90",
-                6,
-            )
-            spawisModified()
-        else:
-            data.PVZ_memory.write_bytes(0x00409893, b"\xe9\x68\x37\x46\x00\x90", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_modifySpawMultiplier
-            )
-    elif data.PVZ_version == 2.1:
-        if f:
-            newmem_modifySpawMultiplier = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_modifySpawMultiplier)
-            shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 0x24, mult)
-            shellcode.jmp(0x00409968)
-            data.PVZ_memory.write_bytes(
-                newmem_modifySpawMultiplier,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x00409893,
-                b"\xe9"
-                + calculate_call_address(newmem_modifySpawMultiplier - 0x00409898)
-                + b"\x90",
-                6,
-            )
-            spawisModified()
-        else:
-            data.PVZ_memory.write_bytes(0x00409893, b"\xe9\x68\x6b\x42\x00\x90", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_modifySpawMultiplier
-            )
+    if f:
+        newmem_modifySpawMultiplier = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_modifySpawMultiplier)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 0x24, mult)
+        shellcode.jmp(0x00409968)
+        data.PVZ_memory.write_bytes(
+            newmem_modifySpawMultiplier,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00409893,
+            b"\xe9"
+            + calculate_call_address(newmem_modifySpawMultiplier - 0x00409898)
+            + b"\x90",
+            6,
+        )
+        spawisModified()
+    else:
+        data.PVZ_memory.write_bytes(0x00409893, b"\xe9\x68\x37\x46\x00\x90", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_modifySpawMultiplier
+        )
 
 
 def globalSpawModify(f, zombieTypes):
     divzero(1)
     unlimitedMonsterSpawning(1)
     global newmem_globalSpawModify
-    if data.PVZ_version == 2.0:
-        if f:
-            data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
-            data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
-            newmem_globalSpawModify = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_globalSpawModify)
-            for i in range(0, 42):
-                if str(i) in zombieTypes:
-                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
-                else:
-                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+    if f:
+        data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+        data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+        newmem_globalSpawModify = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_globalSpawModify)
+        for i in range(0, 42):
+            if str(i) in zombieTypes:
+                shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+            else:
+                shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
 
-            shellcode.jmp(0x00425D1D)
-            data.PVZ_memory.write_bytes(
-                newmem_globalSpawModify,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x00820CFF,
-                b"\xe9"
-                + calculate_call_address(newmem_globalSpawModify - 0x00820D04)
-                + b"\x90",
-                6,
-            )
-            spawisModified()
-        else:
-            data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
-            data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xed\x9f\x42\x00", 5)
-            data.PVZ_memory.write_bytes(0x00820CFF, b"\x0f\x85\x21\x00\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_globalSpawModify
-            )
-    elif data.PVZ_version == 2.1:
-        if f:
-            data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
-            data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
-            newmem_globalSpawModify = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_globalSpawModify)
-            for i in range(0, 42):
-                if str(i) in zombieTypes:
-                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
-                else:
-                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
-
-            shellcode.jmp(0x00425D1D)
-            data.PVZ_memory.write_bytes(
-                newmem_globalSpawModify,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0082401F,
-                b"\xe9"
-                + calculate_call_address(newmem_globalSpawModify - 0x00824024)
-                + b"\x90",
-                6,
-            )
-            spawisModified()
-        else:
-            data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
-            data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
-            data.PVZ_memory.write_bytes(0x0082401F, b"\x0f\x85\x21\x00\x00\x00", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_globalSpawModify
-            )
+        shellcode.jmp(0x00425D1D)
+        data.PVZ_memory.write_bytes(
+            newmem_globalSpawModify,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x00820CFF,
+            b"\xe9"
+            + calculate_call_address(newmem_globalSpawModify - 0x00820D04)
+            + b"\x90",
+            6,
+        )
+        spawisModified()
+    else:
+        data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+        data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xed\x9f\x42\x00", 5)
+        data.PVZ_memory.write_bytes(0x00820CFF, b"\x0f\x85\x21\x00\x00\x00", 6)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_globalSpawModify
+        )
+        # newmem_globalSpawModify = None
 
 
 def changeZombieHead(f, zombieType):
     print("changehead" + str(f))
     global newmem_changeZombieHead
     global newmem_changeZombieDeadHead
-    if data.PVZ_version == 2.0:
-        if f:
-            newmem_changeZombieHead = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
-            shellcode.jne_long_offset(0x4E)
-            shellcode.pushad()
-            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
-            shellcode.push_byte(0xFF)
-            shellcode.push_dword(0x0065851C)
-            shellcode.call(0x005331C0)
-            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
-            shellcode.push_byte(0xFF)
-            shellcode.push_dword(0x00658110)
-            shellcode.call(0x005331C0)
-            shellcode.mov_exx_dword_ptr_eyy(asm.EAX, asm.ESI)
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.EAX, 0x820)
-            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ECX, 0x8)
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ESI, 0x118)
-            shellcode.and_eax_dword(0xFFFF)
-            shellcode.lea_exx_eyy_ezz_times(asm.EBX, asm.EAX, asm.EAX, 4)
-            shellcode.shl_exx_byte(asm.EBX, 5)
-            shellcode.add_exx_ptr_eyy(asm.EBX, asm.EDX)
-            shellcode.push_dword_ptr(0x006A7A08)
-            shellcode.mov_exx(asm.EAX, 0x00658500)
-            shellcode.mov_exx_eyy(asm.ECX, asm.EBX)
-            shellcode.call(0x00473490)
-            shellcode.popad()
-            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 0x58)
-            shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x54, 0xFF)
-            shellcode.jmp(0x0052AF92)
-            data.PVZ_memory.write_bytes(
-                newmem_changeZombieHead,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0052AF8B,
-                b"\xe9"
-                + calculate_call_address(newmem_changeZombieHead - 0x0052AF90)
-                + b"\x90\x90",
-                7,
-            )
-            newmem_changeZombieDeadHead = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
-            shellcode2.cmp_exx_byte(asm.EAX, zombieType)
-            shellcode2.jne_long_offset(0xB)
-            shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
-            shellcode2.jmp(0x00529D07)
-            shellcode2.cmp_exx_byte(asm.EAX, 0x23)
-            shellcode2.jne(0x0084E4E4)
-            shellcode2.jmp(0x0084E4D9)
-            data.PVZ_memory.write_bytes(
-                newmem_changeZombieDeadHead,
-                bytes(shellcode2.code[: shellcode2.index]),
-                shellcode2.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0084E4D0,
-                b"\xe9"
-                + calculate_call_address(newmem_changeZombieDeadHead - 0x0084E4D5)
-                + b"\x90\x90\x90\x90",
-                9,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x0052AF8B, b"\x8b\x46\x58\x83\x46\x54\xff", 7)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_changeZombieHead
-            )
-            data.PVZ_memory.write_bytes(
-                0x0084E4D0, b"\x83\xf8\x23\x0f\x85\x0b\x00\x00\x00", 9
-            )
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_changeZombieDeadHead
-            )
-    elif data.PVZ_version == 2.1:
-        if f:
-            newmem_changeZombieHead = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
-            shellcode.jne_long_offset(0x4E)
-            shellcode.pushad()
-            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
-            shellcode.push_byte(0xFF)
-            shellcode.push_dword(0x0065851C)
-            shellcode.call(0x005331C0)
-            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
-            shellcode.push_byte(0xFF)
-            shellcode.push_dword(0x00658110)
-            shellcode.call(0x005331C0)
-            shellcode.mov_exx_dword_ptr_eyy(asm.EAX, asm.ESI)
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.EAX, 0x820)
-            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ECX, 0x8)
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ESI, 0x118)
-            shellcode.and_eax_dword(0xFFFF)
-            shellcode.lea_exx_eyy_ezz_times(asm.EBX, asm.EAX, asm.EAX, 4)
-            shellcode.shl_exx_byte(asm.EBX, 5)
-            shellcode.add_exx_ptr_eyy(asm.EBX, asm.EDX)
-            shellcode.push_dword_ptr(0x006A7A08)
-            shellcode.mov_exx(asm.EAX, 0x00658500)
-            shellcode.mov_exx_eyy(asm.ECX, asm.EBX)
-            shellcode.call(0x00473490)
-            shellcode.popad()
-            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 0x58)
-            shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x54, 0xFF)
-            shellcode.jmp(0x0052AF92)
-            data.PVZ_memory.write_bytes(
-                newmem_changeZombieHead,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0052AF8B,
-                b"\xe9"
-                + calculate_call_address(newmem_changeZombieHead - 0x0052AF90)
-                + b"\x90\x90",
-                7,
-            )
-            newmem_changeZombieDeadHead = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 256
-            )
-            shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
-            shellcode2.cmp_exx_byte(asm.EAX, zombieType)
-            shellcode2.jne_long_offset(0xB)
-            shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
-            shellcode2.jmp(0x00529D07)
-            shellcode2.cmp_exx_byte(asm.EAX, 0x23)
-            shellcode2.jne(0x008A9214)
-            shellcode2.jmp(0x008A9209)
-            data.PVZ_memory.write_bytes(
-                newmem_changeZombieDeadHead,
-                bytes(shellcode2.code[: shellcode2.index]),
-                shellcode2.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x008A9200,
-                b"\xe9"
-                + calculate_call_address(newmem_changeZombieDeadHead - 0x008A9205)
-                + b"\x90\x90\x90\x90",
-                9,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x0052AF8B, b"\x8b\x46\x58\x83\x46\x54\xff", 7)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_changeZombieHead
-            )
-            data.PVZ_memory.write_bytes(
-                0x008A9200, b"\x83\xf8\x23\x0f\x85\x0b\x00\x00\x00", 9
-            )
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_changeZombieDeadHead
-            )
+    if f:
+        newmem_changeZombieHead = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_changeZombieHead)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+        shellcode.jne_long_offset(0x4E)
+        shellcode.pushad()
+        shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+        shellcode.push_byte(0xFF)
+        shellcode.push_dword(0x0065851C)
+        shellcode.call(0x005331C0)
+        shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+        shellcode.push_byte(0xFF)
+        shellcode.push_dword(0x00658110)
+        shellcode.call(0x005331C0)
+        shellcode.mov_exx_dword_ptr_eyy(asm.EAX, asm.ESI)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.EAX, 0x820)
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ECX, 0x8)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ESI, 0x118)
+        shellcode.and_eax_dword(0xFFFF)
+        shellcode.lea_exx_eyy_ezz_times(asm.EBX, asm.EAX, asm.EAX, 4)
+        shellcode.shl_exx_byte(asm.EBX, 5)
+        shellcode.add_exx_ptr_eyy(asm.EBX, asm.EDX)
+        shellcode.push_dword_ptr(0x006A7A08)
+        shellcode.mov_exx(asm.EAX, 0x00658500)
+        shellcode.mov_exx_eyy(asm.ECX, asm.EBX)
+        shellcode.call(0x00473490)
+        shellcode.popad()
+        shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 0x58)
+        shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x54, 0xFF)
+        shellcode.jmp(0x0052AF92)
+        data.PVZ_memory.write_bytes(
+            newmem_changeZombieHead,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0052AF8B,
+            b"\xe9"
+            + calculate_call_address(newmem_changeZombieHead - 0x0052AF90)
+            + b"\x90\x90",
+            7,
+        )
+        newmem_changeZombieDeadHead = pymem.memory.allocate_memory(
+            data.PVZ_memory.process_handle, 256
+        )
+        shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
+        shellcode2.cmp_exx_byte(asm.EAX, zombieType)
+        shellcode2.jne_long_offset(0xB)
+        shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
+        shellcode2.jmp(0x00529D07)
+        shellcode2.cmp_exx_byte(asm.EAX, 0x23)
+        shellcode2.jne(0x0084E4E4)
+        shellcode2.jmp(0x0084E4D9)
+        data.PVZ_memory.write_bytes(
+            newmem_changeZombieDeadHead,
+            bytes(shellcode2.code[: shellcode2.index]),
+            shellcode2.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0084E4D0,
+            b"\xe9"
+            + calculate_call_address(newmem_changeZombieDeadHead - 0x0084E4D5)
+            + b"\x90\x90\x90\x90",
+            9,
+        )
+    else:
+        data.PVZ_memory.write_bytes(0x0052AF8B, b"\x8b\x46\x58\x83\x46\x54\xff", 7)
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_changeZombieHead
+        )
+        data.PVZ_memory.write_bytes(
+            0x0084E4D0, b"\x83\xf8\x23\x0f\x85\x0b\x00\x00\x00", 9
+        )
+        pymem.memory.free_memory(
+            data.PVZ_memory.process_handle, newmem_changeZombieDeadHead
+        )
 
 
 def deathrattleCallZombie(f, deadZombieType):
@@ -3444,10 +2954,7 @@ def deathrattleCallZombie(f, deadZombieType):
         shellcode.je_offset(0x39)
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EDI, 0x24, deadZombieType)
         shellcode.jne_long_offset(0x2F)
-        if data.PVZ_version == 2.0:
-            shellcode.mov_exx(asm.EAX, 42)
-        else:
-            shellcode.mov_exx(asm.EAX, 45)
+        shellcode.mov_exx(asm.EAX, 42)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
         shellcode.nop_6()
@@ -3613,10 +3120,7 @@ def zombieDeadZombie(f, deadZombieType, bossWeight):
         shellcode.cmp_exx_dword(asm.EAX, bossWeight)
         shellcode.mov_exx(asm.EAX, 25)
         shellcode.jl_long_offset(0x0F)
-        if data.PVZ_version == 2.0:
-            shellcode.mov_exx(asm.EAX, 42)
-        else:
-            shellcode.mov_exx(asm.EAX, 45)
+        shellcode.mov_exx(asm.EAX, 41)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
         shellcode.je_offset(0xD7)
@@ -3680,10 +3184,7 @@ def reserveMaterialDropAllCard(f, zombieWeight, lmpWeight):
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, lmpWeight)
         shellcode.jl_long_offset(0x14)
-        if data.PVZ_version == 2.0:
-            shellcode.mov_exx(asm.EAX, 42)
-        else:
-            shellcode.mov_exx(asm.EAX, 45)
+        shellcode.mov_exx(asm.EAX, 42)
         shellcode.call(0x005AF400)
         shellcode.add_exx_dword(asm.EAX, 0x100)
         shellcode.jmp_dword_offset(0x5)
@@ -5401,61 +4902,3 @@ def zombieTypeBomeDeadDropSun(f, type):
         pymem.memory.free_memory(
             data.PVZ_memory.process_handle, newmem_zombieTypeBomeDeadDropSun
         )
-
-
-newmem_infiniteItems = None
-
-
-def infiniteItems(f):
-    global newmem_infiniteItems
-    if data.PVZ_version == 2.0:
-        pass
-    elif data.PVZ_version == 2.1:
-        if f:
-            newmem_infiniteItems = pymem.memory.allocate_memory(
-                data.PVZ_memory.process_handle, 2048
-            )
-            shellcode = asm.Asm(newmem_infiniteItems)
-            shellcode.pushad()
-            shellcode.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x82C)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x208, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x20C, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x210, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x220, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CB4, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CB8, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CBC, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CC0, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CC4, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CEC, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CF0, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CF4, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CF8, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1CFC, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1D00, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1D04, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1D08, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1D0C, 9999)
-            shellcode.mov_dword_ptr_exx_add_dword_dowrd(asm.EAX, 0x1D10, 9999)
-            shellcode.popad()
-            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x28)
-            shellcode.cmp_ptr_exx_add_byte_eyy(asm.ESI, 0x24, asm.EAX)
-            shellcode.jmp(0x00538020)
-            data.PVZ_memory.write_bytes(
-                newmem_infiniteItems,
-                bytes(shellcode.code[: shellcode.index]),
-                shellcode.index,
-            )
-            data.PVZ_memory.write_bytes(
-                0x0053801A,
-                b"\xe9"
-                + calculate_call_address(newmem_infiniteItems - 0x0053801F)
-                + b"\x90",
-                6,
-            )
-        else:
-            data.PVZ_memory.write_bytes(0x0053801A, b"\x8b\x41\x28\x39\x46\x24", 6)
-            pymem.memory.free_memory(
-                data.PVZ_memory.process_handle, newmem_infiniteItems
-            )

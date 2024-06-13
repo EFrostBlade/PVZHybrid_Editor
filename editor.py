@@ -51,7 +51,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.29"
+current_version = "0.30"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -220,6 +220,23 @@ def chooseGame():
 
     def openPVZ_memory(process1):
         try:
+            window_name = re.search(r"\{\{(.+?)\}\}", process1).group(1)
+            if "2.0" in window_name:
+                data.update_PVZ_version(2.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.1" in window_name:
+                data.update_PVZ_version(2.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             data.update_PVZ_memory(Pymem(int(re.search(r"(\d+)", process1).group(1))))
             data.update_PVZ_pid(int(re.search(r"(\d+)", process1).group(1)))
         except:
@@ -238,6 +255,22 @@ def chooseGame():
         try:
             hwnd = win32gui.FindWindow("MainWindow", None)
             pid = win32process.GetWindowThreadProcessId(hwnd)
+            if "2.0" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.1" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             data.update_PVZ_memory(Pymem(pid[1]))
             data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
@@ -394,6 +427,13 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.30\n"
+        "新增自动识别游戏版本功能，目前支持2.0（含2.088）与2.1\n"
+        "修复了一系列2.1失效的功能，包括超级铲子、解锁所有卡牌、僵尸豆魅惑、废稿头免控、显血修复、出怪修改、礼盒僵尸等\n"
+        "修复了僵尸血量修改、僵尸卡阳光消耗修改\n"
+        "适配新地图、新版快捷键\n"
+        "新增功能：无限物品，银币、金币、钻石和商店物品锁定为9999\n"
+        "暂时搁置：自由放置中某些特殊情况的处理、随机子弹（计划重做）\n"
         "b0.29\n"
         "新增僵王绘制矫正功能，支持多僵王共存\n"
         "重写了植物选择，现在选择植物时会弹出图鉴进行选择了\n"
@@ -553,7 +593,7 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 >= index >= 48:
+    if 256 > index >= 48:
         index = index + 27
     combobox.current(index)
     window.destroy()
@@ -602,8 +642,13 @@ def open_card_select_window(combobox):
 def mainWindow():
     global main_window
     main_window = ttk.Window()
-    main_window.title("杂交版多功能修改器  " + str(current_version))
-    main_window.geometry("600x600")
+    main_window.title(
+        "杂交版多功能修改器  "
+        + str(current_version)
+        + "      游戏版本："
+        + str(data.PVZ_version)
+    )
+    main_window.geometry("600x650")
     main_window.iconphoto(
         False, ttk.PhotoImage(file=resource_path(r"res\icon\editor.png"))
     )
@@ -802,6 +847,22 @@ def mainWindow():
         try:
             hwnd = win32gui.FindWindow("MainWindow", None)
             pid = win32process.GetWindowThreadProcessId(hwnd)
+            if "2.0" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.1" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             data.update_PVZ_memory(Pymem(pid[1]))
             data.update_PVZ_pid(pid[1])
             process_label["text"] = (
@@ -1080,6 +1141,20 @@ def mainWindow():
     )
     never_fail_check.grid(row=6, column=0, sticky=W)
     ToolTip(never_fail_check, text="僵尸进家不判定游戏失败", bootstyle=(INFO, INVERSE))
+    Infinite_Items_status = ttk.BooleanVar(quick_start_frame)
+    Infinite_Items_check = ttk.Checkbutton(
+        quick_start_frame,
+        text="无限物品",
+        variable=Infinite_Items_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.infiniteItems(Infinite_Items_status.get()),
+    )
+    Infinite_Items_check.grid(row=7, column=0, sticky=W)
+    ToolTip(
+        Infinite_Items_check,
+        text="银币、金币、钻石和商店物品锁定为9999",
+        bootstyle=(INFO, INVERSE),
+    )
     # pause_pro_status = ttk.BooleanVar(quick_start_frame)
     # pause_pro_check = ttk.Checkbutton(quick_start_frame, text="高级暂停", variable=pause_pro_status,
     #                                   bootstyle="success-round-toggle", command=lambda: pvz.pausePro(pause_pro_status.get()))
@@ -2546,7 +2621,7 @@ def mainWindow():
                 elif zombie_select.hatType == 2:
                     zombie_hatHP_label["text"] = "铁桶:"
                 elif zombie_select.hatType == 3:
-                    zombie_hatHP_label["text"] = "橄榄帽:"
+                    zombie_hatHP_label["text"] = "黑橄榄:"
                 elif zombie_select.hatType == 4:
                     zombie_hatHP_label["text"] = "矿工帽:"
                 elif zombie_select.hatType == 7:
@@ -2559,6 +2634,16 @@ def mainWindow():
                     zombie_hatHP_label["text"] = "钢盔:"
                 elif zombie_select.hatType == 11:
                     zombie_hatHP_label["text"] = "绿帽:"
+                elif zombie_select.hatType == 12:
+                    zombie_hatHP_label["text"] = "睡帽:"
+                elif zombie_select.hatType == 18:
+                    zombie_hatHP_label["text"] = "红橄榄:"
+                elif zombie_select.hatType == 19:
+                    zombie_hatHP_label["text"] = "小红橄:"
+                elif zombie_select.hatType == 20:
+                    zombie_hatHP_label["text"] = "坚果头:"
+                elif zombie_select.hatType == 21:
+                    zombie_hatHP_label["text"] = "高冰果:"
                 else:
                     zombie_hatHP_label["text"] = str(zombie_select.hatType) + "未知:"
                 if zombie_attribute_frame.focus_get() != zombie_hatHP_entry:
@@ -4920,7 +5005,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_1_key.grid(row=0, column=1)
-    slot_1_key.current(0)
+    slot_1_key.current(2)
     ttk.Label(card_select_frame, text="2:").grid(row=0, column=2)
     slot_2_key = ttk.Combobox(
         card_select_frame,
@@ -4930,7 +5015,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_2_key.grid(row=0, column=3)
-    slot_2_key.current(0)
+    slot_2_key.current(3)
     ttk.Label(card_select_frame, text="3:").grid(row=0, column=4)
     slot_3_key = ttk.Combobox(
         card_select_frame,
@@ -4940,7 +5025,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_3_key.grid(row=0, column=5)
-    slot_3_key.current(0)
+    slot_3_key.current(4)
     ttk.Label(card_select_frame, text="4:").grid(row=0, column=6)
     slot_4_key = ttk.Combobox(
         card_select_frame,
@@ -4950,7 +5035,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_4_key.grid(row=0, column=7)
-    slot_4_key.current(0)
+    slot_4_key.current(5)
     ttk.Label(card_select_frame, text="5:").grid(row=0, column=8)
     slot_5_key = ttk.Combobox(
         card_select_frame,
@@ -4960,7 +5045,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_5_key.grid(row=0, column=9)
-    slot_5_key.current(0)
+    slot_5_key.current(6)
     ttk.Label(card_select_frame, text="6:").grid(row=0, column=10)
     slot_6_key = ttk.Combobox(
         card_select_frame,
@@ -4970,7 +5055,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_6_key.grid(row=0, column=11)
-    slot_6_key.current(0)
+    slot_6_key.current(7)
     ttk.Label(card_select_frame, text="7:").grid(row=0, column=12)
     slot_7_key = ttk.Combobox(
         card_select_frame,
@@ -4980,7 +5065,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_7_key.grid(row=0, column=13)
-    slot_7_key.current(0)
+    slot_7_key.current(8)
     ttk.Label(card_select_frame, text="8:").grid(row=1, column=0)
     slot_8_key = ttk.Combobox(
         card_select_frame,
@@ -4990,7 +5075,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_8_key.grid(row=1, column=1)
-    slot_8_key.current(0)
+    slot_8_key.current(9)
     ttk.Label(card_select_frame, text="9:").grid(row=1, column=2)
     slot_9_key = ttk.Combobox(
         card_select_frame,
@@ -5000,7 +5085,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_9_key.grid(row=1, column=3)
-    slot_9_key.current(0)
+    slot_9_key.current(10)
     ttk.Label(card_select_frame, text="10:").grid(row=1, column=4)
     slot_10_key = ttk.Combobox(
         card_select_frame,
@@ -5010,7 +5095,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_10_key.grid(row=1, column=5)
-    slot_10_key.current(0)
+    slot_10_key.current(1)
     ttk.Label(card_select_frame, text="11:").grid(row=1, column=6)
     slot_11_key = ttk.Combobox(
         card_select_frame,
@@ -5020,7 +5105,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_11_key.grid(row=1, column=7)
-    slot_11_key.current(0)
+    slot_11_key.current(27)
     ttk.Label(card_select_frame, text="12:").grid(row=1, column=8)
     slot_12_key = ttk.Combobox(
         card_select_frame,
@@ -5030,7 +5115,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_12_key.grid(row=1, column=9)
-    slot_12_key.current(0)
+    slot_12_key.current(33)
     ttk.Label(card_select_frame, text="13:").grid(row=1, column=10)
     slot_13_key = ttk.Combobox(
         card_select_frame,
@@ -5040,7 +5125,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_13_key.grid(row=1, column=11)
-    slot_13_key.current(0)
+    slot_13_key.current(15)
     ttk.Label(card_select_frame, text="14:").grid(row=1, column=12)
     slot_14_key = ttk.Combobox(
         card_select_frame,
@@ -5050,7 +5135,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_14_key.grid(row=1, column=13)
-    slot_14_key.current(0)
+    slot_14_key.current(28)
     function_key_frame = ttk.Frame(card_select_frame)
     function_key_frame.grid(row=2, column=0, columnspan=14)
     shovel_key_label = ttk.Label(function_key_frame, text="使用铲子:")
@@ -5063,7 +5148,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_shovel_key.grid(row=0, column=1)
-    slot_shovel_key.current(0)
+    slot_shovel_key.current(36)
     # ToolTip(shovel_key_label, text="使用铲子", bootstyle=(INFO, INVERSE))
     zombie_hp_key_label = ttk.Label(function_key_frame, text="僵尸显血:")
     zombie_hp_key_label.grid(row=0, column=2)
@@ -5075,7 +5160,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_zombie_hp_key.grid(row=0, column=3)
-    slot_zombie_hp_key.current(0)
+    slot_zombie_hp_key.current(34)
     # ToolTip(zombie_hp_key_label, text="显示僵尸血量", bootstyle=(INFO, INVERSE))
     plant_hp_key_label = ttk.Label(function_key_frame, text="植物显血:")
     plant_hp_key_label.grid(row=0, column=4)
@@ -5087,7 +5172,7 @@ def mainWindow():
         state=READONLY,
     )
     slot_plant_hp_key.grid(row=0, column=5)
-    slot_plant_hp_key.current(0)
+    slot_plant_hp_key.current(13)
     # ToolTip(plant_hp_key_label, text="显示僵尸血量", bootstyle=(INFO, INVERSE))
     top_key_label = ttk.Label(function_key_frame, text="卡槽置顶:")
     top_key_label.grid(row=0, column=6)
@@ -5099,8 +5184,118 @@ def mainWindow():
         state=READONLY,
     )
     slot_top_key.grid(row=0, column=7)
-    slot_top_key.current(0)
+    slot_top_key.current(32)
     # ToolTip(top_key_label, text="卡槽置顶", bootstyle=(INFO, INVERSE))
+    speed_key_label = ttk.Label(function_key_frame, text="游戏加速:")
+    speed_key_label.grid(row=0, column=8)
+    slot_speed_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_speed_key.grid(row=0, column=9)
+    slot_speed_key.current(24)
+    bag_key_label = ttk.Label(function_key_frame, text="使用物品:")
+    bag_key_label.grid(row=1, column=0)
+    slot_bag_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_bag_key.grid(row=1, column=1)
+    slot_bag_key.current(12)
+    reserved1_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved1_key_label.grid(row=1, column=2)
+    slot_reserved1_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved1_key.grid(row=1, column=3)
+    slot_reserved1_key.current(0)
+    reserved2_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved2_key_label.grid(row=1, column=4)
+    slot_reserved2_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved2_key.grid(row=1, column=5)
+    slot_reserved2_key.current(0)
+    reserved3_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved3_key_label.grid(row=1, column=6)
+    slot_reserved3_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved3_key.grid(row=1, column=7)
+    slot_reserved3_key.current(0)
+    reserved4_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved4_key_label.grid(row=1, column=8)
+    slot_reserved4_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved4_key.grid(row=1, column=9)
+    slot_reserved4_key.current(0)
+    reserved5_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved5_key_label.grid(row=2, column=0)
+    slot_reserved5_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved5_key.grid(row=2, column=1)
+    slot_reserved5_key.current(0)
+    reserved6_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved6_key_label.grid(row=2, column=2)
+    slot_reserved6_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved6_key.grid(row=2, column=3)
+    slot_reserved6_key.current(0)
+    reserved7_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved7_key_label.grid(row=2, column=4)
+    slot_reserved7_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved7_key.grid(row=2, column=5)
+    slot_reserved7_key.current(0)
+    reserved8_key_label = ttk.Label(function_key_frame, text="预留快捷:")
+    reserved8_key_label.grid(row=2, column=6)
+    slot_reserved8_key = ttk.Combobox(
+        function_key_frame,
+        width=3,
+        values=data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
+    )
+    slot_reserved8_key.grid(row=2, column=7)
+    slot_reserved8_key.current(0)
 
     def loadSlotKey():
         config = load_config(config_file_path)
@@ -5174,6 +5369,14 @@ def mainWindow():
             pass
         try:
             slot_top_key.current(config["slotKeys"]["top"])
+        except:
+            pass
+        try:
+            slot_speed_key.current(config["slotKeys"]["speed"])
+        except:
+            pass
+        try:
+            slot_bag_key.current(config["slotKeys"]["bag"])
         except:
             pass
 
@@ -5392,6 +5595,32 @@ def mainWindow():
                     )
                     slot_key_status.set(False)
                     return ()
+            if slot_speed_key.current() != -1:
+                if (
+                    slot_speed_key.current() not in slot_key_list
+                    or slot_speed_key.current() == 0
+                ):
+                    config["slotKeys"]["speed"] = slot_speed_key.current()
+                    slot_key_list.append(slot_speed_key.current())
+                else:
+                    Messagebox.show_error(
+                        "游戏加速快捷键重复", title="不可设置相同快捷键"
+                    )
+                    slot_key_status.set(False)
+                    return ()
+            if slot_bag_key.current() != -1:
+                if (
+                    slot_bag_key.current() not in slot_key_list
+                    or slot_bag_key.current() == 0
+                ):
+                    config["slotKeys"]["bag"] = slot_bag_key.current()
+                    slot_key_list.append(slot_bag_key.current())
+                else:
+                    Messagebox.show_error(
+                        "使用物品快捷键重复", title="不可设置相同快捷键"
+                    )
+                    slot_key_status.set(False)
+                    return ()
 
             save_config(config, config_file_path)
             slot_key_list = config["slotKeys"]
@@ -5407,10 +5636,10 @@ def mainWindow():
         bootstyle="primary-round-toggle",
         command=lambda: setSlotKey(),
     )
-    slot_key_check.grid(row=0, column=8, columnspan=4)
+    slot_key_check.grid(row=2, column=8, columnspan=4)
 
     hp_show_frame = ttk.LabelFrame(common_page, text="显血修复", bootstyle=DANGER)
-    hp_show_frame.place(x=460, y=440, relx=0, anchor=NW)
+    hp_show_frame.place(x=505, y=440, relx=0, anchor=NW)
     fog_hp_status = ttk.BooleanVar(hp_show_frame)
     fog_hp_check = ttk.Checkbutton(
         hp_show_frame,
@@ -5442,12 +5671,12 @@ def mainWindow():
     boss_correct_status = ttk.BooleanVar(common_page)
     boss_correct_check = ttk.Checkbutton(
         common_page,
-        text="僵王绘制矫正",
+        text="僵王绘制\n矫正",
         variable=boss_correct_status,
         bootstyle="danger-round-toggle",
         command=lambda: pvz.bossCorrect(boss_correct_status.get()),
     )
-    boss_correct_check.place(x=460, y=515, relx=0, anchor=NW)
+    boss_correct_check.place(x=505, y=525, relx=0, anchor=NW)
 
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
@@ -5974,7 +6203,7 @@ def mainWindow():
         recruit_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
         ttk.Label(
             recruit_window,
-            text="抖音直播工会，不扣点\n提供专业运营，全程跟播\n工会独家起号方法\n免费开权限，新出插件提前尝鲜\n想直播可添加下方微信\nE_FrostBlade",
+            text="抖音最强植物工会，0抽点\n一对一教学搭建起号\n主播有24小时运营\n在播主播人均月收五位数\n欢迎各位加入",
             font=("黑体", 14),
             bootstyle=PRIMARY,
         ).pack(pady=10)

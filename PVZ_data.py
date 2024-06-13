@@ -2,6 +2,7 @@ from pymem import Pymem
 
 PVZ_memory = Pymem()
 PVZ_pid = 0
+PVZ_version = 2.1
 
 
 def update_PVZ_memory(memory):
@@ -12,6 +13,12 @@ def update_PVZ_memory(memory):
 def update_PVZ_pid(pid):
     global PVZ_pid
     PVZ_pid = pid
+
+
+def update_PVZ_version(version):
+    global PVZ_version
+    PVZ_version = version
+    print(PVZ_version)
 
 
 baseAddress = 0x006A9EC0
@@ -59,6 +66,9 @@ zombiesType = [
     "小黄鸭僵尸",
     "床车僵尸",
     "小摔哥僵尸",
+    "橄榄巨人",
+    "橄榄小鬼",
+    "雪人矿工",
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -209,6 +219,13 @@ plantsType = [
     "海冰菇",
     "莲叶壳",
     "小猫向日葵",
+    "礼盒机",
+    "招财猫",
+    "水晶蜗牛",
+    "坚果存钱罐",
+    "吸金磁射手",
+    "钻石种子",
+    "抽奖盒子豪华版",
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -255,69 +272,151 @@ plantsType = plantsType + [
     "小黄鸭僵尸",
     "床车僵尸",
     "小摔哥僵尸",
+    "橄榄巨人",
+    "橄榄小鬼",
+    "雪人矿工",
 ]
 
-zombies_HP_addresses = {
-    "普僵": 0x005227BB,
-    "路障的路障": 0x522892,
-    "路障的绿帽": 0x0085A8AF,
-    "撑杆": 0x522CBF,
-    "撑杆的坚果": 0x0085AA02,
-    "铁桶的铁桶": 0x52292B,
-    "报纸": 0x52337D,
-    "冰车二爷": 0x0085ADCD,
-    "铁门的铁门": 0x522949,
-    "铁门的路障": 0x0085A0CD,
-    "铁门的铁桶": 0x0085A080,
-    "橄榄的黑橄榄帽": 0x522BB0,
-    "橄榄的废稿头盔": 0x85A794,
-    "舞王": 0x523530,
-    "舞王的黑橄榄帽": 0x0085A501,
-    "舞王的废稿头盔": 0x0085A56D,
-    "潜水和投篮的黑橄榄帽": 0x0085A025,
-    "大型冰车": 0x522DE1,
-    "雪橇车": 0x523139,
-    "雪橇小队": 0x0085AB94,
-    "海豚": 0x522D64,
-    "海豚的路障": 0x0085A6FD,
-    "小丑": 0x522FC7,
-    "小丑的路障": 0x0085A0EA,
-    "气球": 0x005234BF,
-    "矿工的橄榄帽": 0x522BEF,
-    "矿工本体": 0x0085A6C3,
-    "跳跳": 0x523300,
-    "跳跳的铁桶": 0x0085A1EC,
-    "跳跳的坚果": 0x0085A326,
-    "冰车雪人": 0x52296E,
-    "蹦极": 0x522A1B,
-    "扶梯本体和扶梯": 0x52299C,
-    "扶梯的路障": 0x0085A347,
-    "扶梯的铁桶": 0x0085A39E,
-    "扶梯的坚果": 0x0085A4E0,
-    "投石车": 0x522E8D,
-    "白眼": 0x523D26,
-    "红眼": 0x523E4A,
-    "巨人的铁门": 0x0085A5CE,
-    "巨人的铁桶": 0x0085A5BA,
-    "巨人的黑橄榄帽": 0x0085A6B0,
-    "巨人的废稿头盔": 0x0085A656,
-    "植物僵尸的铁门": 0x0085A1C6,
-    "植物僵尸的路障": 0x0085A1A4,
-    "植物僵尸的铁桶": 0x0085A156,
-    "坚果僵尸的坚果": 0x52382B,
-    "辣椒僵尸的辣椒": 0x523A87,
-    "高冰果僵尸的高冰果": 0x52395D,
-    "迪斯科僵尸": 0x0085A82D,
-    "骷髅": 0x0085AB76,
-    "死灵法师": 0x0085ADB2,
-    "火焰迪斯科": 0x0085AC14,
-    "火焰舞者": 0x0085AD96,
-    "床车": 0x0085AE77,
-    "小摔哥的睡帽": 0x0085AEC7,
-    "小黄鸭的路障": 0x0085AE63,
-    "小黄鸭的铁桶": 0x0085AE30,
-    "僵王": 0x0085AEE5,
-}
+
+def get_zombies_HP_addresses(PVZ_version):
+    if PVZ_version == 2.0:
+        return {
+            "普僵": 0x005227BB,
+            "路障的路障": 0x522892,
+            "路障的绿帽": 0x0085A8AF,
+            "撑杆": 0x522CBF,
+            "撑杆的坚果": 0x0085AA02,
+            "铁桶的铁桶": 0x52292B,
+            "报纸": 0x52337D,
+            "冰车二爷": 0x0085ADCD,
+            "铁门的铁门": 0x522949,
+            "铁门的路障": 0x0085A0CD,
+            "铁门的铁桶": 0x0085A080,
+            "橄榄的黑橄榄帽": 0x522BB0,
+            "橄榄的废稿头盔": 0x85A794,
+            "舞王": 0x523530,
+            "舞王的黑橄榄帽": 0x0085A501,
+            "舞王的废稿头盔": 0x0085A56D,
+            "潜水和投篮的黑橄榄帽": 0x0085A025,
+            "大型冰车": 0x522DE1,
+            "雪橇车": 0x523139,
+            "雪橇小队": 0x0085AB94,
+            "海豚": 0x522D64,
+            "海豚的路障": 0x0085A6FD,
+            "小丑": 0x522FC7,
+            "小丑的路障": 0x0085A0EA,
+            "气球": 0x005234BF,
+            "矿工的橄榄帽": 0x522BEF,
+            "矿工本体": 0x0085A6C3,
+            "跳跳": 0x523300,
+            "跳跳的铁桶": 0x0085A1EC,
+            "跳跳的坚果": 0x0085A326,
+            "冰车雪人": 0x52296E,
+            "蹦极": 0x522A1B,
+            "扶梯本体和扶梯": 0x52299C,
+            "扶梯的路障": 0x0085A347,
+            "扶梯的铁桶": 0x0085A39E,
+            "扶梯的坚果": 0x0085A4E0,
+            "投石车": 0x522E8D,
+            "白眼": 0x523D26,
+            "红眼": 0x523E4A,
+            "巨人的铁门": 0x0085A5CE,
+            "巨人的铁桶": 0x0085A5BA,
+            "巨人的黑橄榄帽": 0x0085A6B0,
+            "巨人的废稿头盔": 0x0085A656,
+            "植物僵尸的铁门": 0x0085A1C6,
+            "植物僵尸的路障": 0x0085A1A4,
+            "植物僵尸的铁桶": 0x0085A156,
+            "坚果僵尸的坚果": 0x52382B,
+            "辣椒僵尸的辣椒": 0x523A87,
+            "高冰果僵尸的高冰果": 0x52395D,
+            "迪斯科僵尸": 0x0085A82D,
+            "骷髅": 0x0085AB76,
+            "死灵法师": 0x0085ADB2,
+            "火焰迪斯科": 0x0085AC14,
+            "火焰舞者": 0x0085AD96,
+            "床车": 0x0085AE77,
+            "小摔哥的睡帽": 0x0085AEC7,
+            "小黄鸭的路障": 0x0085AE63,
+            "小黄鸭的铁桶": 0x0085AE30,
+            "僵王": 0x0085AEE5,
+        }
+    elif PVZ_version == 2.1:
+        return {
+            "普僵": 0x005227BB,
+            "路障的路障": 0x00522892,
+            "路障的绿帽": 0x008D08AF,
+            "路尸的绿帽上限": 0x008D08B9,
+            "撑杆": 0x00522CBF,
+            "撑杆的坚果": 0x008D0A02,
+            "铁桶的铁桶": 0x0052292B,
+            "报纸": 0x0052337D,
+            "冰车二爷": 0x008D0DCD,
+            "铁门的铁门": 0x00522949,
+            "铁门的路障": 0x008D00CD,
+            "铁门的铁桶": 0x008D0080,
+            "橄榄的黑橄榄帽": 0x00522BB0,
+            "橄榄的废稿头盔": 0x008D0794,
+            "橄榄的废稿头盔上限": 0x008D079E,
+            "舞王": 0x00523530,
+            "舞王的黑橄榄帽": 0x008D0501,
+            "舞王的废稿头盔": 0x008D056D,
+            "舞王的废稿头盔上限": 0x008D0577,
+            "潜水和投篮的黑橄榄帽": 0x008D0025,
+            "大型冰车": 0x00522DE1,
+            "雪橇车": 0x00523139,
+            "雪橇小队": 0x008D0B94,
+            "雪橇小队上限": 0x008D0B9E,
+            "海豚": 0x00522D64,
+            "海豚的路障": 0x008D06FD,
+            "小丑": 0x00522FC7,
+            "小丑的路障": 0x008D00EA,
+            "气球": 0x005234BF,
+            "矿工本体": 0x008D06C3,
+            "跳跳": 0x00523300,
+            "跳跳的铁桶": 0x008D01EC,
+            "跳跳的坚果": 0x008D0326,
+            "冰车雪人": 0x0052296E,
+            "蹦极": 0x00522A1B,
+            "扶梯本体和扶梯": 0x0052299C,
+            "扶梯僵尸的路障饰品": 0x008D0347,
+            "扶梯的路障": 0x008D039E,
+            "扶梯的坚果": 0x008D04E0,
+            "投石车": 0x00522E8D,
+            "白眼": 0x00523D26,
+            "红眼": 0x00523E4A,
+            "巨人的铁门": 0x008D05CE,
+            "巨人的铁桶": 0x008D05BA,
+            "巨人的黑橄榄帽": 0x008D06B0,
+            "巨人的废稿头盔": 0x008D0656,
+            "巨人的废稿头盔上限": 0x008D0660,
+            "植物僵尸的铁门": 0x008D01C6,
+            "植物僵尸的路障": 0x008D01A4,
+            "植物僵尸的铁桶": 0x008D0156,
+            "坚果僵尸的坚果": 0x0052382B,
+            "辣椒僵尸的辣椒": 0x00523A87,
+            "高冰果僵尸的高冰果": 0x0052395D,
+            "迪斯科僵尸": 0x008D082D,
+            "骷髅": 0x008D0B76,
+            "骷髅上限": 0x008D0B80,
+            "死灵法师": 0x008D0DB2,
+            "火焰迪斯科": 0x008D0C14,
+            "火焰舞者": 0x008D0D96,
+            "床车": 0x008D0E77,
+            "小摔哥的睡帽": 0x008D0EC7,
+            "小摔哥的睡帽上限": 0x008D0ED1,
+            "小黄鸭的路障": 0x008D0E63,
+            "小黄鸭的铁桶": 0x008D0E30,
+            "僵王": 0x008D0EE5,
+            "橄榄巨人": 0x008D0F04,
+            "橄榄巨人头盔": 0x008D0F18,
+            "橄榄小鬼头盔": 0x008D0F8F,
+            "雪人矿工": 0x008D0FA3,
+            "雪人矿工帽": 0x008D0FC9,
+        }
+
+
+zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
 plants_HP_addresses = {
     "一般植物": 0x00844DBF,
     "火炬坚果/磁力坚果/西瓜坚果": 0x0045E1A7,
@@ -523,6 +622,13 @@ bulletType = [
     "土豆加农炮(无伤害)",
     "冰孢子",
     "小阳光",
+    "豌豆僵尸的火豌豆1",
+    "豌豆僵尸的火豌豆2",
+    "黄金豌豆",
+    "大型豌豆",
+    "大型火焰豌豆",
+    "大型冰焰豌豆",
+    "冰焰豌豆",
 ]
 keyTpye = [
     "无",
@@ -924,11 +1030,18 @@ class plantCharacteristic:
             self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
             self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
         else:
-            self.addr = 0x008452C8 + type - 256
-            self.sun = PVZ_memory.read_uchar(self.addr)
-            self.cd = 0
-            self.canAttack = True
-            self.attackInterval = 0
+            if PVZ_version == 2.0:
+                self.addr = 0x008452C8 + type - 256
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
+            elif PVZ_version == 2.1:
+                self.addr = 0x0088B018 + type - 256
+                self.sun = PVZ_memory.read_uchar(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
 
     def setSun(self, sun):
         if self.type < 256:
@@ -958,19 +1071,31 @@ class plantCharacteristic:
 class zombieType:
     def __init__(self, type):
         self.type = type
-        if type <= 41:
+        if type <= 44:
             self.addr = 0x007A6000 + type * 0x1C
             self.anime = PVZ_memory.read_int(self.addr + 0x4)
             self.level = PVZ_memory.read_int(self.addr + 0x8)
             self.weight = PVZ_memory.read_int(self.addr + 0x14)
-        elif type == 42:
-            self.weight = PVZ_memory.read_uchar(0x0085A887)
-        elif type == 43:
-            self.weight = PVZ_memory.read_uchar(0x0085A75F)
-        elif type == 44:
-            self.weight = PVZ_memory.read_uchar(0x0085A538)
         elif type == 45:
-            self.weight = PVZ_memory.read_uchar(0x0085A613)
+            if PVZ_version == 2.0:
+                self.weight = PVZ_memory.read_uchar(0x0085A887)
+            elif PVZ_version == 2.1:
+                self.weight = PVZ_memory.read_uchar(0x008D0887)
+        elif type == 46:
+            if PVZ_version == 2.0:
+                self.weight = PVZ_memory.read_uchar(0x0085A75F)
+            elif PVZ_version == 2.1:
+                self.weight = PVZ_memory.read_uchar(0x008D075F)
+        elif type == 47:
+            if PVZ_version == 2.0:
+                self.weight = PVZ_memory.read_uchar(0x0085A538)
+            elif PVZ_version == 2.1:
+                self.weight = PVZ_memory.read_uchar(0x008D0538)
+        elif type == 48:
+            if PVZ_version == 2.0:
+                self.weight = PVZ_memory.read_uchar(0x0085A613)
+            elif PVZ_version == 2.1:
+                self.weight = PVZ_memory.read_uchar(0x008D0613)
 
     def setAnime(self, anime):
         PVZ_memory.write_int(self.addr + 0x4, anime)
