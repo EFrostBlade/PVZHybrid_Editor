@@ -51,7 +51,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.30"
+current_version = "0.31"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -427,6 +427,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.31\n"
+        "修复了部分新增植物种植是芽的问题\n"
+        "修复了解锁全部植物无效的问题\n"
         "b0.30\n"
         "新增自动识别游戏版本功能，目前支持2.0（含2.088）与2.1\n"
         "修复了一系列2.1失效的功能，包括超级铲子、解锁所有卡牌、僵尸豆魅惑、废稿头免控、显血修复、出怪修改、礼盒僵尸等\n"
@@ -4395,6 +4398,8 @@ def mainWindow():
         for r in range(0, rols):
             for c in range(0, 9):
                 for p in plants_data[r][c]:
+                    print(p)
+                    print(data.plantsType[p])
                     pvz.putPlant(r, c, p)
                 if ladders_data[r][c] == 1:
                     pvz.putLadder(r, c)

@@ -511,7 +511,9 @@ def unlock():
     shellcode.mov_e(asm.AL, 1)
     shellcode.ret()
     data.PVZ_memory.write_bytes(
-        newmem_unlock, shellcode.get_code(), shellcode.get_code_len()
+        newmem_unlock,
+        bytes(shellcode.code[: shellcode.index]),
+        shellcode.index,
     )
     data.PVZ_memory.write_bytes(
         0x00453B20, b"\xe9" + calculate_call_address(newmem_unlock - 0x00453B25), 5
@@ -1096,7 +1098,7 @@ def putPlant(row, col, type):
         def creat_asm(self, startAddress):
             plantPut_asm = asm.Asm(startAddress)
             plantPut_asm.push_byte(255)
-            plantPut_asm.push_byte(self.type)
+            plantPut_asm.push_dword(self.type)
             plantPut_asm.mov_exx(asm.EAX, self.row)
             plantPut_asm.push_byte(self.col)
             plantPut_asm.mov_exx_dword_ptr(asm.EBP, 0x006A9EC0)
