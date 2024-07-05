@@ -162,9 +162,23 @@ cython_debug/
 #test files
 test/
 plugin/
+res/gameres
 test.py
 giftboxspaw.py
 configurations.json
 rename.py
 listener.py
+listener_2.py
+listener_3.py
 listener/
+PVZ_live.py
+PVZ_live.exe
+PVZ_live.build/
+PVZ_live.dist/
+PVZ_live.onefile-build/
+config.json
+Installer.py
+key.txt
+PVZ_live*
+test*
+PVZ_Hybrid.py

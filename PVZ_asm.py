@@ -36,10 +36,22 @@ BH = 7
 
 
 class Asm:
-    def __init__(self, startAddress):
+    def __init__(self, startAddress=0):
         self.code = bytearray(65536)
         self.index = 0
         self.startAddress = startAddress
+        self.labels = {}
+        self.pending_jumps = {}  # 存储待回填的跳转指令位置，键为标签，值为跳转指令的索引列表
+        self.pending_jothers = {}  # 存储待回填的跳转指令位置，键为标签，值为跳转指令的索引列表
+        self.pending_leas = {}  # 存储待回填的lea指令位置，键为标签，值为lea指令的索引列表
+        self.pending_pushs = {}  # 存储待回填的push指令位置，键为标签，值为push指令的索引列表
+
+    def get_code(self):
+        return bytes(self.code[: self.index])
+
+    def add_bytes(self, val):
+        self.code[self.index : self.index + len(val)] = val
+        self.index += len(val)
 
     def add_byte(self, val):
         self.code[self.index] = val
@@ -85,6 +97,9 @@ class Asm:
         self.add_byte(val)
 
     def push_dword(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
         self.add_byte(0x68)
         self.add_dword(val)
 
@@ -99,6 +114,9 @@ class Asm:
         self.index += 4
 
     def push_byte(self, val):
+        if val < 0:
+            # 将负数转换为8位无符号整数的等效值
+            val += 2**8
         self.add_byte(0x6A)
         self.add_byte(val)
 
@@ -131,10 +149,25 @@ class Asm:
         self.add_byte(0x05)
         self.add_dword(address)
 
+    def fsub_dword_ptr_address(self, address):
+        self.add_byte(0xD8)
+        self.add_byte(0x25)
+        self.add_dword(address)
+
+    def fcom_dword_ptr_address(self, address):
+        self.add_byte(0xD8)
+        self.add_byte(0x15)
+        self.add_dword(address)
+
     def fld_dword_ptr_exx_add_byte(self, exx, val):
         self.add_byte(0xD9)
         self.add_byte(0x40 + exx)
         self.add_byte(val)
+
+    def fld_dword_ptr_exx_add_dword(self, exx, val):
+        self.add_byte(0xD9)
+        self.add_byte(0x80 + exx)
+        self.add_dword(val)
 
     def fstp_dword_ptr_exx_add_byte(self, exx, val):
         self.add_byte(0xD9)
@@ -142,6 +175,11 @@ class Asm:
         if exx == ESP:
             self.add_byte(0x24)
         self.add_byte(val)
+
+    def fstp_dword_ptr_exx_add_dword(self, exx, val):
+        self.add_byte(0xD9)
+        self.add_byte(0x98 + exx)
+        self.add_dword(val)
 
     def fiadd_ptr_exx(self, exx):
         self.add_byte(0xDA)
@@ -162,6 +200,14 @@ class Asm:
         if exx == ESP:
             self.add_byte(0x24)
 
+    def fstsw_ax(self):
+        self.add_byte(0x9B)
+        self.add_byte(0xDF)
+        self.add_byte(0xE0)
+
+    def sahf(self):
+        self.add_byte(0x9E)
+
     def mov_e(self, e, val):
         self.add_byte(0xB0 + e)
         self.add_byte(val)
@@ -169,6 +215,16 @@ class Asm:
     def mov_exx(self, exx, val):
         self.add_byte(0xB8 + exx)
         self.add_dword(val)
+
+    def mov_exx_fs_offset(self, exx, offset):
+        if exx == EAX:
+            self.add_byte(0x64)
+            self.add_byte(0xA1)
+        else:
+            self.add_byte(0x64)
+            self.add_byte(0x8B)
+            self.add_byte(0x05 + exx * 8)
+        self.add_dword(offset)
 
     def mov_exx_dword_ptr(self, exx, val):
         self.add_byte(0x8B)
@@ -233,10 +289,6 @@ class Asm:
         self.code[self.index : self.index + 4] = offset_bytes
         self.index += 4
 
-    def call_dword_offset(self, offset):
-        self.add_byte(0xE8)  # call 指令的操作码
-        self.add_dword(offset)
-
     def call_exx(self, exx):
         self.add_byte(0xFF)
         self.add_byte(0xD0 + exx)
@@ -275,6 +327,12 @@ class Asm:
         self.add_byte(0x84 + exx * 8)
         self.add_byte(exy)  # exx+(eyy)*8
         self.add_dword(val)
+
+    def lea_exx_ptr_eyy(self, exx, eyy):
+        self.add_byte(0x8D)
+        self.add_byte(0x00 + exx * 8 + eyy)
+        if eyy == ESP:
+            self.add_byte(0x24)
 
     def lea_exx_ptr_eyy_add_byte(self, exx, eyy, val):
         self.add_byte(0x8D)
@@ -403,6 +461,11 @@ class Asm:
         self.add_byte(0xE8 + exx)
         self.add_byte(val)
 
+    def sub_exx_dword(self, exx, val):
+        self.add_byte(0x81)
+        self.add_byte(0xE8 + exx)
+        self.add_dword(val)
+
     def sub_exx_eyy(self, exx, eyy):
         self.add_byte(0x29)
         self.add_byte(0xC0 + exx + eyy * 8)
@@ -485,7 +548,7 @@ class Asm:
 
     def mov_byte_ptr_exx_add_byte_byte(self, exx, val, val2):
         self.add_byte(0xC6)
-        self.add_byte(0x40 + exx * 8)
+        self.add_byte(0x40 + exx)
         self.add_byte(val)
         self.add_byte(val2)
 
@@ -570,6 +633,13 @@ class Asm:
         self.add_dword(address)
         self.add_dword(val)
 
+    def mov_ptr_dword_float(self, address, val):
+        self.add_byte(0xC7)
+        self.add_byte(0x05)
+        self.add_dword(address)
+        self.code[self.index : self.index + 4] = struct.pack("f", val)
+        self.index += 4
+
     def mov_fs_offset_exx(self, offset, exx):
         self.add_byte(0x64)
         self.add_byte(0x89)
@@ -589,11 +659,6 @@ class Asm:
         self.add_byte(0x03)
         self.add_byte(exx * 8 + eyy)
 
-    def je_offset(self, val):
-        self.add_byte(0x0F)
-        self.add_byte(0x84)
-        self.add_dword(val)
-
     def je_short_offset(self, val):
         self.add_byte(0x74)
         self.add_byte(val)
@@ -601,11 +666,6 @@ class Asm:
     def jl_offset(self, val):
         self.add_byte(0x7C)
         self.add_byte(val)
-
-    def jl_long_offset(self, val):
-        self.add_byte(0x0F)
-        self.add_byte(0x8C)
-        self.add_dword(val)
 
     def jle_offset(self, val):
         self.add_byte(0x7E)
@@ -629,11 +689,6 @@ class Asm:
     def jne_short_offset(self, val):
         self.add_byte(0x75)
         self.add_byte(val)
-
-    def jne_long_offset(self, val):
-        self.add_byte(0x0F)
-        self.add_byte(0x85)
-        self.add_dword(val)
 
     def ja_offset(self, val):
         self.add_byte(0x77)
@@ -660,10 +715,6 @@ class Asm:
     def jmp_short_offset(self, val):
         self.add_byte(0xEB)
         self.add_byte(val)
-
-    def jmp_dword_offset(self, val):
-        self.add_byte(0xE9)
-        self.add_dword(val)
 
     def xor_dword_ptr_address_val(self, address, val):
         self.add_byte(0x83)
@@ -712,6 +763,220 @@ class Asm:
         self.add_byte(0x84)
         self.add_byte(0xC0 + x * 8 + y)
 
+    def create_label(self, label):
+        self.labels[label] = self.index
+        # 如果有待回填的跳转指向这个标签，现在回填它们
+        if label in self.pending_jumps:
+            for jump_index in self.pending_jumps[label]:
+                self.jmp_dword_offset_at(jump_index, self.index - jump_index - 5)
+            del self.pending_jumps[label]  # 清除已回填的跳转
+        if label in self.pending_jothers:
+            for jump_index in self.pending_jothers[label]:
+                self.jother_dword_offset_at(jump_index, self.index - jump_index - 6)
+            del self.pending_jothers[label]  # 清除已回填的跳转
+        if label in self.pending_leas:
+            for jump_index in self.pending_leas[label]:
+                self.lea_dword_at(jump_index, self.index + self.startAddress)
+            del self.pending_leas[label]  # 清除已回填的跳转
+        if label in self.pending_pushs:
+            for jump_index in self.pending_pushs[label]:
+                self.push_dword_at(jump_index, self.index + self.startAddress)
+            del self.pending_pushs[label]
+
+    def jmp_dword_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0xE9)
+        self.add_dword(val)
+
+    def jmp_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jmp_dword_offset(self.labels[label] - self.index - 5)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jumps:
+                self.pending_jumps[label] = []
+            self.pending_jumps[label].append(self.index)
+            self.jmp_dword_offset(0)  # 使用占位符偏移量
+
+    def jmp_dword_offset_at(self, index, offset):
+        self.code[index + 1 : index + 5] = offset.to_bytes(
+            4, byteorder="little", signed=True
+        )
+
+    def jother_dword_offset_at(self, index, offset):
+        self.code[index + 2 : index + 6] = offset.to_bytes(
+            4, byteorder="little", signed=True
+        )
+
+    def je_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x84)
+        self.add_dword(val)
+
+    def je_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.je_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.je(0)  # 使用占位符偏移量
+
+    def jl_long_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x8C)
+        self.add_dword(val)
+
+    def jl_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jl_long_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.jl_long_offset(0)  # 使用占位符偏移量
+
+    def jnl_long_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x8D)
+        self.add_dword(val)
+
+    def jnl_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jnl_long_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.jnl_long_offset(0)  # 使用占位符偏移量
+
+    def jne_long_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x85)
+        self.add_dword(val)
+
+    def jne_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jne_long_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.jne_long_offset(0)  # 使用占位符偏移量
+
+    def jae_long_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x83)
+        self.add_dword(val)
+
+    def jae_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jae_long_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.jae_long_offset(0)
+
+    def jbe_long_offset(self, val):
+        if val < 0:
+            # 将负数转换为32位无符号整数的等效值
+            val += 2**32
+        self.add_byte(0x0F)
+        self.add_byte(0x86)
+        self.add_dword(val)
+
+    def jbe_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.jbe_long_offset(self.labels[label] - self.index - 6)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jothers:
+                self.pending_jothers[label] = []
+            self.pending_jothers[label].append(self.index)
+            self.jbe_long_offset(0)
+
+    def call_dword_offset(self, offset):
+        if offset < 0:
+            # 将负数转换为32位无符号整数的等效值
+            offset += 2**32
+        self.add_byte(0xE8)  # call 指令的操作码
+        self.add_dword(offset)
+
+    def call_label(self, label):
+        if label in self.labels:
+            # 如果标签已存在，直接计算偏移并跳转
+            self.call_dword_offset(self.labels[label] - self.index - 5)
+        else:
+            # 如果标签不存在，记录跳转位置以便回填
+            if label not in self.pending_jumps:
+                self.pending_jumps[label] = []
+            self.pending_jumps[label].append(self.index)
+            self.call_dword_offset(0)  # 使用占位符偏移量
+
+    def lea_exx_label_add_byte(self, exx, label, val):
+        if label in self.labels:
+            self.lea_exx_dword_ptr(exx, self.labels[label] + val)
+        else:
+            print("Label not found: %s" % label)
+            if label not in self.pending_leas:
+                self.pending_leas[label] = []
+            self.pending_leas[label].append(self.index)
+            self.lea_exx_dword_ptr(exx, val)  # 使用占位符偏移量
+
+    def lea_dword_at(self, index, address):
+        print(index, address)
+        val = self.code[index + 2 : index + 6]
+        int_val = int.from_bytes(val, "little")  # 使用 'little' 如果字节是小端序
+        print(int_val)
+        val2 = int_val + address
+        print(val2)
+        self.code[index + 2 : index + 6] = val2.to_bytes(4, byteorder="little")
+
+    def push_label(self, label):
+        if label in self.labels:
+            self.push_dword(self.labels[label])
+        else:
+            if label not in self.pending_pushs:
+                self.pending_pushs[label] = []
+            self.pending_pushs[label].append(self.index)
+            self.push_dword(0)  # 使用占位符偏移量
+
+    def push_dword_at(self, index, address):
+        val = self.code[index + 1 : index + 5]
+        int_val = int.from_bytes(val, "little")  # 使用 'little' 如果字节是小端序
+        val2 = int_val + address
+        self.code[index + 1 : index + 5] = val2.to_bytes(4, byteorder="little")
+
 
 def runThread(cla):
     process_handle = pymem.process.open(data.PVZ_pid)
@@ -737,33 +1002,6 @@ def runThread(cla):
             pass
         else:
             data.PVZ_memory.write_bytes(0x00552014, b"\xdb", 1)
-            break
-        time.sleep(0.001)
-    pymem.memory.free_memory(process_handle, startAddress)
-
-
-def justRunThread(cla):
-    process_handle = pymem.process.open(data.PVZ_pid)
-    startAddress = pymem.memory.allocate_memory(process_handle, 1024)
-    # print(hex(startAddress))
-    asm = cla.creat_asm(startAddress + 1)
-    shellcode = b"\x60" + bytes(asm.code[: asm.index]) + b"\x61\xc3"
-    data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index + 3)
-    thread_h = pymem.ressources.kernel32.CreateRemoteThread(
-        process_handle,
-        ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
-        0,
-        startAddress,
-        0,
-        0,
-        ctypes.byref(ctypes.c_ulong(0)),
-    )
-    exit_code = ctypes.c_ulong()
-    while 1:
-        pymem.ressources.kernel32.GetExitCodeThread(thread_h, ctypes.byref(exit_code))
-        if exit_code.value == 259:
-            pass
-        else:
             break
         time.sleep(0.001)
     pymem.memory.free_memory(process_handle, startAddress)

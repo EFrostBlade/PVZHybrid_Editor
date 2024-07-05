@@ -2,7 +2,8 @@ from pymem import Pymem
 
 PVZ_memory = Pymem()
 PVZ_pid = 0
-PVZ_version = 2.1
+PVZ_version = "未找到游戏"
+zombies_HP_addresses = None
 
 
 def update_PVZ_memory(memory):
@@ -17,7 +18,9 @@ def update_PVZ_pid(pid):
 
 def update_PVZ_version(version):
     global PVZ_version
+    global zombies_HP_addresses
     PVZ_version = version
+    zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
     print(PVZ_version)
 
 
@@ -69,12 +72,18 @@ zombiesType = [
     "橄榄巨人",
     "橄榄小鬼",
     "雪人矿工",
+    "狂野机枪僵尸",
+    "火炬坚果僵尸",
+    "机枪撑杆僵尸",
+    "机枪海豚僵尸",
+    "僵尸坚果巨人",
+    "僵尸豌豆小鬼",
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
-    "橄榄废稿头",
-    "舞王废稿头",
-    "巨人废稿头",
+    "橄榄废稿头概率",
+    "舞王废稿头概率",
+    "巨人废稿头概率",
 ]
 itemType = [
     "未知0",
@@ -226,6 +235,11 @@ plantsType = [
     "吸金磁射手",
     "钻石种子",
     "抽奖盒子豪华版",
+    "炫彩杨桃",
+    "坚果保龄球",
+    "进化豆",
+    "流星",
+    "苹果闹钟",
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -244,7 +258,7 @@ plantsType = plantsType + [
     "潜水",
     "冰车巨人",
     "雪橇",
-    "海豚机枪",
+    "海豚豌豆骑士",
     "小丑",
     "气球舞王",
     "矿工",
@@ -275,10 +289,17 @@ plantsType = plantsType + [
     "橄榄巨人",
     "橄榄小鬼",
     "雪人矿工",
+    "狂野机枪僵尸",
+    "火炬坚果僵尸",
+    "机枪撑杆僵尸",
+    "机枪海豚僵尸",
+    "僵尸坚果巨人",
+    "僵尸豌豆小鬼",
 ]
 
 
 def get_zombies_HP_addresses(PVZ_version):
+    print("PVZ_version", PVZ_version)
     if PVZ_version == 2.0:
         return {
             "普僵": 0x005227BB,
@@ -341,7 +362,7 @@ def get_zombies_HP_addresses(PVZ_version):
             "小黄鸭的铁桶": 0x0085AE30,
             "僵王": 0x0085AEE5,
         }
-    elif PVZ_version == 2.1:
+    elif PVZ_version == 2.1 or PVZ_version == 2.2:
         return {
             "普僵": 0x005227BB,
             "路障的路障": 0x00522892,
@@ -416,7 +437,6 @@ def get_zombies_HP_addresses(PVZ_version):
         }
 
 
-zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
 plants_HP_addresses = {
     "一般植物": 0x00844DBF,
     "火炬坚果/磁力坚果/西瓜坚果": 0x0045E1A7,
@@ -892,6 +912,7 @@ class zombie:
         self.isHpynotized = PVZ_memory.read_bool(self.addr + 0xB8)
         self.isBlow = PVZ_memory.read_bool(self.addr + 0xB9)
         self.isDying = PVZ_memory.read_bool(self.addr + 0xBA)
+        self.isGarlic = PVZ_memory.read_bool(self.addr + 0xBF)
         self.stolenPlant = PVZ_memory.read_ushort(self.addr + 0x128)
 
     def setRow(self, row):
@@ -947,6 +968,9 @@ class zombie:
 
     def setIsDying(self, isDying):
         PVZ_memory.write_bool(self.addr + 0xBA, isDying)
+
+    def setIsGarlic(self, isGarlic):
+        PVZ_memory.write_bool(self.addr + 0xBF, isGarlic)
 
     def setStolenPlant(self, stolenPlant):
         PVZ_memory.write_ushort(self.addr + 0x128, stolenPlant)
@@ -1036,7 +1060,7 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 2.1:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.addr = 0x0088B018 + type - 256
                 self.sun = PVZ_memory.read_uchar(self.addr)
                 self.cd = 0
@@ -1071,30 +1095,30 @@ class plantCharacteristic:
 class zombieType:
     def __init__(self, type):
         self.type = type
-        if type <= 44:
+        if type <= 50:
             self.addr = 0x007A6000 + type * 0x1C
             self.anime = PVZ_memory.read_int(self.addr + 0x4)
             self.level = PVZ_memory.read_int(self.addr + 0x8)
             self.weight = PVZ_memory.read_int(self.addr + 0x14)
-        elif type == 45:
+        elif type == 51:
             if PVZ_version == 2.0:
                 self.weight = PVZ_memory.read_uchar(0x0085A887)
-            elif PVZ_version == 2.1:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.weight = PVZ_memory.read_uchar(0x008D0887)
-        elif type == 46:
+        elif type == 52:
             if PVZ_version == 2.0:
                 self.weight = PVZ_memory.read_uchar(0x0085A75F)
-            elif PVZ_version == 2.1:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.weight = PVZ_memory.read_uchar(0x008D075F)
-        elif type == 47:
+        elif type == 53:
             if PVZ_version == 2.0:
                 self.weight = PVZ_memory.read_uchar(0x0085A538)
-            elif PVZ_version == 2.1:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.weight = PVZ_memory.read_uchar(0x008D0538)
-        elif type == 48:
+        elif type == 54:
             if PVZ_version == 2.0:
                 self.weight = PVZ_memory.read_uchar(0x0085A613)
-            elif PVZ_version == 2.1:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.weight = PVZ_memory.read_uchar(0x008D0613)
 
     def setAnime(self, anime):
@@ -1104,13 +1128,25 @@ class zombieType:
         PVZ_memory.write_int(self.addr + 0x4, level)
 
     def setWeight(self, weight):
-        if self.type <= 41:
+        if self.type <= 50:
             PVZ_memory.write_int(self.addr + 0x14, weight)
-        elif self.type == 42:
-            PVZ_memory.write_uchar(0x0085A887, weight)
-        elif self.type == 43:
-            PVZ_memory.write_uchar(0x0085A75F, weight)
-        elif self.type == 44:
-            PVZ_memory.write_uchar(0x0085A538, weight)
-        elif self.type == 45:
-            PVZ_memory.write_uchar(0x0085A613, weight)
+        elif self.type == 51:
+            if PVZ_version == 2.0:
+                PVZ_memory.write_uchar(0x0085A887, weight)
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
+                PVZ_memory.write_uchar(0x008D0887, weight)
+        elif self.type == 52:
+            if PVZ_version == 2.0:
+                PVZ_memory.write_uchar(0x0085A75F, weight)
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
+                PVZ_memory.write_uchar(0x008D075F, weight)
+        elif self.type == 53:
+            if PVZ_version == 2.0:
+                PVZ_memory.write_uchar(0x0085A538, weight)
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
+                PVZ_memory.write_uchar(0x008D0538, weight)
+        elif self.type == 54:
+            if PVZ_version == 2.0:
+                PVZ_memory.write_uchar(0x0085A613, weight)
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
+                PVZ_memory.write_uchar(0x008D0613, weight)

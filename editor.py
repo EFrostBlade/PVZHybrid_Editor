@@ -237,6 +237,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(data.PVZ_version)
                 )
+            elif "2.2" in window_name:
+                data.update_PVZ_version(2.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             data.update_PVZ_memory(Pymem(int(re.search(r"(\d+)", process1).group(1))))
             data.update_PVZ_pid(int(re.search(r"(\d+)", process1).group(1)))
         except:
@@ -265,6 +273,14 @@ def chooseGame():
                 )
             elif "2.1" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.2" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.2)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -427,6 +443,11 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.32\n"
+        "适配杂交2.2版本新地图、新植物、新僵尸\n"
+        "新增一键完成所有迷你游戏关卡\n"
+        "修复了出怪修改的一系列问题\n"
+        "修复了场地物品可能会加载失败报错的问题\n"
         "b0.31\n"
         "修复了部分新增植物种植是芽的问题\n"
         "修复了解锁全部植物无效的问题\n"
@@ -596,8 +617,8 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 48:
-        index = index + 27
+    if 256 > index >= 60:
+        index = index + 15
     combobox.current(index)
     window.destroy()
 
@@ -605,17 +626,24 @@ def on_card_image_click(event, window, combobox):
 def open_card_select_window(combobox):
     global card_select_window
     card_select_window = tk.Toplevel()
-    card_select_window.title("选择植物卡片")
+    card_select_window.title("选择卡片")
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
     card_select_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
 
-    images = os.listdir(resource_path("res/cards/pvzhe_plants"))
+    notebook = ttk.Notebook(card_select_window)
+    notebook.pack(fill="both", expand=True)
+
+    # Create a tab for plants
+    plant_tab = ttk.Frame(notebook)
+    notebook.add(plant_tab, text="植物")
+
+    plant_images = os.listdir(resource_path("res/cards/pvzhe_plants"))
     r = 0
-    for i, image_file in enumerate(images):
+    for i, image_file in enumerate(plant_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_plants/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(card_select_window, image=photo, text=str(i))
+        label = tk.Label(plant_tab, image=photo, text=str(i))
         label.image = photo  # keep a reference to the image
         label.bind(
             "<Button-1>",
@@ -624,11 +652,15 @@ def open_card_select_window(combobox):
         label.grid(row=i // 11, column=i % 11)
         r = i // 11
 
-    images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
-    for i, image_file in enumerate(images):
+    # Create a tab for zombies
+    zombie_tab = ttk.Frame(notebook)
+    notebook.add(zombie_tab, text="僵尸")
+
+    zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(card_select_window, image=photo, text=str(i + 256))
+        label = tk.Label(zombie_tab, image=photo, text=str(i + 256))
         label.image = photo  # keep a reference to the image
         label.bind(
             "<Button-1>",
@@ -640,6 +672,43 @@ def open_card_select_window(combobox):
         combobox.event_generate("<Escape>")
 
     card_select_window.after(100, lambda: closeCombobox(combobox))
+
+
+def on_zombie_image_click(event, window, combobox):
+    index = int(event.widget.cget("text"))
+    combobox.current(index)
+    window.destroy()
+
+
+def open_zombie_select_window(combobox):
+    global zombie_select_window
+    zombie_select_window = tk.Toplevel()
+    zombie_select_window.title("选择僵尸")
+    main_window_x = main_window.winfo_x()
+    main_window_y = main_window.winfo_y()
+    zombie_select_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
+
+    notebook = ttk.Notebook(zombie_select_window)
+    notebook.pack(fill="both", expand=True)
+    zombie_tab = ttk.Frame(notebook)
+    notebook.add(zombie_tab, text="僵尸")
+
+    zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    for i, image_file in enumerate(zombie_images):
+        image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
+        photo = ImageTk.PhotoImage(image)
+        label = tk.Label(zombie_tab, image=photo, text=i)
+        label.image = photo  # keep a reference to the image
+        label.bind(
+            "<Button-1>",
+            lambda event: on_zombie_image_click(event, zombie_select_window, combobox),
+        )
+        label.grid(row=i // 11, column=i % 11)
+
+    def closeCombobox(combobox):
+        combobox.event_generate("<Escape>")
+
+    zombie_select_window.after(100, lambda: closeCombobox(combobox))
 
 
 def mainWindow():
@@ -835,7 +904,7 @@ def mainWindow():
 
     def updateGame():
         chooseGame()
-        if type(data.PVZ_memory) != Pymem:
+        if type(data.PVZ_memory) != Pymem:  # noqa: E721
             process_label["text"] = "未找到游戏"
             process_label.config(bootstyle=DANGER)
         else:
@@ -860,6 +929,14 @@ def mainWindow():
                 )
             elif "2.1" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.2" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.2)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1430,43 +1507,44 @@ def mainWindow():
 
     game_save_frame = ttk.LabelFrame(common_page, text="存档修改", bootstyle=DARK)
     game_save_frame.place(x=0, y=325, anchor=NW)
-    ttk.Label(game_save_frame, text="冒险第").grid(row=0, column=0)
-    adventure_start_level_value = ttk.IntVar(game_save_frame)
-    adventure_start_level_combobox = ttk.Combobox(
-        game_save_frame,
-        textvariable=adventure_start_level_value,
-        width=2,
-        values=list(range(1, 67 + 1)),
-        font=("黑体", 8),
-        bootstyle=SECONDARY,
-        state=READONLY,
-    )
-    adventure_start_level_combobox.grid(row=0, column=1)
-    adventure_start_level_value.set(1)
-    ttk.Label(game_save_frame, text="关至第").grid(row=0, column=2)
-    adventure_end_level_value = ttk.IntVar(game_save_frame)
-    adventure_end_level_combobox = ttk.Combobox(
-        game_save_frame,
-        textvariable=adventure_end_level_value,
-        width=2,
-        values=list(range(1, 67 + 1)),
-        font=("黑体", 8),
-        bootstyle=SECONDARY,
-        state=READONLY,
-    )
-    adventure_end_level_combobox.grid(row=0, column=3)
-    adventure_end_level_value.set(67)
-    ttk.Label(game_save_frame, text="关").grid(row=0, column=4)
+    # ttk.Label(game_save_frame, text="冒险第").grid(row=0, column=0)
+    # adventure_start_level_value = ttk.IntVar(game_save_frame)
+    # adventure_start_level_combobox = ttk.Combobox(
+    #     game_save_frame,
+    #     textvariable=adventure_start_level_value,
+    #     width=2,
+    #     values=list(range(1, 67 + 1)),
+    #     font=("黑体", 8),
+    #     bootstyle=SECONDARY,
+    #     state=READONLY,
+    # )
+    # adventure_start_level_combobox.grid(row=0, column=1)
+    # adventure_start_level_value.set(1)
+    # ttk.Label(game_save_frame, text="关至第").grid(row=0, column=2)
+    # adventure_end_level_value = ttk.IntVar(game_save_frame)
+    # adventure_end_level_combobox = ttk.Combobox(
+    #     game_save_frame,
+    #     textvariable=adventure_end_level_value,
+    #     width=2,
+    #     values=list(range(1, 67 + 1)),
+    #     font=("黑体", 8),
+    #     bootstyle=SECONDARY,
+    #     state=READONLY,
+    # )
+    # adventure_end_level_combobox.grid(row=0, column=3)
+    # adventure_end_level_value.set(67)
+    # ttk.Label(game_save_frame, text="关").grid(row=0, column=4)
 
     def complete_advantures():
-        for i in range(
-            adventure_start_level_value.get() - 1, adventure_end_level_value.get()
-        ):
+        # for i in range(
+        #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
+        # ):
+        for i in range(0, 67):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
         game_save_frame,
-        text="已完成",
+        text="完成所有冒险",
         bootstyle=(SUCCESS, OUTLINE),
         padding=0,
         command=lambda: complete_advantures(),
@@ -1474,77 +1552,111 @@ def mainWindow():
     adventure_complete_button.grid(row=1, column=0, columnspan=2, padx=2)
 
     def lock_advantures():
-        for i in range(
-            adventure_start_level_value.get() - 1, adventure_end_level_value.get()
-        ):
+        # for i in range(
+        #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
+        # ):
+        for i in range(0, 67):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
         game_save_frame,
-        text="未完成",
+        text="锁定所有冒险",
         bootstyle=(DANGER, OUTLINE),
         padding=0,
         command=lambda: lock_advantures(),
     )
     adventure_lock_button.grid(row=1, column=2, columnspan=2, padx=2)
-    ttk.Label(game_save_frame, text="挑战第").grid(row=2, column=0)
-    challenge_start_level_value = ttk.IntVar(game_save_frame)
-    challenge_start_level_combobox = ttk.Combobox(
-        game_save_frame,
-        textvariable=challenge_start_level_value,
-        width=2,
-        values=list(range(1, 99 + 1)),
-        font=("黑体", 8),
-        bootstyle=SECONDARY,
-        state=READONLY,
-    )
-    challenge_start_level_combobox.grid(row=2, column=1)
-    challenge_start_level_value.set(1)
-    ttk.Label(game_save_frame, text="关至第").grid(row=2, column=2)
-    challenge_end_level_value = ttk.IntVar(game_save_frame)
-    challenge_end_level_combobox = ttk.Combobox(
-        game_save_frame,
-        textvariable=challenge_end_level_value,
-        width=2,
-        values=list(range(1, 99 + 1)),
-        font=("黑体", 8),
-        bootstyle=SECONDARY,
-        state=READONLY,
-    )
-    challenge_end_level_combobox.grid(row=2, column=3)
-    challenge_end_level_value.set(99)
-    ttk.Label(game_save_frame, text="关").grid(row=2, column=4)
+    # ttk.Label(game_save_frame, text="挑战第").grid(row=2, column=0)
+    # challenge_start_level_value = ttk.IntVar(game_save_frame)
+    # challenge_start_level_combobox = ttk.Combobox(
+    #     game_save_frame,
+    #     textvariable=challenge_start_level_value,
+    #     width=2,
+    #     values=list(range(1, 99 + 1)),
+    #     font=("黑体", 8),
+    #     bootstyle=SECONDARY,
+    #     state=READONLY,
+    # )
+    # challenge_start_level_combobox.grid(row=2, column=1)
+    # challenge_start_level_value.set(1)
+    # ttk.Label(game_save_frame, text="关至第").grid(row=2, column=2)
+    # challenge_end_level_value = ttk.IntVar(game_save_frame)
+    # challenge_end_level_combobox = ttk.Combobox(
+    #     game_save_frame,
+    #     textvariable=challenge_end_level_value,
+    #     width=2,
+    #     values=list(range(1, 99 + 1)),
+    #     font=("黑体", 8),
+    #     bootstyle=SECONDARY,
+    #     state=READONLY,
+    # )
+    # challenge_end_level_combobox.grid(row=2, column=3)
+    # challenge_end_level_value.set(99)
+    # ttk.Label(game_save_frame, text="关").grid(row=2, column=4)
 
     def complete_challenges():
-        for i in range(
-            challenge_start_level_value.get() - 1, challenge_end_level_value.get()
-        ):
+        # for i in range(
+        #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
+        # ):
+        for i in range(0, 100):
             pvz.completeChallenge(i)
 
-    adventure_complete_button = ttk.Button(
+    challenges_complete_button = ttk.Button(
         game_save_frame,
-        text="已完成",
+        text="完成所有挑战",
         bootstyle=(SUCCESS, OUTLINE),
         padding=0,
         command=lambda: complete_challenges(),
     )
-    adventure_complete_button.grid(row=3, column=0, columnspan=2, padx=2)
+    challenges_complete_button.grid(row=3, column=0, columnspan=2, padx=2)
 
     def lock_challenges():
-        for i in range(
-            challenge_start_level_value.get() - 1, challenge_end_level_value.get()
-        ):
+        # for i in range(
+        #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
+        # ):
+        for i in range(0, 100):
             pvz.lockChallenge(i)
 
-    adventure_lock_button = ttk.Button(
+    challenges_lock_button = ttk.Button(
         game_save_frame,
-        text="未完成",
+        text="锁定所有挑战",
         bootstyle=(DANGER, OUTLINE),
         padding=0,
         command=lambda: lock_challenges(),
     )
-    adventure_lock_button.grid(row=3, column=2, columnspan=2, padx=2)
+    challenges_lock_button.grid(row=3, column=2, columnspan=2, padx=2)
 
+    def complete_miniGame():
+        # for i in range(
+        #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
+        # ):
+        for i in range(0, 30):
+            pvz.completeMiniGame(i)
+
+    miniGame_complete_button = ttk.Button(
+        game_save_frame,
+        text="完成迷你游戏",
+        bootstyle=(SUCCESS, OUTLINE),
+        padding=0,
+        command=lambda: complete_miniGame(),
+    )
+    miniGame_complete_button.grid(row=5, column=0, columnspan=2, padx=2)
+
+    def lock_miniGame():
+        # for i in range(
+        #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
+        # ):
+        for i in range(0, 30):
+            pvz.lockMiniGame(i)
+
+    miniGame_lock_button = ttk.Button(
+        game_save_frame,
+        text="锁定迷你游戏",
+        bootstyle=(DANGER, OUTLINE),
+        padding=0,
+        command=lambda: lock_miniGame(),
+    )
+    miniGame_lock_button.grid(row=5, column=2, columnspan=2, padx=2)
     # 读取快捷键配置
 
     def get_shortcuts():
@@ -2225,6 +2337,9 @@ def mainWindow():
     )
     zombiePut_type_combobox.grid(row=2, column=0, columnspan=4, sticky=W)
     zombiePut_type_combobox.current(0)
+    zombiePut_type_combobox.bind(
+        "<Button-1>", lambda event: open_zombie_select_window(zombiePut_type_combobox)
+    )
     zombiePut_num = ttk.IntVar(zombie_put_frame)
     zombiePut_num_entry = ttk.Entry(
         zombie_put_frame, textvariable=zombiePut_num, font=("黑体", 8), width=7
@@ -3638,7 +3753,7 @@ def mainWindow():
                     )
                     + 0x11C
                 )
-                + 0xEC * j
+                + 0x1EC * j
             )
             item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
@@ -3754,7 +3869,7 @@ def mainWindow():
                     )
                     + 0x11C
                 )
-                + 0xEC * j
+                + 0x1EC * j
             )
             item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
@@ -4370,7 +4485,7 @@ def mainWindow():
                     )
                     + 0x11C
                 )
-                + 0xEC * j
+                + 0x1EC * j
             )
             item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
@@ -6000,21 +6115,25 @@ def mainWindow():
         pvz.globalSpawModify(1, selected_ids)
         messagebox.showinfo("成功", "配置应用成功")
 
-    # 创建界面元素
-    for idx, zombie_name in enumerate(data.zombieSpaw):
-        row = idx // 4
-        col = idx % 4
-        var = ttk.IntVar()
-        chk = ttk.Checkbutton(spaw_type_frame, text=zombie_name + ":", variable=var)
-        chk.grid(row=row, column=col * 2, sticky=W)
-        checkboxes[zombie_name] = var
+    try:
+        # 创建界面元素
+        for idx, zombie_name in enumerate(data.zombieSpaw):
+            row = idx // 4
+            col = idx % 4
+            var = ttk.IntVar()
+            chk = ttk.Checkbutton(spaw_type_frame, text=zombie_name + ":", variable=var)
+            chk.grid(row=row, column=col * 2, sticky=W)
+            checkboxes[zombie_name] = var
 
-        zombie = data.zombieType(idx)
-        zombies[zombie_name] = zombie
-        weight_var = ttk.IntVar(value=zombie.weight)
-        weight_vars[zombie_name] = weight_var
-        entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
-        entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
+            zombie = data.zombieType(idx)
+            zombies[zombie_name] = zombie
+            weight_var = ttk.IntVar(value=zombie.weight)
+            weight_vars[zombie_name] = weight_var
+            entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
+            entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
+    except Exception as e:
+        print(idx)
+        messagebox.showerror("错误", f"创建界面元素时出现错误: {e}")
 
     # 读取配置方案
     def load_configurations():
