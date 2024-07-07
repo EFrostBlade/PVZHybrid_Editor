@@ -51,7 +51,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.31"
+current_version = "0.33"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -443,6 +443,12 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.33\n"
+        "增加杂交2.2新子弹\n"
+        "修复了修改子弹和随机子弹,现在会在发射前进行修改\n"
+        "新增坚果巨人闪退修复，位于暂未分类标签页\n"
+        "修复废稿头免控失效\n"
+        "修复了部分僵尸血量的地址\n"
         "b0.32\n"
         "适配杂交2.2版本新地图、新植物、新僵尸\n"
         "新增一键完成所有迷你游戏关卡\n"
@@ -5907,6 +5913,15 @@ def mainWindow():
         command=lambda: pvz.scrapHelmetControlled(scrap_helmet_controlled_status.get()),
     )
     scrap_helmet_controlled_check.pack()
+    fix_nut_gargantuar_status = ttk.BooleanVar(other_toggle_frame)
+    fix_nut_gargantuar_check = ttk.Checkbutton(
+        other_toggle_frame,
+        text="坚果巨人修复",
+        variable=fix_nut_gargantuar_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.fix_nut_gargantuar(fix_nut_gargantuar_status.get()),
+    )
+    fix_nut_gargantuar_check.pack()
     endless_frame = ttk.Frame(other_page)
     endless_frame.pack(anchor=W)
     ttk.Label(endless_frame, text="无尽轮数").pack(side=LEFT)

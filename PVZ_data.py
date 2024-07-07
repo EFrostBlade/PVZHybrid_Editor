@@ -362,7 +362,7 @@ def get_zombies_HP_addresses(PVZ_version):
             "小黄鸭的铁桶": 0x0085AE30,
             "僵王": 0x0085AEE5,
         }
-    elif PVZ_version == 2.1 or PVZ_version == 2.2:
+    elif PVZ_version == 2.1:
         return {
             "普僵": 0x005227BB,
             "路障的路障": 0x00522892,
@@ -434,6 +434,79 @@ def get_zombies_HP_addresses(PVZ_version):
             "橄榄小鬼头盔": 0x008D0F8F,
             "雪人矿工": 0x008D0FA3,
             "雪人矿工帽": 0x008D0FC9,
+        }
+    elif PVZ_version == 2.2:
+        return {
+            "普僵": 0x005227BB,
+            "路障的路障": 0x00522892,
+            "路障的绿帽": 0x008D08AC,
+            "路尸的绿帽上限": 0x008D08B6,
+            "撑杆": 0x00522CBF,
+            "撑杆的坚果": 0x008D09FF,
+            "铁桶的铁桶": 0x0052292B,
+            "报纸": 0x0052337D,
+            "冰车二爷": 0x008D0DCA,
+            "铁门的铁门": 0x00522949,
+            "铁门的路障": 0x008D00CD,
+            "铁门的铁桶": 0x008D0080,
+            "橄榄的黑橄榄帽": 0x00522BB0,
+            "橄榄的废稿头盔": 0x008D0791,
+            "橄榄的废稿头盔上限": 0x008D079B,
+            "舞王": 0x00523530,
+            "舞王的黑橄榄帽": 0x008D0501,
+            "舞王的废稿头盔": 0x008D056D,
+            "舞王的废稿头盔上限": 0x008D0577,
+            "潜水和投篮的黑橄榄帽": 0x008D0025,
+            "大型冰车": 0x00522DE1,
+            "雪橇车": 0x00523139,
+            "雪橇小队": 0x008D0B91,
+            "雪橇小队上限": 0x008D0B9B,
+            "海豚": 0x00522D64,
+            "海豚的路障": 0x008D06FD,
+            "小丑": 0x00522FC7,
+            "小丑的路障": 0x008D00EA,
+            "气球": 0x005234BF,
+            "矿工本体": 0x008D06C3,
+            "跳跳": 0x00523300,
+            "跳跳的铁桶": 0x008D01EC,
+            "跳跳的坚果": 0x008D0326,
+            "冰车雪人": 0x0052296E,
+            "蹦极": 0x00522A1B,
+            "扶梯本体和扶梯": 0x0052299C,
+            "扶梯僵尸的路障饰品": 0x008D0347,
+            "扶梯的路障": 0x008D039E,
+            "扶梯的坚果": 0x008D04E0,
+            "投石车": 0x00522E8D,
+            "白眼": 0x00523D26,
+            "红眼": 0x00523E4A,
+            "巨人的铁门": 0x008D05CE,
+            "巨人的铁桶": 0x008D05BA,
+            "巨人的黑橄榄帽": 0x008D06B0,
+            "巨人的废稿头盔": 0x008D0656,
+            "巨人的废稿头盔上限": 0x008D0660,
+            "植物僵尸的铁门": 0x008D01C6,
+            "植物僵尸的路障": 0x008D01A4,
+            "植物僵尸的铁桶": 0x008D0156,
+            "坚果僵尸的坚果": 0x0052382B,
+            "辣椒僵尸的辣椒": 0x00523A87,
+            "高冰果僵尸的高冰果": 0x0052395D,
+            "迪斯科僵尸": 0x008D082A,
+            "骷髅": 0x008D0B73,
+            "骷髅上限": 0x008D0B7D,
+            "死灵法师": 0x008D0DAF,
+            "火焰迪斯科": 0x008D0C11,
+            "火焰舞者": 0x008D0D93,
+            "床车": 0x008D0E74,
+            "小摔哥的睡帽": 0x008D0EC4,
+            "小摔哥的睡帽上限": 0x008D0ECE,
+            "小黄鸭的路障": 0x008D0E60,
+            "小黄鸭的铁桶": 0x008D0E2D,
+            "僵王": 0x008D0EE2,
+            "橄榄巨人": 0x008D0F01,
+            "橄榄巨人头盔": 0x008D0F15,
+            "橄榄小鬼头盔": 0x008D0F8C,
+            "雪人矿工": 0x008D0FA0,
+            "雪人矿工帽": 0x008D0FC6,
         }
 
 
@@ -649,6 +722,8 @@ bulletType = [
     "大型火焰豌豆",
     "大型冰焰豌豆",
     "冰焰豌豆",
+    "星星",
+    "大星星",
 ]
 keyTpye = [
     "无",
@@ -1047,49 +1122,37 @@ class slot:
 class plantCharacteristic:
     def __init__(self, type):
         self.type = type
-        if type < 256:
-            self.addr = 0x007A2010 + type * 0x24
-            self.sun = PVZ_memory.read_int(self.addr)
-            self.cd = PVZ_memory.read_int(self.addr + 0x4)
-            self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
-            self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
-        else:
-            if PVZ_version == 2.0:
-                self.addr = 0x008452C8 + type - 256
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.1 or PVZ_version == 2.2:
-                self.addr = 0x0088B018 + type - 256
-                self.sun = PVZ_memory.read_uchar(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
+        # if type < 256:
+        self.addr = 0x007A2010 + type * 0x24
+        self.sun = PVZ_memory.read_int(self.addr)
+        self.cd = PVZ_memory.read_int(self.addr + 0x4)
+        self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
+        self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+        # else:
+        #     if PVZ_version == 2.0:
+        #         self.addr = 0x008452C8 + type - 256
+        #         self.sun = PVZ_memory.read_int(self.addr)
+        #         self.cd = 0
+        #         self.canAttack = True
+        #         self.attackInterval = 0
+        #     elif PVZ_version == 2.1 or PVZ_version == 2.2:
+        #         self.addr = 0x0088B018 + type - 256
+        #         self.sun = PVZ_memory.read_uchar(self.addr)
+        #         self.cd = 0
+        #         self.canAttack = True
+        #         self.attackInterval = 0
 
     def setSun(self, sun):
-        if self.type < 256:
-            PVZ_memory.write_int(self.addr, sun)
-        else:
-            PVZ_memory.write_uchar(self.addr, sun)
+        PVZ_memory.write_int(self.addr, sun)
 
     def setCd(self, cd):
-        if self.type < 256:
-            PVZ_memory.write_int(self.addr + 0x4, cd)
-        else:
-            pass
+        PVZ_memory.write_int(self.addr + 0x4, cd)
 
     def setCanAttack(self, canAttack):
-        if self.type < 256:
-            PVZ_memory.write_bool(self.addr + 0x8, canAttack)
-        else:
-            pass
+        PVZ_memory.write_bool(self.addr + 0x8, canAttack)
 
     def setAttackInterval(self, attackInterval):
-        if self.type < 256:
-            PVZ_memory.write_int(self.addr + 0xC, attackInterval)
-        else:
-            pass
+        PVZ_memory.write_int(self.addr + 0xC, attackInterval)
 
 
 class zombieType:

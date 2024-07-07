@@ -148,8 +148,10 @@ def getNowFlag():
 def getRandomZombie(hasBoss=False):
     if data.PVZ_version == 2.0:
         zombieType = random.randint(0, 41)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1:
         zombieType = random.randint(0, 44)
+    elif data.PVZ_version == 2.2:
+        zombieType = random.randint(0, 50)
     if hasBoss is True:
         return zombieType
     else:
@@ -161,8 +163,10 @@ def getRandomZombie(hasBoss=False):
 def getRandomPlant(isPut=False):
     if data.PVZ_version == 2.0:
         plantType = random.randint(0, 96)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1:
         plantType = random.randint(0, 102)
+    if data.PVZ_version == 2.2:
+        plantType = random.randint(0, 107)
     if plantType >= 48:
         plantType = plantType + 27
     if isPut is False:
@@ -1027,11 +1031,18 @@ def scrapHelmetControlled(f):
             data.PVZ_memory.write_bytes(0x0084AB3F, b"\x90\xe9", 2)
         else:
             data.PVZ_memory.write_bytes(0x0084AB3F, b"\x0f\x85", 2)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1:
         if f:
             data.PVZ_memory.write_bytes(0x0089A03F, b"\x90\xe9", 2)
         else:
             data.PVZ_memory.write_bytes(0x0089A03F, b"\x0f\x85", 2)
+    elif data.PVZ_version == 2.2:
+        if f:
+            data.PVZ_memory.write_bytes(0x0089A03F, b"\x90\xe9", 2)
+            data.PVZ_memory.write_bytes(0x00882211, b"\x90\x90\x90\x90\x90\x90", 6)
+        else:
+            data.PVZ_memory.write_bytes(0x0089A03F, b"\x0f\x85", 2)
+            data.PVZ_memory.write_bytes(0x00882211, b"\x0f\x84\x87\x00\x00\x00", 6)
 
 
 def conveyorBeltFull(f):
@@ -2165,26 +2176,58 @@ def slotKey(slot_key_list):
 
 def setAllBullet(f, type):
     global newmem_setAllBullet
+    # [ENABLE]
+    # //code from here to '[DISABLE]' will be used to enable the cheat
+    # alloc(newmem,2048)
+    # label(returnhere)
+    # label(originalcode)
+    # label(exit)
+
+    # newmem: //this is allocated memory, you have read,write,execute access
+    # //place your code here
+    # mov eax,#39
+    # originalcode:
+    # mov [ebp+5C],eax
+    # mov eax,esi
+
+    # exit:
+    # jmp returnhere
+
+    # "PlantsVsZombies.exe"+6C769:
+    # jmp newmem
+    # returnhere:
+
+    # [DISABLE]
+    # //code from here till the end of the code will be used to disable the cheat
+    # dealloc(newmem)
+    # "PlantsVsZombies.exe"+6C769:
+    # db 89 45 5C 8B C6
+    # //mov [ebp+5C],eax
+    # //mov eax,esi
     if f:
-        print(type)
         newmem_setAllBullet = pymem.memory.allocate_memory(
-            data.PVZ_memory.process_handle, 64
+            data.PVZ_memory.process_handle, 2048
         )
-        shellcode = (
-            b"\xc7\x46\x5c"
-            + type.to_bytes(4, byteorder="little")
-            + b"\xda\x64\x24\x18\x57\xe9"
-            + calculate_call_address(0x0046E8E1 - newmem_setAllBullet - 0x11)
-        )
-        data.PVZ_memory.write_bytes(newmem_setAllBullet, shellcode, 17)
+        shellcode = asm.Asm(newmem_setAllBullet)
+        shellcode.mov_exx(asm.EAX, type)
+        shellcode.mov_ptr_exx_add_byte_eyy(asm.EBP, 0x5C, asm.EAX)
+        shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+        shellcode.jmp(0x0046C76E)
         data.PVZ_memory.write_bytes(
-            0x0046E8DC,
-            b"\xe9" + calculate_call_address(newmem_setAllBullet - 0x0046E8E1),
+            newmem_setAllBullet,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        data.PVZ_memory.write_bytes(
+            0x0046C769,
+            b"\xe9" + calculate_call_address(newmem_setAllBullet - 0x0046C76E),
             5,
         )
+        data.PVZ_memory.write_bytes(0x0088CE91, b"\x90\x90\x90\x90\x90", 5)
     else:
-        data.PVZ_memory.write_bytes(0x0046E8DC, b"\xda\x64\x24\x18\x57", 5)
+        data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_setAllBullet)
+        data.PVZ_memory.write_bytes(0x0088CE91, b"\xe8\x1a\x1e\xbe\xff", 5)
 
 
 def setOneBullet(f, type1, type2):
@@ -2222,50 +2265,39 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
     global newmem_randomBullet
     if f:
         newmem_randomBullet = pymem.memory.allocate_memory(
-            data.PVZ_memory.process_handle, 64
+            data.PVZ_memory.process_handle, 2048
         )
         shellcode = asm.Asm(newmem_randomBullet)
-        shellcode.random(25)
-        shellcode.cmp_exx_dword(asm.EDX, 13)
-        shellcode.je_offset(0x29)
-        if hasDoom:
-            shellcode.nop_6()
-            shellcode.nop_6()
-        else:
-            shellcode.cmp_exx_dword(asm.EDX, 11)
-            shellcode.je_offset(0x1D)
-        if hasMine:
-            shellcode.nop_6()
-            shellcode.nop_6()
-        else:
-            shellcode.cmp_exx_dword(asm.EDX, 22)
-            shellcode.je_offset(0x11)
-        if hasPepper:
-            shellcode.nop_6()
-            shellcode.nop_6()
-        else:
-            shellcode.cmp_exx_dword(asm.EDX, 24)
-            shellcode.je_offset(0x3)
-        shellcode.mov_ptr_exx_add_byte_eyy(asm.ESI, 0x5C, asm.EDX)
-        shellcode.add_byte(0xDA)
-        shellcode.add_byte(0x64)
-        shellcode.add_byte(0x24)
-        shellcode.add_byte(0x18)
-        shellcode.add_byte(0x57)
-        shellcode.jmp(0x0046E8E1)
+        shellcode.create_label("start")
+        shellcode.mov_exx(asm.EAX, 39)
+        shellcode.call(0x005AF400)
+        if not hasDoom:
+            shellcode.cmp_exx_byte(asm.EAX, 11)
+            shellcode.je_label("start")
+        if not hasMine:
+            shellcode.cmp_exx_byte(asm.EAX, 22)
+            shellcode.je_label("start")
+        if not hasPepper:
+            shellcode.cmp_exx_byte(asm.EAX, 24)
+            shellcode.je_label("start")
+        shellcode.mov_ptr_exx_add_byte_eyy(asm.EBP, 0x5C, asm.EAX)
+        shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+        shellcode.jmp(0x0046C76E)
         data.PVZ_memory.write_bytes(
             newmem_randomBullet,
             bytes(shellcode.code[: shellcode.index]),
             shellcode.index,
         )
         data.PVZ_memory.write_bytes(
-            0x0046E8DC,
-            b"\xe9" + calculate_call_address(newmem_randomBullet - 0x0046E8E1),
+            0x0046C769,
+            b"\xe9" + calculate_call_address(newmem_randomBullet - 0x0046C76E),
             5,
         )
+        data.PVZ_memory.write_bytes(0x0088CE91, b"\x90\x90\x90\x90\x90", 5)
     else:
-        data.PVZ_memory.write_bytes(0x0046E8DC, b"\xda\x64\x24\x18\x57", 5)
+        data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_randomBullet)
+        data.PVZ_memory.write_bytes(0x0088CE91, b"\xe8\x1a\x1e\xbe\xff", 5)
 
 
 def setAttackSpeed(multiple):
@@ -5617,7 +5649,7 @@ def recoveryCars():
     data.PVZ_memory.write_bytes(0x0040BC98, b"\xeb\x60", 2)
     data.PVZ_memory.write_bytes(0x00458002, b"\xfc\x99", 2)
     data.PVZ_memory.write_bytes(0x0040BD17, b"\x01", 1)
-    asm.runThread(carsRecovery(), data.PVZ_memory, data.PVZ_pid)
+    asm.runThread(carsRecovery())
     data.PVZ_memory.write_bytes(0x0040BC98, b"\x75\x09", 2)
     data.PVZ_memory.write_bytes(0x00458002, b"\xf8\x9b", 2)
     data.PVZ_memory.write_bytes(0x0040BD17, b"\x00", 1)
@@ -6319,3 +6351,24 @@ def vase_gargantuar_fix(f):
         else:
             data.PVZ_memory.write_bytes(0x0052F41F, b"\xe9\x8c\x51\x31\x00\x90", 6)
             data.PVZ_memory.write_bytes(0x005272BB, b"\xe9\x10\xd5\x31\x00\x90", 6)
+
+
+def fix_nut_gargantuar(f):
+    # [ENABLE]
+    # 008A60E0:
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
+    # nop
+
+    # [DISABLE]
+    # 008A60E0:
+    # push 01
+    # call 00530E30
+    if f:
+        data.PVZ_memory.write_bytes(0x008A60E0, b"\x90\x90\x90\x90\x90\x90\x90", 7)
+    else:
+        data.PVZ_memory.write_bytes(0x008A60E0, b"\x6a\x01\xe8\x49\xad\xc8\xff", 7)
