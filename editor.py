@@ -51,7 +51,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.33"
+current_version = "0.34"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -245,6 +245,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(data.PVZ_version)
                 )
+            elif "2.3" in window_name:
+                data.update_PVZ_version(2.3)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             data.update_PVZ_memory(Pymem(int(re.search(r"(\d+)", process1).group(1))))
             data.update_PVZ_pid(int(re.search(r"(\d+)", process1).group(1)))
         except:
@@ -281,6 +289,14 @@ def chooseGame():
                 )
             elif "2.2" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.3" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -443,6 +459,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.34\n"
+        "适配杂交2.3新植物、新僵尸、新地图、新子弹\n"
+        "仅修复僵王血量地址"
         "b0.33\n"
         "增加杂交2.2新子弹\n"
         "修复了修改子弹和随机子弹,现在会在发射前进行修改\n"
@@ -534,7 +553,7 @@ def support():
 
     def open_qq():
         webbrowser.open_new(
-            r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d2041551741"
+            r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d3171264475"
         )
 
     qq_frame = ttk.Frame(support_window)
@@ -553,7 +572,7 @@ def support():
     ).pack(side=LEFT)
     ttk.Button(
         qq_frame,
-        text="2041551741",
+        text="3171264475",
         padding=0,
         bootstyle=(PRIMARY, LINK),
         cursor="hand2",
@@ -821,7 +840,7 @@ def mainWindow():
 
         def open_qq():
             webbrowser.open_new(
-                r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d2041551741"
+                r"https://ti.qq.com/open_qq/index2.html?url=mqqapi%3a%2f%2fuserprofile%2ffriend_profile_card%3fsrc_type%3dweb%26version%3d1.0%26source%3d2%26uin%3d3171264475"
             )
 
         qq_frame = ttk.Frame(update_window)
@@ -840,7 +859,7 @@ def mainWindow():
         ).pack(side=LEFT)
         ttk.Button(
             qq_frame,
-            text="2041551741",
+            text="3171264475",
             padding=0,
             bootstyle=(PRIMARY, LINK),
             cursor="hand2",
@@ -943,6 +962,14 @@ def mainWindow():
                 )
             elif "2.2" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.3" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1282,7 +1309,7 @@ def mainWindow():
         text="解锁全部植物",
         padding=0,
         bootstyle=(SUCCESS, OUTLINE),
-        command=lambda: pvz.unlock(),
+        command=lambda: pvz.unlock(1),
     )
     unlock_button.grid(row=11, column=0, sticky=W, pady=(2, 2))
     ToolTip(
@@ -1545,7 +1572,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 67):
+        for i in range(0, 78):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
@@ -1561,7 +1588,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 67):
+        for i in range(0, 78):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
@@ -1604,7 +1631,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 100):
+        for i in range(0, 112):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -1620,7 +1647,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 100):
+        for i in range(0, 112):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(
@@ -6147,7 +6174,7 @@ def mainWindow():
             entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
             entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
     except Exception as e:
-        print(idx)
+        print(zombie_name)
         messagebox.showerror("错误", f"创建界面元素时出现错误: {e}")
 
     # 读取配置方案

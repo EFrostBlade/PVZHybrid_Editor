@@ -75,6 +75,7 @@ def getMap():
             or map == 21
             or map == 24
             or map == 27
+            or map == 29
         ):
             return 5
         elif (
@@ -152,6 +153,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 44)
     elif data.PVZ_version == 2.2:
         zombieType = random.randint(0, 50)
+    elif data.PVZ_version == 2.3:
+        zombieType = random.randint(0, 55)
     if hasBoss is True:
         return zombieType
     else:
@@ -164,15 +167,17 @@ def getRandomPlant(isPut=False):
     if data.PVZ_version == 2.0:
         plantType = random.randint(0, 96)
     elif data.PVZ_version == 2.1:
-        plantType = random.randint(0, 102)
-    if data.PVZ_version == 2.2:
-        plantType = random.randint(0, 107)
+        plantType = random.randint(0, 103)
+    elif data.PVZ_version == 2.2:
+        plantType = random.randint(0, 108)
+    elif data.PVZ_version == 2.3:
+        plantType = random.randint(0, 122)
     if plantType >= 48:
         plantType = plantType + 27
     if isPut is False:
         return plantType
     else:
-        ExcludedCards = [105, 112, 113, 118]
+        ExcludedCards = [105, 112, 113, 118, 133]
         while plantType in ExcludedCards:
             plantType = getRandomPlant(True)
         return plantType
@@ -611,7 +616,7 @@ def shovelpro(f):
             data.PVZ_memory.write_bytes(addr + 0x15, b"\x83\xf8\x17", 3)
             data.PVZ_memory.write_bytes(0x004111D8, b"\x01\x9f\x9c\x57\x00\x00", 6)
             pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_shovelpro)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             data.PVZ_memory.write_bytes(0x008E0460, b"\xe9\x7f\x00\x00\x00\x90", 6)
             newmem_shovelpro = pymem.memory.allocate_memory(
@@ -655,17 +660,9 @@ def randomSlots_operstion(randomSlots_event, haszombie):
         )
         for i in range(0, 14):
             if haszombie is False:
-                if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
-                    plant = random.randint(0, 102)
-                elif data.PVZ_version == 2.0:
-                    plant = random.randint(0, 96)
-                if plant >= 48:
-                    plant = plant + 27
+                plant = getRandomPlant(False)
             else:
-                if data.PVZ_version == 2.0:
-                    plant = random.randint(257, 297)
-                elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
-                    plant = random.randint(257, 300)
+                plant = getRandomZombie(True) + 256
             data.PVZ_memory.write_int(
                 data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
             )
@@ -990,7 +987,7 @@ def zombiebeanHpynotized(f):
             pymem.memory.free_memory(
                 data.PVZ_memory.process_handle, newmem_zombiebeanHpynotized1
             )
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             newmem_zombiebeanHpynotized1 = pymem.memory.allocate_memory(
                 data.PVZ_memory.process_handle, 64
@@ -1036,7 +1033,7 @@ def scrapHelmetControlled(f):
             data.PVZ_memory.write_bytes(0x0089A03F, b"\x90\xe9", 2)
         else:
             data.PVZ_memory.write_bytes(0x0089A03F, b"\x0f\x85", 2)
-    elif data.PVZ_version == 2.2:
+    elif data.PVZ_version >= 2.2:
         if f:
             data.PVZ_memory.write_bytes(0x0089A03F, b"\x90\xe9", 2)
             data.PVZ_memory.write_bytes(0x00882211, b"\x90\x90\x90\x90\x90\x90", 6)
@@ -2170,7 +2167,7 @@ def slotKey(slot_key_list):
         pymem.memory.free_memory(data.PVZ_memory.process_handle, newmem_slotKey)
         if data.PVZ_version == 2.0:
             data.PVZ_memory.write_bytes(0x00539660, b"\xe9\x9b\x5c\x33\x00\x90", 6)
-        elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+        elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
             data.PVZ_memory.write_bytes(0x00539660, b"\xe9\x9b\x5b\x36\x00\x90", 6)
 
 
@@ -2731,28 +2728,7 @@ def morph_all_plant():
             i = i + 1
         j = j + 1
     for p in plant_list:
-        if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
-            plantType = random.randint(0, 102)
-        elif data.PVZ_version == 2.0:
-            plantType = random.randint(0, 96)
-        if plantType >= 48:
-            plantType = plantType + 27
-        if plantType == 118:
-            plantType = 123
-        if plantType == 11:
-            plantType = 123
-        if plantType == 45:
-            plantType = 123
-        if plantType == 110:
-            plantType = 38
-        if plantType == 105:
-            plantType = 21
-        if plantType == 108:
-            plantType = 10
-        if plantType == 112:
-            plantType = 43
-        if plantType == 113:
-            plantType = 78
+        plantType = getRandomPlant(True)
         putPlant(p.row, p.col, plantType)
         p.setExist(True)
 
@@ -2798,7 +2774,7 @@ def PlantConnotHitedDeath(f):
     if f:
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x90\x90\x90", 3)
         data.PVZ_memory.write_bytes(0x0046D7A6, b"\x90\x90\x90", 3)
-        if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+        if data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
             data.PVZ_memory.write_bytes(0x008AD752, b"\x90\x90\x90", 3)
         elif data.PVZ_version == 2.0:
             data.PVZ_memory.write_bytes(0x0084F15D, b"\x90\x90\x90", 3)
@@ -2806,7 +2782,7 @@ def PlantConnotHitedDeath(f):
     else:
         data.PVZ_memory.write_bytes(0x0046CFEB, b"\x29\x50\x40", 3)
         data.PVZ_memory.write_bytes(0x0046D7A6, b"\x29\x50\x40", 3)
-        if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+        if data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
             data.PVZ_memory.write_bytes(0x008AD752, b"\x29\x50\x40", 3)
         elif data.PVZ_version == 2.0:
             data.PVZ_memory.write_bytes(0x0084F15D, b"\x29\x50\x40", 3)
@@ -2826,7 +2802,7 @@ def fogDraw(f):
             data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x80", 2)
         else:
             data.PVZ_memory.write_bytes(0x0086E521, b"\x0f\x84", 2)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             data.PVZ_memory.write_bytes(0x008A7821, b"\x0f\x80", 2)
         else:
@@ -2839,7 +2815,7 @@ def invisibleDraw(f):
             data.PVZ_memory.write_bytes(0x0086E56C, b"\x70", 1)
         else:
             data.PVZ_memory.write_bytes(0x0086E56C, b"\x74", 1)
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             data.PVZ_memory.write_bytes(0x008A786C, b"\x70", 1)
         else:
@@ -3207,7 +3183,7 @@ def modifySpawMultiplier(f, mult):
             pymem.memory.free_memory(
                 data.PVZ_memory.process_handle, newmem_modifySpawMultiplier
             )
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             newmem_modifySpawMultiplier = pymem.memory.allocate_memory(
                 data.PVZ_memory.process_handle, 256
@@ -3284,6 +3260,42 @@ def globalSpawModify(f, zombieTypes):
             shellcode = asm.Asm(newmem_globalSpawModify)
             for i in range(0, 51):
                 if str(i) in zombieTypes:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            data.PVZ_memory.write_bytes(
+                0x0082401F,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x00824024)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            data.PVZ_memory.write_bytes(0x0082401F, b"\x0f\x85\x21\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
+    elif data.PVZ_version == 2.3:
+        if f:
+            data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 56):
+                if str(i) in zombieTypes:
+                    print(i)
                     shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
                 else:
                     shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
@@ -3394,7 +3406,7 @@ def changeZombieHead(f, zombieType):
             pymem.memory.free_memory(
                 data.PVZ_memory.process_handle, newmem_changeZombieDeadHead
             )
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
                 data.PVZ_memory.process_handle, 256
@@ -5478,7 +5490,7 @@ def infiniteItems(f):
     global newmem_infiniteItems
     if data.PVZ_version == 2.0:
         pass
-    elif data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    elif data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             newmem_infiniteItems = pymem.memory.allocate_memory(
                 data.PVZ_memory.process_handle, 2048
@@ -5739,7 +5751,7 @@ def overPlant(f):
 
 
 def column(f):
-    if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    if data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         if f:
             data.PVZ_memory.write_bytes(0x00410ADF, b"\xeb\x0b\x90\x90\x90", 5)
             data.PVZ_memory.write_bytes(0x00439035, b"\xeb\x0b\x90\x90\x90", 5)
@@ -6334,7 +6346,7 @@ def num_slot(f):
 
 
 def vase_gargantuar_fix(f):
-    if data.PVZ_version == 2.1 or data.PVZ_version == 2.2:
+    if data.PVZ_version == 2.1 or data.PVZ_version >= 2.2:
         # [ENABLE]
         # 0052F41F:
         # db D9 EE 51 D9 1C 24
