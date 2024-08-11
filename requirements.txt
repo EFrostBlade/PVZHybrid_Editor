@@ -1,0 +1,12 @@
+pyDes
+pymem
+Pillow
+pycryptodome
+cryptography
+requests
+keyboard
+psutil
+pywin32
+wmi
+pyperclip
+ttkbootstrap
