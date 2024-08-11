@@ -1,5 +1,5 @@
-# ruff: noqa: F401,F403,F405,E402,F541,E722
-import PVZ_asm
+# ruff: noqa: F403,F405,E402,F541,E722
+# import PVZ_asm
 import PVZ_Hybrid as pvz
 import PVZ_data as data
 from tkinter import filedialog
@@ -10,11 +10,11 @@ import ttkbootstrap as ttk
 import tkinter as tk
 from tkinter import (
     messagebox,
-    Toplevel,
+    # Toplevel,
     Listbox,
     Checkbutton,
     IntVar,
-    font,
+    # font,
     simpledialog,
 )
 import importlib.util
@@ -22,36 +22,38 @@ import requests
 import keyboard
 import json
 import webbrowser
-import ctypes
+
+# import ctypes
 import sys
 import os
-import time
+
+# import time
 import re
 import random
 import psutil
 import win32process
 import win32gui
 import queue
-from threading import Thread, Event
-import wmi
-import hashlib
-import pyperclip
-import struct
+# from threading import Thread, Event
+# import wmi
+# import hashlib
+# import pyperclip
+# import struct
 
-from pyDes import *
-import binascii
+# from pyDes import *
+# import binascii
 from pymem import Pymem
 from PIL import Image, ImageTk
-from Crypto import Random
-from typing import List, Dict
-from datetime import datetime, timedelta
-import base64
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
-from urllib.parse import urlencode
+# from Crypto import Random
+# from typing import List, Dict
+# from datetime import datetime, timedelta
+# import base64
+# from Crypto.PublicKey import RSA
+# from Crypto.Cipher import PKCS1_v1_5
+# from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.34"
+current_version = "0.35"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -459,6 +461,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.35\n"
+        '适配杂交2.3新僵尸血量，感谢群友"。"辛苦搜集的血量地址\n'
+        "修复win7版没有新卡的问题，尝试修复win7版叠种不生效的问题"
         "b0.34\n"
         "适配杂交2.3新植物、新僵尸、新地图、新子弹\n"
         "仅修复僵王血量地址"

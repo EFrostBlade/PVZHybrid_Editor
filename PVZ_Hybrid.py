@@ -3565,7 +3565,10 @@ def deathrattleCallZombie(f, deadZombieType):
         )
 
 
-def zombieDeadZombie(f, deadZombieType, bossWeight):
+newmem_zombieDeadZombie = None
+
+
+def zombieDeadZombie(f, deadZombieType, bossWeight, bosshp):
     global newmem_zombieDeadZombie
     # [ENABLE]
     # //code from here to '[DISABLE]' will be used to enable the cheat
@@ -3658,8 +3661,8 @@ def zombieDeadZombie(f, deadZombieType, bossWeight):
             data.PVZ_memory.process_handle, 256
         )
         shellcode = asm.Asm(newmem_zombieDeadZombie)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBP, 0x24, deadZombieType)
-        shellcode.jne_long_offset(0xC6)
+        shellcode.cmp_byte_ptr_exx_add_byte_byte(asm.EBP, 0x24, deadZombieType)
+        shellcode.jne_label("originalcode")
         shellcode.pushad()
         shellcode.push_byte(0x47)
         shellcode.push_dword(0x00061A80)
@@ -3682,38 +3685,52 @@ def zombieDeadZombie(f, deadZombieType, bossWeight):
         shellcode.mov_exx_eyy(asm.EDI, asm.EBP)
         shellcode.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
         shellcode.cmp_dword_ptr_exx_add_dword_byte(asm.EAX, 0x7FC, 3)
-        shellcode.jne_long_offset(0x62)
+        shellcode.jne_label("end")
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
         shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.EAX, 0x164, 1)
-        shellcode.je_offset(0x4F)
+        shellcode.je_label("end")
         shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EDI, 0x24, deadZombieType)
-        shellcode.jne_long_offset(0x45)
+        shellcode.jne_label("end")
+        shellcode.create_label("RZ")
         shellcode.mov_exx(asm.EAX, 999)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_dword(asm.EAX, bossWeight)
         shellcode.mov_exx(asm.EAX, 25)
-        shellcode.jl_long_offset(0x0F)
+        shellcode.jl_label("CZ")
         if data.PVZ_version == 2.0:
-            shellcode.mov_exx(asm.EAX, 42)
+            shellcode.mov_exx(asm.EAX, 41)
+        elif data.PVZ_version == 2.1:
+            shellcode.mov_exx(asm.EAX, 44)
+        elif data.PVZ_version == 2.2:
+            shellcode.mov_exx(asm.EAX, 51)
         else:
-            shellcode.mov_exx(asm.EAX, 45)
+            shellcode.mov_exx(asm.EAX, 56)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
-        shellcode.je_offset(0xD7)
+        shellcode.je_label("RZ")
+        shellcode.create_label("CZ")
         shellcode.push_ptr_exx_add_byte(asm.EDI, 0x1C)
         shellcode.push_exx(asm.EAX)
         shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.EDI, 4)
         shellcode.call(0x0040DDC0)
+        shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.EDI, 0xB8, 1)
+        shellcode.jne_label("bumeihuo")
+        shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EAX, 0xB8, 1)
+        shellcode.create_label("bumeihuo")
         shellcode.fld_dword_ptr_exx_add_byte(asm.EDI, 0x2C)
         shellcode.fstp_dword_ptr_exx_add_byte(asm.EAX, 0x2C)
-        shellcode.mov_ptr_exx_add_dword_dword(asm.EAX, 0x1B0, 1)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EAX, 0x24, 25)
+        shellcode.jne_label("end")
+        if bosshp != 0:
+            shellcode.mov_ptr_exx_add_dword_dword(asm.EAX, 0xC8, bosshp)
+            shellcode.mov_ptr_exx_add_dword_dword(asm.EAX, 0xCC, bosshp)
+        shellcode.create_label("end")
         shellcode.popad()
         shellcode.mov_ptr_exx_add_byte_dword(asm.EBP, 0x28, 3)
+        shellcode.create_label("originalcode")
         shellcode.push_exx(asm.EBP)
         shellcode.mov_exx_eyy(asm.EBP, asm.ESP)
-        shellcode.add_byte(0x83)
-        shellcode.add_byte(0xE4)
-        shellcode.add_byte(0xF8)
+        shellcode.add_bytes(b"\x83\xe4\xf8")
         shellcode.jmp(0x00529A36)
         data.PVZ_memory.write_bytes(
             newmem_zombieDeadZombie,
@@ -5682,15 +5699,15 @@ def ignoreZombies(f):
 
 
 def overPlant(f):
-    addr = (
-        int.from_bytes(
-            data.PVZ_memory.read_bytes(0x40E2C2, 1)
-            + data.PVZ_memory.read_bytes(0x40E2C1, 1)
-            + data.PVZ_memory.read_bytes(0x40E2C0, 1)
-            + data.PVZ_memory.read_bytes(0x40E2BF, 1)
-        )
-        + 0x40E2C3
-    )
+    # addr = (
+    #     int.from_bytes(
+    #         data.PVZ_memory.read_bytes(0x40E2C2, 1)
+    #         + data.PVZ_memory.read_bytes(0x40E2C1, 1)
+    #         + data.PVZ_memory.read_bytes(0x40E2C0, 1)
+    #         + data.PVZ_memory.read_bytes(0x40E2BF, 1)
+    #     )
+    #     + 0x40E2C3
+    # )
     if f:
         data.PVZ_memory.write_bytes(0x00425634, b"\xeb\x1b\x0f\x1f\x00", 5)
         data.PVZ_memory.write_bytes(0x0040E3C6, b"\xe9\x94\x00\x00\x00\x0f\x1f\x00", 8)
@@ -5701,7 +5718,7 @@ def overPlant(f):
             0x0040E263, b"\x8b\x5c\x24\x24\xeb\x2a\x0f\x1f\x00", 9
         )
         data.PVZ_memory.write_bytes(
-            addr, b"\x0f\x1f\x00\x8b\x4c\x24\x2c\x66\x0f\x1f\x44\x00\x00", 13
+            0x0087FA00, b"\x0f\x1f\x00\x8b\x4c\x24\x2c\x66\x0f\x1f\x44\x00\x00", 13
         )
         # data.PVZ_memory.write_bytes(
         #     0x00843D50, b"\xeb\x6a\x90\x90\x90\x90\x90\x90\x90", 9
@@ -5728,9 +5745,9 @@ def overPlant(f):
             0x0040E263, b"\x83\xf9\x03\x8b\x5c\x24\x24\x75\x27", 9
         )
         data.PVZ_memory.write_bytes(
-            addr,
+            0x0087FA00,
             b"\x83\xf9\x02\x8b\x4c\x24\x2c\x0f\x84"
-            + calculate_call_address(0x0040E2CD - addr - 0xD),
+            + calculate_call_address(0x0040E2CD - 0x0087FA00 - 0xD),
             13,
         )
         # data.PVZ_memory.write_bytes(
