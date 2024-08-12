@@ -83,6 +83,9 @@ zombiesType = [
     "海妖僵尸",
     "缠绕潜水僵尸",
     "钻石僵尸",
+    "防爆门僵尸",
+    "骑鸭僵尸",
+    "小推车小鬼僵尸",
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -259,6 +262,16 @@ plantsType = [
     "黄金西瓜投手",
     "寒冰菇王",
     "自费盒子",
+    "内卷投手",
+    "制冰豆",
+    "伪装的向日葵",
+    "骄阳玉米投手",
+    "辣椒重塑者",
+    "棱镜向日葵",
+    "大王钢齿花",
+    "促销豆",
+    "促销花盆",
+    "天使向日葵",
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -319,6 +332,9 @@ plantsType = plantsType + [
     "海妖僵尸",
     "缠绕潜水僵尸",
     "钻石僵尸",
+    "防爆门僵尸",
+    "骑鸭僵尸",
+    "小推车小鬼僵尸",
 ]
 
 
@@ -537,6 +553,84 @@ def get_zombies_HP_addresses(PVZ_version):
             "海妖僵尸": 0x008D1C4D,
             "缠绕潜水僵尸": 0x008D1CDA,
         }
+    elif PVZ_version == 2.35:
+        return {
+            "普僵": 0x005227BB,
+            "路障的路障": 0x00522892,
+            "路障的绿帽": 0x008D08AA,
+            "撑杆": 0x00522CBF,
+            "撑杆的坚果": 0x008D09FD,
+            "铁桶的铁桶": 0x0052292B,
+            "报纸": 0x0052337D,
+            "冰车二爷": 0x008D0DAE,
+            "铁门的铁门": 0x00522949,
+            "铁门的路障": 0x008D00CD,
+            "铁门的铁桶": 0x008D0080,
+            "橄榄的黑橄榄帽": 0x00522BB0,
+            "橄榄的废稿头盔": 0x008D078F,
+            "舞王": 0x00523530,
+            "舞王的黑橄榄帽": 0x008D04E5,
+            "舞王的废稿头盔": 0x008D0551,
+            "潜水和投篮的黑橄榄帽": 0x008D0025,
+            "大型冰车": 0x00522DE1,
+            "雪橇车": 0x00523139,
+            "雪橇小队": 0x008D0B75,
+            "海豚": 0x00522D64,
+            "海豚的路障": 0x008D06E1,
+            "小丑": 0x00522FC7,
+            "小丑的路障": 0x008D00EA,
+            "气球": 0x005234BF,
+            "矿工本体": 0x008D06A7,
+            "跳跳": 0x00523300,
+            "跳跳的铁桶": 0x008D01EC,
+            "跳跳的坚果": 0x008D0318,
+            "冰车雪人": 0x0052296E,
+            "蹦极": 0x00522A1B,
+            "扶梯本体和扶梯": 0x0052299C,
+            "扶梯僵尸的铁桶": 0x008D0390,
+            "扶梯的路障": 0x008D0339,
+            "扶梯的坚果": 0x008D04C4,
+            "投石车": 0x00522E8D,
+            "投石车橄榄帽": 0x008D0025,
+            "白眼": 0x00523D26,
+            "红眼": 0x00523E4A,
+            "巨人的铁门": 0x008D05B2,
+            "巨人的铁桶": 0x008D059E,
+            "巨人的黑橄榄帽": 0x008D0694,
+            "巨人的废稿头盔": 0x008D063A,
+            "小鬼": 0x005227BB,
+            "植物僵尸本体": 0x005227BB,
+            "植物僵尸的铁门": 0x008D01C6,
+            "植物僵尸的路障": 0x008D01A4,
+            "植物僵尸的铁桶": 0x0052292B,
+            "坚果僵尸的坚果": 0x0052382B,
+            "辣椒僵尸的辣椒": 0x00523A87,
+            "高冰果僵尸的高冰果": 0x008D11D1,
+            "机枪射手僵尸": 0x008D11A2,
+            "火炬坚果僵尸的坚果头": 0x008D12EC,
+            "机枪撑杆僵尸": 0x008D1415,
+            "机枪海豚僵尸的路障": 0x008D164F,
+            "迪斯科僵尸": 0x008D0828,
+            "骷髅": 0x008D0B57,
+            "死灵法师": 0x008D0D93,
+            "火焰迪斯科": 0x008D0BF5,
+            "火焰舞者": 0x008D0D77,
+            "床车": 0x008D0E58,
+            "小摔哥的睡帽": 0x008D0EA8,
+            "小黄鸭的路障": 0x008D0E44,
+            "小黄鸭的铁桶": 0x008D0E11,
+            "僵王": 0x008D0EDA,
+            "橄榄巨人": 0x008D0F01,
+            "橄榄巨人头盔": 0x008D0F15,
+            "橄榄小鬼": 0x005227BB,
+            "橄榄小鬼头盔": 0x008D0F8C,
+            "雪人矿工": 0x008D0FC6,
+            "雪人矿工帽": 0x008D0FA0,
+            "钻石僵尸帽": 0x008D1DF7,
+            "鲨鱼僵尸": 0x008D1A97,
+            "海妖僵尸": 0x008D1C4D,
+            "缠绕潜水僵尸": 0x008D1CDA,
+        }
 
 
 plants_HP_addresses = {
@@ -684,6 +778,8 @@ goldPlant = [
     "向日葵女王",
     "至尊VIP坚果",
     "狂野机枪射手",
+    "寒冰加农炮",
+    "黄金西瓜投手",
 ]
 goldPlantIndex = [23, 26, 30, 40, 42, 43, 46, 47, 78, 82, 86, 88, 109]
 mushroomPlant = [
@@ -758,6 +854,7 @@ bulletType = [
     "忧郁菇投手",
     "冰大炮",
     "黄金瓜",
+    "火玉米",
 ]
 keyTpye = [
     "无",
@@ -1199,6 +1296,18 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
+            elif PVZ_version == 2.3:
+                self.addr = 0x00088B04D + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
+            elif PVZ_version == 2.35:
+                self.addr = 0x0088B05D + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -1242,7 +1351,7 @@ class zombieType:
                     self.weight = PVZ_memory.read_uchar(0x0085A613)
                 elif PVZ_version == 2.1 or PVZ_version == 2.2:
                     self.weight = PVZ_memory.read_uchar(0x008D0613)
-        else:
+        elif PVZ_version == 2.3:
             if type <= 55:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
@@ -1255,6 +1364,20 @@ class zombieType:
             elif type == 58:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 59:
+                self.weight = PVZ_memory.read_uchar(0x008D05F7)
+        elif PVZ_version == 2.35:
+            if type <= 58:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 59:
+                self.weight = PVZ_memory.read_uchar(0x008D0896)
+            elif type == 60:
+                self.weight = PVZ_memory.read_uchar(0x008D0743)
+            elif type == 61:
+                self.weight = PVZ_memory.read_uchar(0x008D051C)
+            elif type == 62:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
 
     def setAnime(self, anime):
@@ -1287,7 +1410,7 @@ class zombieType:
                     PVZ_memory.write_uchar(0x0085A613, weight)
                 elif PVZ_version == 2.1 or PVZ_version == 2.2:
                     PVZ_memory.write_uchar(0x008D0613, weight)
-        else:
+        elif PVZ_version == 2.3:
             if self.type <= 55:
                 PVZ_memory.write_int(self.addr + 0x14, weight)
             elif self.type == 56:
@@ -1297,4 +1420,15 @@ class zombieType:
             elif self.type == 58:
                 PVZ_memory.write_uchar(0x008D051C, weight)
             elif self.type == 59:
+                PVZ_memory.write_uchar(0x008D05F7, weight)
+        elif PVZ_version == 2.35:
+            if self.type <= 58:
+                PVZ_memory.write_int(self.addr + 0x14, weight)
+            elif self.type == 59:
+                PVZ_memory.write_uchar(0x008D0896, weight)
+            elif self.type == 60:
+                PVZ_memory.write_uchar(0x008D0743, weight)
+            elif self.type == 61:
+                PVZ_memory.write_uchar(0x008D051C, weight)
+            elif self.type == 62:
                 PVZ_memory.write_uchar(0x008D05F7, weight)

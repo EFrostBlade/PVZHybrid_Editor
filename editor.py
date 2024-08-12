@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.35"
+current_version = "0.36"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -247,6 +247,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(data.PVZ_version)
                 )
+            elif "2.3.5" in window_name:
+                data.update_PVZ_version(2.35)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             elif "2.3" in window_name:
                 data.update_PVZ_version(2.3)
                 main_window.title(
@@ -291,6 +299,14 @@ def chooseGame():
                 )
             elif "2.2" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.3.5" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.35)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -973,6 +989,14 @@ def mainWindow():
                     + "      游戏版本："
                     + str(data.PVZ_version)
                 )
+            elif "2.3.5" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.35)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             elif "2.3" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.3)
                 main_window.title(
@@ -1577,7 +1601,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 78):
+        for i in range(0, 89):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
@@ -1593,7 +1617,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 78):
+        for i in range(0, 89):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
@@ -1636,7 +1660,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 112):
+        for i in range(0, 132):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -1652,7 +1676,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 112):
+        for i in range(0, 132):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(

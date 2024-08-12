@@ -75,7 +75,9 @@ def getMap():
             or map == 21
             or map == 24
             or map == 27
-            or map == 29
+            or map == 30
+            or map == 31
+            or map == 32
         ):
             return 5
         elif (
@@ -155,6 +157,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 50)
     elif data.PVZ_version == 2.3:
         zombieType = random.randint(0, 55)
+    elif data.PVZ_version == 2.35:
+        zombieType = random.randint(0, 58)
     if hasBoss is True:
         return zombieType
     else:
@@ -172,12 +176,14 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 108)
     elif data.PVZ_version == 2.3:
         plantType = random.randint(0, 122)
+    elif data.PVZ_version == 2.35:
+        plantType = random.randint(0, 133)
     if plantType >= 48:
         plantType = plantType + 27
     if isPut is False:
         return plantType
     else:
-        ExcludedCards = [105, 112, 113, 118, 133]
+        ExcludedCards = [105, 112, 113, 118, 133, 157]
         while plantType in ExcludedCards:
             plantType = getRandomPlant(True)
         return plantType
@@ -3294,6 +3300,42 @@ def globalSpawModify(f, zombieTypes):
             )
             shellcode = asm.Asm(newmem_globalSpawModify)
             for i in range(0, 56):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            data.PVZ_memory.write_bytes(
+                0x0082401F,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x00824024)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            data.PVZ_memory.write_bytes(0x0082401F, b"\x0f\x85\x21\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
+    elif data.PVZ_version == 2.35:
+        if f:
+            data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 59):
                 if str(i) in zombieTypes:
                     print(i)
                     shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
