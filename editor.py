@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.36"
+current_version = "0.37"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 data.update_PVZ_memory(1)
@@ -255,6 +255,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(data.PVZ_version)
                 )
+            elif "2.3.6" in window_name:
+                data.update_PVZ_version(2.36)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
             elif "2.3" in window_name:
                 data.update_PVZ_version(2.3)
                 main_window.title(
@@ -307,6 +315,14 @@ def chooseGame():
                 )
             elif "2.3.5" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.35)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.3.6" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.36)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -447,7 +463,7 @@ def support():
 
     def open_qq0():
         webbrowser.open_new(
-            r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=MiNaJQYA-UtmWE3Gb2DejwzY4C-9G-Be&authKey=Q%2FuS%2B%2F4qS9Olws%2FZqTeuuU01xCUAFay8Sk5l1uW1RIZl74vN5p5QhkwSpNCn4Jjv&noverify=0&group_code=522376997"
+            r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jtpHFKp2U6UF-jQWoD6bFBGvOe8-nU33&authKey=xGtPLe9Hus9NLhJ%2FTZZdLU0uzPIAM2OGTGI%2B9K8D1Onyujzgmm5t1RPIGWpSrLaz&noverify=0&group_code=978991455"
         )
 
     qq0_frame = ttk.Frame(support_window)
@@ -457,7 +473,7 @@ def support():
     )
     ttk.Button(
         qq0_frame,
-        text="522376997",
+        text="978991455",
         padding=0,
         bootstyle=(PRIMARY, LINK),
         cursor="hand2",
@@ -477,6 +493,13 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.37\n"
+        "适配杂交2.3.6 16卡槽\n"
+        "仅修复僵王血量地址\n"
+        "优化了植物选择界面的显示效果\n"
+        "b0.36\n"
+        "适配杂交2.3.5新植物、新僵尸、新地图、新子弹\n"
+        "仅修复僵王血量地址"
         "b0.35\n"
         '适配杂交2.3新僵尸血量，感谢群友"。"辛苦搜集的血量地址\n'
         "修复win7版没有新卡的问题，尝试修复win7版叠种不生效的问题"
@@ -695,8 +718,8 @@ def open_card_select_window(combobox):
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=i // 11, column=i % 11)
-        r = i // 11
+        label.grid(row=i // 18, column=i % 18)
+        r = i // 18
 
     # Create a tab for zombies
     zombie_tab = ttk.Frame(notebook)
@@ -712,7 +735,7 @@ def open_card_select_window(combobox):
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=r + 1 + i // 11, column=i % 11)
+        label.grid(row=r + 1 + i // 18, column=i % 18)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -749,7 +772,7 @@ def open_zombie_select_window(combobox):
             "<Button-1>",
             lambda event: on_zombie_image_click(event, zombie_select_window, combobox),
         )
-        label.grid(row=i // 11, column=i % 11)
+        label.grid(row=i // 18, column=i % 18)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -814,7 +837,7 @@ def mainWindow():
 
         def open_qq0():
             webbrowser.open_new(
-                r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=MiNaJQYA-UtmWE3Gb2DejwzY4C-9G-Be&authKey=Q%2FuS%2B%2F4qS9Olws%2FZqTeuuU01xCUAFay8Sk5l1uW1RIZl74vN5p5QhkwSpNCn4Jjv&noverify=0&group_code=522376997"
+                r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jtpHFKp2U6UF-jQWoD6bFBGvOe8-nU33&authKey=xGtPLe9Hus9NLhJ%2FTZZdLU0uzPIAM2OGTGI%2B9K8D1Onyujzgmm5t1RPIGWpSrLaz&noverify=0&group_code=978991455"
             )
 
         qq0_frame = ttk.Frame(update_window)
@@ -824,7 +847,7 @@ def mainWindow():
         )
         ttk.Button(
             qq0_frame,
-            text="522376997",
+            text="978991455",
             padding=0,
             bootstyle=(PRIMARY, LINK),
             cursor="hand2",
@@ -991,6 +1014,14 @@ def mainWindow():
                 )
             elif "2.3.5" in win32gui.GetWindowText(hwnd):
                 data.update_PVZ_version(2.35)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(data.PVZ_version)
+                )
+            elif "2.3.6" in win32gui.GetWindowText(hwnd):
+                data.update_PVZ_version(2.36)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -4759,7 +4790,7 @@ def mainWindow():
         # ttk.Checkbutton(slots_frame,text="可用",bootstyle="danger-round-toggle",variable=slot_canUse_flag,command=lambda:change_slot_canUse()).grid(row=slot_number-1,column=6)
 
     # 为slots 1至14创建UI组件
-    for slot_number in range(1, 15):
+    for slot_number in range(1, 17):
         create_slot_ui(slot_number)
 
     slots_config_frame = ttk.LabelFrame(slot_page, text="卡槽设置", bootstyle=SUCCESS)
@@ -4772,7 +4803,7 @@ def mainWindow():
         slot_num_frame,
         textvariable=slots_num_value,
         width=2,
-        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -5390,28 +5421,28 @@ def mainWindow():
     )
     slot_bag_key.grid(row=1, column=1)
     slot_bag_key.current(12)
-    reserved1_key_label = ttk.Label(function_key_frame, text="预留快捷:")
-    reserved1_key_label.grid(row=1, column=2)
-    slot_reserved1_key = ttk.Combobox(
+    slot_15_key_label = ttk.Label(function_key_frame, text="15:")
+    slot_15_key_label.grid(row=1, column=2)
+    slot_15_key = ttk.Combobox(
         function_key_frame,
         width=3,
         values=data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
-    slot_reserved1_key.grid(row=1, column=3)
-    slot_reserved1_key.current(0)
-    reserved2_key_label = ttk.Label(function_key_frame, text="预留快捷:")
-    reserved2_key_label.grid(row=1, column=4)
-    slot_reserved2_key = ttk.Combobox(
+    slot_15_key.grid(row=1, column=3)
+    slot_15_key.current(data.keyTpye.index("T"))
+    slot_16_key_label = ttk.Label(function_key_frame, text="16:")
+    slot_16_key_label.grid(row=1, column=4)
+    slot_16_key = ttk.Combobox(
         function_key_frame,
         width=3,
         values=data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
-    slot_reserved2_key.grid(row=1, column=5)
-    slot_reserved2_key.current(0)
+    slot_16_key.grid(row=1, column=5)
+    slot_16_key.current(data.keyTpye.index("Y"))
     reserved3_key_label = ttk.Label(function_key_frame, text="预留快捷:")
     reserved3_key_label.grid(row=1, column=6)
     slot_reserved3_key = ttk.Combobox(
@@ -5559,6 +5590,14 @@ def mainWindow():
             pass
         try:
             slot_bag_key.current(config["slotKeys"]["bag"])
+        except:
+            pass
+        try:
+            slot_15_key.current(config["slotKeys"]["15"])
+        except:
+            pass
+        try:
+            slot_16_key.current(config["slotKeys"]["16"])
         except:
             pass
 
@@ -5725,6 +5764,28 @@ def mainWindow():
                     slot_key_list.append(slot_14_key.current())
                 else:
                     Messagebox.show_error("快捷键14重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if slot_15_key.current() != -1:
+                if (
+                    slot_15_key.current() not in slot_key_list
+                    or slot_15_key.current() == 0
+                ):
+                    config["slotKeys"]["15"] = slot_15_key.current()
+                    slot_key_list.append(slot_15_key.current())
+                else:
+                    Messagebox.show_error("快捷键15重复", title="不可设置相同快捷键")
+                    slot_key_status.set(False)
+                    return ()
+            if slot_16_key.current() != -1:
+                if (
+                    slot_16_key.current() not in slot_key_list
+                    or slot_16_key.current() == 0
+                ):
+                    config["slotKeys"]["16"] = slot_16_key.current()
+                    slot_key_list.append(slot_16_key.current())
+                else:
+                    Messagebox.show_error("快捷键16重复", title="不可设置相同快捷键")
                     slot_key_status.set(False)
                     return ()
             if slot_shovel_key.current() != -1:

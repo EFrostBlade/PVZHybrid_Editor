@@ -157,7 +157,7 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 50)
     elif data.PVZ_version == 2.3:
         zombieType = random.randint(0, 55)
-    elif data.PVZ_version == 2.35:
+    elif data.PVZ_version == 2.35 or data.PVZ_version == 2.36:
         zombieType = random.randint(0, 58)
     if hasBoss is True:
         return zombieType
@@ -176,7 +176,7 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 108)
     elif data.PVZ_version == 2.3:
         plantType = random.randint(0, 122)
-    elif data.PVZ_version == 2.35:
+    elif data.PVZ_version == 2.35 or data.PVZ_version == 2.36:
         plantType = random.randint(0, 133)
     if plantType >= 48:
         plantType = plantType + 27
@@ -1669,11 +1669,19 @@ def slotKey(slot_key_list):
         else:
             shellcode.nop_6()
             shellcode.nop_6()
+        if slot_key_list["15"] > 0:
+            shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["15"]])
+            shellcode.je_offset(0x749)
+        else:
+            shellcode.nop_6()
+            shellcode.nop_6()
+        if slot_key_list["16"] > 0:
+            shellcode.cmp_exx_dword(asm.EDI, data.keyCode[slot_key_list["16"]])
+            shellcode.je_offset(0x79F)
+        else:
+            shellcode.nop_6()
+            shellcode.nop_6()
         # 预留快捷键
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
-        shellcode.nop_6()
         shellcode.nop_6()
         shellcode.nop_6()
         shellcode.nop_6()
@@ -2133,9 +2141,51 @@ def slotKey(slot_key_list):
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
         shellcode.jmp(0x0041B278)
         # 预留快捷键
+        shellcode.mov_exx(asm.EDX, 14)
+        shellcode.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.ECX, 0x768)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x144)
+        shellcode.cmp_ptr_exx_add_byte_eyy(asm.EBX, 0x24, asm.EDX)
+        shellcode.jl_offset(0x3A)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
+        shellcode.jne_short_offset(0x2E)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
+        shellcode.jne_short_offset(0x28)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
+        shellcode.jne_short_offset(0x22)
+        shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
+        shellcode.add_exx_eyy(asm.EAX, asm.EDX)
+        shellcode.lea_exy_byte(0x40, 0x28)
+        shellcode.push_exx(asm.EAX)
+        shellcode.call(0x00488590)
+        shellcode.call(0x0040E520)
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
         shellcode.jmp(0x0041B278)
+        shellcode.mov_exx(asm.EDX, 15)
+        shellcode.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.ECX, 0x768)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x144)
+        shellcode.cmp_ptr_exx_add_byte_eyy(asm.EBX, 0x24, asm.EDX)
+        shellcode.jl_offset(0x3A)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EBX, asm.EDI, 0x138)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x28, 0xFF)
+        shellcode.jne_short_offset(0x2E)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x2C, 0xFF)
+        shellcode.jne_short_offset(0x28)
+        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x30, 0x00)
+        shellcode.jne_short_offset(0x22)
+        shellcode.imul_exx_eyy_dword(asm.EDX, asm.EDX, 0x50)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ECX, 0x768)
+        shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x144)
+        shellcode.add_exx_eyy(asm.EAX, asm.EDX)
+        shellcode.lea_exy_byte(0x40, 0x28)
+        shellcode.push_exx(asm.EAX)
+        shellcode.call(0x00488590)
+        shellcode.call(0x0040E520)
         shellcode.popad()
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ESI, 0x8C)
         shellcode.jmp(0x0041B278)
@@ -3327,7 +3377,7 @@ def globalSpawModify(f, zombieTypes):
             pymem.memory.free_memory(
                 data.PVZ_memory.process_handle, newmem_globalSpawModify
             )
-    elif data.PVZ_version == 2.35:
+    elif data.PVZ_version == 2.35 or data.PVZ_version == 2.36:
         if f:
             data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
             data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
