@@ -554,7 +554,7 @@ def get_zombies_HP_addresses(PVZ_version):
             "海妖僵尸": 0x008D1C4D,
             "缠绕潜水僵尸": 0x008D1CDA,
         }
-    elif PVZ_version == 2.35 or PVZ_version == 2.36:
+    elif PVZ_version == 2.35 or PVZ_version >= 2.36:
         return {
             "普僵": 0x005227BB,
             "路障的路障": 0x00522892,
@@ -1303,7 +1303,7 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 2.35 or PVZ_version == 2.36:
+            elif PVZ_version == 2.35 or PVZ_version >= 2.36:
                 self.addr = 0x0088B05D + (type - 256) * 0x4
                 self.sun = PVZ_memory.read_int(self.addr)
                 self.cd = 0
@@ -1366,7 +1366,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 59:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
-        elif PVZ_version == 2.35 or PVZ_version == 2.36:
+        elif PVZ_version == 2.35 or PVZ_version >= 2.36:
             if type <= 58:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
@@ -1422,7 +1422,7 @@ class zombieType:
                 PVZ_memory.write_uchar(0x008D051C, weight)
             elif self.type == 59:
                 PVZ_memory.write_uchar(0x008D05F7, weight)
-        elif PVZ_version == 2.35 or PVZ_version == 2.36:
+        elif PVZ_version == 2.35 or PVZ_version >= 2.36:
             if self.type <= 58:
                 PVZ_memory.write_int(self.addr + 0x14, weight)
             elif self.type == 59:

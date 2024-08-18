@@ -7,7 +7,7 @@ import pymem.ressources.structure
 import pymem.process
 import pymem.memory
 import pymem.thread
-import PVZ_data as data
+import PVZ_data as PVZ_data
 
 EAX = 0
 ECX = 1
@@ -979,13 +979,13 @@ class Asm:
 
 
 def runThread(cla):
-    process_handle = pymem.process.open(data.PVZ_pid)
+    process_handle = pymem.process.open(PVZ_data.PVZ_pid)
     startAddress = pymem.memory.allocate_memory(process_handle, 65536)
     # print(hex(startAddress))
     asm = cla.creat_asm(startAddress + 1)
     shellcode = b"\x60" + bytes(asm.code[: asm.index]) + b"\x61\xc3"
-    data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index + 3)
-    data.PVZ_memory.write_bytes(0x00552014, b"\xfe", 1)
+    PVZ_data.PVZ_memory.write_bytes(startAddress, shellcode, asm.index + 3)
+    PVZ_data.PVZ_memory.write_bytes(0x00552014, b"\xfe", 1)
     thread_h = pymem.ressources.kernel32.CreateRemoteThread(
         process_handle,
         ctypes.cast(0, pymem.ressources.structure.LPSECURITY_ATTRIBUTES),
@@ -1001,7 +1001,7 @@ def runThread(cla):
         if exit_code.value == 259:
             pass
         else:
-            data.PVZ_memory.write_bytes(0x00552014, b"\xdb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x00552014, b"\xdb", 1)
             break
         time.sleep(0.001)
     pymem.memory.free_memory(process_handle, startAddress)

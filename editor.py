@@ -1,7 +1,7 @@
 # ruff: noqa: F403,F405,E402,F541,E722
 # import PVZ_asm
 import PVZ_Hybrid as pvz
-import PVZ_data as data
+import PVZ_data as PVZ_data
 from tkinter import filedialog
 from ttkbootstrap.tooltip import ToolTip
 from ttkbootstrap.dialogs.dialogs import Messagebox
@@ -53,10 +53,10 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.37"
+current_version = "0.38"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
-data.update_PVZ_memory(1)
+PVZ_data.update_PVZ_memory(1)
 zombie_select = None
 plant_select = None
 item_select = None
@@ -224,55 +224,65 @@ def chooseGame():
         try:
             window_name = re.search(r"\{\{(.+?)\}\}", process1).group(1)
             if "2.0" in window_name:
-                data.update_PVZ_version(2.0)
+                PVZ_data.update_PVZ_version(2.0)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.1" in window_name:
-                data.update_PVZ_version(2.1)
+                PVZ_data.update_PVZ_version(2.1)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.2" in window_name:
-                data.update_PVZ_version(2.2)
+                PVZ_data.update_PVZ_version(2.2)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.5" in window_name:
-                data.update_PVZ_version(2.35)
+                PVZ_data.update_PVZ_version(2.35)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.6" in window_name:
-                data.update_PVZ_version(2.36)
+                PVZ_data.update_PVZ_version(2.36)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.3.7" in window_name:
+                PVZ_data.update_PVZ_version(2.37)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3" in window_name:
-                data.update_PVZ_version(2.3)
+                PVZ_data.update_PVZ_version(2.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
-            data.update_PVZ_memory(Pymem(int(re.search(r"(\d+)", process1).group(1))))
-            data.update_PVZ_pid(int(re.search(r"(\d+)", process1).group(1)))
+            PVZ_data.update_PVZ_memory(
+                Pymem(int(re.search(r"(\d+)", process1).group(1)))
+            )
+            PVZ_data.update_PVZ_pid(int(re.search(r"(\d+)", process1).group(1)))
         except:
             Messagebox.show_error(
                 "没有足够的权限，请确保游戏未以管理员身份运行",
@@ -290,55 +300,63 @@ def chooseGame():
             hwnd = win32gui.FindWindow("MainWindow", None)
             pid = win32process.GetWindowThreadProcessId(hwnd)
             if "2.0" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.0)
+                PVZ_data.update_PVZ_version(2.0)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.1" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.1)
+                PVZ_data.update_PVZ_version(2.1)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.2" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.2)
+                PVZ_data.update_PVZ_version(2.2)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.5" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.35)
+                PVZ_data.update_PVZ_version(2.35)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.6" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.36)
+                PVZ_data.update_PVZ_version(2.36)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.3.7" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.37)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.3)
+                PVZ_data.update_PVZ_version(2.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
-            data.update_PVZ_memory(Pymem(pid[1]))
-            data.update_PVZ_pid(pid[1])
+            PVZ_data.update_PVZ_memory(Pymem(pid[1]))
+            PVZ_data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
             choose_process_window.destroy()
         except:
@@ -360,8 +378,8 @@ def chooseGame():
     def close():
         choose_process_window.quit()
         choose_process_window.destroy()
-        data.update_PVZ_memory(0)
-        data.update_PVZ_pid(0)
+        PVZ_data.update_PVZ_memory(0)
+        PVZ_data.update_PVZ_pid(0)
 
     def getSelecthwnd():
         hwnd_title = dict()
@@ -493,6 +511,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.38\n"
+        "适配杂交2.3.7 16卡槽\n"
+        "仅修复僵王血量地址\n"
         "b0.37\n"
         "适配杂交2.3.6 16卡槽\n"
         "仅修复僵王血量地址\n"
@@ -787,7 +808,7 @@ def mainWindow():
         "杂交版多功能修改器  "
         + str(current_version)
         + "      游戏版本："
-        + str(data.PVZ_version)
+        + str(PVZ_data.PVZ_version)
     )
     main_window.geometry("600x650")
     main_window.iconphoto(
@@ -973,14 +994,14 @@ def mainWindow():
 
     def updateGame():
         chooseGame()
-        if type(data.PVZ_memory) != Pymem:  # noqa: E721
+        if type(PVZ_data.PVZ_memory) != Pymem:  # noqa: E721
             process_label["text"] = "未找到游戏"
             process_label.config(bootstyle=DANGER)
         else:
             process_label["text"] = (
                 "找到进程："
-                + str(data.PVZ_memory.process_id)
-                + str(psutil.Process(data.PVZ_memory.process_id).name())
+                + str(PVZ_data.PVZ_memory.process_id)
+                + str(psutil.Process(PVZ_data.PVZ_memory.process_id).name())
             )
             process_label.config(bootstyle=DANGER)
 
@@ -989,59 +1010,67 @@ def mainWindow():
             hwnd = win32gui.FindWindow("MainWindow", None)
             pid = win32process.GetWindowThreadProcessId(hwnd)
             if "2.0" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.0)
+                PVZ_data.update_PVZ_version(2.0)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.1" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.1)
+                PVZ_data.update_PVZ_version(2.1)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.2" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.2)
+                PVZ_data.update_PVZ_version(2.2)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.5" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.35)
+                PVZ_data.update_PVZ_version(2.35)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3.6" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.36)
+                PVZ_data.update_PVZ_version(2.36)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.3.7" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.37)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
                 )
             elif "2.3" in win32gui.GetWindowText(hwnd):
-                data.update_PVZ_version(2.3)
+                PVZ_data.update_PVZ_version(2.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
                     + "      游戏版本："
-                    + str(data.PVZ_version)
+                    + str(PVZ_data.PVZ_version)
                 )
-            data.update_PVZ_memory(Pymem(pid[1]))
-            data.update_PVZ_pid(pid[1])
+            PVZ_data.update_PVZ_memory(Pymem(pid[1]))
+            PVZ_data.update_PVZ_pid(pid[1])
             process_label["text"] = (
                 "找到进程："
-                + str(data.PVZ_memory.process_id)
-                + str(psutil.Process(data.PVZ_memory.process_id).name())
+                + str(PVZ_data.PVZ_memory.process_id)
+                + str(psutil.Process(PVZ_data.PVZ_memory.process_id).name())
             )
             process_label.config(bootstyle=DANGER)
         except:
@@ -1408,7 +1437,11 @@ def mainWindow():
     )
     pause_pro_check.grid(row=0, column=0, sticky=W)
     slot_pause_key = ttk.Combobox(
-        pause_pro_frame, width=5, values=data.keyTpye, font=("黑体", 8), state=READONLY
+        pause_pro_frame,
+        width=5,
+        values=PVZ_data.keyTpye,
+        font=("黑体", 8),
+        state=READONLY,
     )
     slot_pause_key.grid(row=1, column=0)
     slot_pause_key.current(0)
@@ -2035,9 +2068,9 @@ def mainWindow():
         zombie_list.clear()
         zombie_list_box.delete(*zombie_list_box.get_children())
         try:
-            zombie_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            zombie_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0xA0
             )
@@ -2047,17 +2080,17 @@ def mainWindow():
         j = 0
         while i < zombie_num:
             zombie_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x90
                 )
                 + 0x204 * j
             )
-            zombie_exist = data.PVZ_memory.read_bytes(zombie_addresss + 0xEC, 1)
+            zombie_exist = PVZ_data.PVZ_memory.read_bytes(zombie_addresss + 0xEC, 1)
             if zombie_exist == b"\x00":
-                zombie_list.append(data.zombie(zombie_addresss))
+                zombie_list.append(PVZ_data.zombie(zombie_addresss))
                 i = i + 1
             j = j + 1
         n = 0
@@ -2423,7 +2456,7 @@ def mainWindow():
     zombiePut_type_combobox = ttk.Combobox(
         zombie_put_frame,
         width=15,
-        values=data.zombiesType,
+        values=PVZ_data.zombiesType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -2518,7 +2551,9 @@ def mainWindow():
     )
     spoil_1_combobox.grid(row=1, column=2)
     spoil_1_combobox.current(0)
-    spoil_1_card = ttk.Combobox(zombie_spoils_frame, width=12, values=data.plantsType)
+    spoil_1_card = ttk.Combobox(
+        zombie_spoils_frame, width=12, values=PVZ_data.plantsType
+    )
     spoil_1_card.insert(0, "选择植物")
     spoil_1_card.configure(state=DISABLED)
     spoil_1_card.grid(row=1, column=3)
@@ -2557,7 +2592,9 @@ def mainWindow():
     )
     spoil_2_combobox.grid(row=2, column=2)
     spoil_2_combobox.current(0)
-    spoil_2_card = ttk.Combobox(zombie_spoils_frame, width=12, values=data.plantsType)
+    spoil_2_card = ttk.Combobox(
+        zombie_spoils_frame, width=12, values=PVZ_data.plantsType
+    )
     spoil_2_card.insert(0, "选择植物")
     spoil_2_card.configure(state=DISABLED)
     spoil_2_card.grid(row=2, column=3)
@@ -2596,7 +2633,9 @@ def mainWindow():
     )
     spoil_3_combobox.grid(row=3, column=2)
     spoil_3_combobox.current(0)
-    spoil_3_card = ttk.Combobox(zombie_spoils_frame, width=12, values=data.plantsType)
+    spoil_3_card = ttk.Combobox(
+        zombie_spoils_frame, width=12, values=PVZ_data.plantsType
+    )
     spoil_3_card.insert(0, "选择植物")
     spoil_3_card.configure(state=DISABLED)
     spoil_3_card.grid(row=3, column=3)
@@ -2635,7 +2674,9 @@ def mainWindow():
     )
     spoil_4_combobox.grid(row=4, column=2)
     spoil_4_combobox.current(0)
-    spoil_4_card = ttk.Combobox(zombie_spoils_frame, width=12, values=data.plantsType)
+    spoil_4_card = ttk.Combobox(
+        zombie_spoils_frame, width=12, values=PVZ_data.plantsType
+    )
     spoil_4_card.insert(0, "选择植物")
     spoil_4_card.configure(state=DISABLED)
     spoil_4_card.grid(row=4, column=3)
@@ -2767,14 +2808,16 @@ def mainWindow():
         zombie_hp_window.geometry(f"+{main_window_x+50}+{main_window_y+50}")
         zombie_hp_values = {}
         row = None
-        for i, (zombie_name, address) in enumerate(data.zombies_HP_addresses.items()):
+        for i, (zombie_name, address) in enumerate(
+            PVZ_data.zombies_HP_addresses.items()
+        ):
             if i % 4 == 0:  # 每四个数据开始新的一行
                 row = ttk.Frame(zombie_hp_window)
                 row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
             label = ttk.Label(row, text=zombie_name, width=15, anchor=E)
             value = ttk.IntVar(row)
             entry = ttk.Entry(row, textvariable=value, width=8)
-            value.set(data.PVZ_memory.read_int(address))  # 假设的读取血量函数
+            value.set(PVZ_data.PVZ_memory.read_int(address))  # 假设的读取血量函数
             label.pack(side=LEFT, anchor=E)
             entry.pack(side=LEFT, expand=YES, fill=X)
             zombie_hp_values[zombie_name] = value
@@ -2786,8 +2829,8 @@ def mainWindow():
         def confirm_changes():
             for zombie_name, value in zombie_hp_values.items():
                 new_hp = value.get()
-                address = data.zombies_HP_addresses[zombie_name]
-                data.PVZ_memory.write_int(address, new_hp)  # 假设的写入血量函数
+                address = PVZ_data.zombies_HP_addresses[zombie_name]
+                PVZ_data.PVZ_memory.write_int(address, new_hp)  # 假设的写入血量函数
             print("所有僵尸和饰品的血量已更新。")
             zombie_hp_window.destroy()
 
@@ -2812,7 +2855,9 @@ def mainWindow():
         if zombie_select is not None:
             try:
                 zombie_type_value.set(
-                    str(zombie_select.type) + ":" + data.zombiesType[zombie_select.type]
+                    str(zombie_select.type)
+                    + ":"
+                    + PVZ_data.zombiesType[zombie_select.type]
                 )
                 if zombie_attribute_frame.focus_get() != zombie_state_entry:
                     zombie_state_value.set(zombie_select.state)
@@ -2905,9 +2950,9 @@ def mainWindow():
         plant_list.clear()
         plant_list_box.delete(*plant_list_box.get_children())
         try:
-            plant_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            plant_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0xBC
             )
@@ -2917,17 +2962,17 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0xAC
                 )
                 + 0x204 * j
             )
-            plant_exist = data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
+            plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
-                plant_list.append(data.plant(plant_addresss))
+                plant_list.append(PVZ_data.plant(plant_addresss))
                 i = i + 1
             j = j + 1
         n = 0
@@ -3356,7 +3401,7 @@ def mainWindow():
     plantPut_type_combobox = ttk.Combobox(
         plant_put_frame,
         width=10,
-        values=data.plantsType,
+        values=PVZ_data.plantsType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -3396,9 +3441,9 @@ def mainWindow():
 
     def clearPlants():
         try:
-            plant_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            plant_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0xBC
             )
@@ -3408,17 +3453,17 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0xAC
                 )
                 + 0x204 * j
             )
-            plant_exist = data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
+            plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
-                data.PVZ_memory.write_bytes(plant_addresss + 0x141, b"\x01", 1)
+                PVZ_data.PVZ_memory.write_bytes(plant_addresss + 0x141, b"\x01", 1)
                 i = i + 1
             j = j + 1
 
@@ -3437,7 +3482,7 @@ def mainWindow():
     plant_type_combobox = ttk.Combobox(
         plant_characteristic_frame,
         width=10,
-        values=data.plantsType,
+        values=PVZ_data.plantsType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -3528,7 +3573,7 @@ def mainWindow():
 
     def get_plant_type():
         global plant_characteristic_type
-        plant_characteristic_type = data.plantCharacteristic(
+        plant_characteristic_type = PVZ_data.plantCharacteristic(
             plant_type_combobox.current()
         )
         plant_characteristic_sun_value.set(plant_characteristic_type.sun)
@@ -3547,7 +3592,7 @@ def mainWindow():
     bullet_type_modify_combobox = ttk.Combobox(
         all_bullet_frame,
         width=10,
-        values=data.bulletType,
+        values=PVZ_data.bulletType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -3655,7 +3700,7 @@ def mainWindow():
     plant_type_bullet_combobox = ttk.Combobox(
         plant_bullet_frame,
         width=10,
-        values=data.plantsType,
+        values=PVZ_data.plantsType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
     )
@@ -3682,7 +3727,7 @@ def mainWindow():
     plant_bullet_type_combobox = ttk.Combobox(
         plant_bullet_frame,
         width=10,
-        values=data.bulletType,
+        values=PVZ_data.bulletType,
         font=("黑体", 8),
         bootstyle=SECONDARY,
         state=READONLY,
@@ -3766,7 +3811,9 @@ def mainWindow():
         if plant_select is not None:
             try:
                 plant_type_value.set(
-                    str(plant_select.type) + ":" + data.plantsType[plant_select.type]
+                    str(plant_select.type)
+                    + ":"
+                    + PVZ_data.plantsType[plant_select.type]
                 )
                 if plant_attribute_frame.focus_get() != plant_state_entry:
                     plant_state_value.set(plant_select.state)
@@ -3828,9 +3875,9 @@ def mainWindow():
         item_list.clear()
         item_list_box.delete(*item_list_box.get_children())
         try:
-            item_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            item_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0x12C
             )
@@ -3840,17 +3887,17 @@ def mainWindow():
         j = 0
         while i < item_num:
             item_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x11C
                 )
                 + 0x1EC * j
             )
-            item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
+            item_exist = PVZ_data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
-                item_list.append(data.item(item_addresss))
+                item_list.append(PVZ_data.item(item_addresss))
                 i = i + 1
             j = j + 1
         n = 0
@@ -3859,7 +3906,7 @@ def mainWindow():
                 "",
                 END,
                 iid=n,
-                text=str(item_list[k].no) + data.itemType[item_list[k].type],
+                text=str(item_list[k].no) + PVZ_data.itemType[item_list[k].type],
             )
             if item_select is not None:
                 if item_select.exist == 0:
@@ -3944,9 +3991,9 @@ def mainWindow():
 
     def clearLadders():
         try:
-            item_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            item_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0x12C
             )
@@ -3956,17 +4003,17 @@ def mainWindow():
         j = 0
         while i < item_num:
             item_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x11C
                 )
                 + 0x1EC * j
             )
-            item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
+            item_exist = PVZ_data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
-                data.PVZ_memory.write_bytes(item_addresss + 0x20, b"\x01", 1)
+                PVZ_data.PVZ_memory.write_bytes(item_addresss + 0x20, b"\x01", 1)
                 i = i + 1
             j = j + 1
 
@@ -4076,9 +4123,9 @@ def mainWindow():
         else:
             if start_car_combobox.current() == 6:
                 try:
-                    car_num = data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                    car_num = PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                         )
                         + 0x110
                     )
@@ -4089,18 +4136,19 @@ def mainWindow():
                 start_car_list = [0] * rows
                 while i < car_num:
                     car_addresss = (
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(
-                                data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(
+                                PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress)
+                                + 0x768
                             )
                             + 0x100
                         )
                         + 0x48 * j
                     )
-                    car_exist = data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
+                    car_exist = PVZ_data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
                     if car_exist == b"\x00":
                         try:
-                            c = data.car(car_addresss)
+                            c = PVZ_data.car(car_addresss)
                             if start_car_list[c.row] == 0:
                                 pvz.startCar(car_addresss)
                                 start_car_list[c.row] = 1
@@ -4113,9 +4161,9 @@ def mainWindow():
                 return
             else:
                 try:
-                    car_num = data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                    car_num = PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                         )
                         + 0x110
                     )
@@ -4125,17 +4173,18 @@ def mainWindow():
                 j = 0
                 while i < car_num:
                     car_addresss = (
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(
-                                data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(
+                                PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress)
+                                + 0x768
                             )
                             + 0x100
                         )
                         + 0x48 * j
                     )
-                    car_exist = data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
+                    car_exist = PVZ_data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
                     if car_exist == b"\x00":
-                        c = data.car(car_addresss)
+                        c = PVZ_data.car(car_addresss)
                         if c.row == start_car_combobox.current():
                             pvz.startCar(car_addresss)
                             return
@@ -4173,9 +4222,9 @@ def mainWindow():
                 return
             pvz.recoveryCars()
             try:
-                car_num = data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                car_num = PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x110
                 )
@@ -4189,17 +4238,18 @@ def mainWindow():
                 delete_car_list[recover_car_combobox.current()] = 1
                 while i < car_num:
                     car_addresss = (
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(
-                                data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(
+                                PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress)
+                                + 0x768
                             )
                             + 0x100
                         )
                         + 0x48 * j
                     )
-                    car_exist = data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
+                    car_exist = PVZ_data.PVZ_memory.read_bytes(car_addresss + 0x30, 1)
                     if car_exist == b"\x00":
-                        c = data.car(car_addresss)
+                        c = PVZ_data.car(car_addresss)
                         try:
                             if (
                                 c.row != recover_car_combobox.current()
@@ -4291,7 +4341,7 @@ def mainWindow():
         for i, row in enumerate(plants_data):
             for j, indices in enumerate(row):
                 text = (
-                    "\n".join([data.plantsType[index] for index in indices])
+                    "\n".join([PVZ_data.plantsType[index] for index in indices])
                     if indices
                     else ""
                 )
@@ -4315,11 +4365,11 @@ def mainWindow():
 
         # 将已有植物类型添加到列表框
         for index in plants_data[i][j]:
-            listbox.insert(tk.END, data.plantsType[index])
+            listbox.insert(tk.END, PVZ_data.plantsType[index])
 
         # Combobox
         combobox = ttk.Combobox(
-            formation_plant_window, values=data.plantsType, font=small_font
+            formation_plant_window, values=PVZ_data.plantsType, font=small_font
         )
         combobox.pack()
         combobox.bind("<Button-1>", lambda event: open_card_select_window(combobox))
@@ -4334,8 +4384,8 @@ def mainWindow():
         # 添加植物类型
         def add_plant():
             selected_plant = combobox.get()
-            if selected_plant in data.plantsType:
-                index = data.plantsType.index(selected_plant)
+            if selected_plant in PVZ_data.plantsType:
+                index = PVZ_data.plantsType.index(selected_plant)
                 plants_data[i][j].append(index)
                 listbox.insert(tk.END, selected_plant)
 
@@ -4531,9 +4581,9 @@ def mainWindow():
                 plants_data[r][c].clear()
                 ladders_data[r][c] = 0
         try:
-            plant_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            plant_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0xBC
             )
@@ -4543,26 +4593,26 @@ def mainWindow():
         j = 0
         while i < plant_num:
             plant_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0xAC
                 )
                 + 0x204 * j
             )
-            plant_exist = data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
+            plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
-                p = data.plant(plant_addresss)
+                p = PVZ_data.plant(plant_addresss)
                 if p.row > 5 or p.col > 8:
                     continue
                 plants_data[p.row][p.col].append(p.type)
                 i = i + 1
             j = j + 1
         try:
-            item_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            item_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0x12C
             )
@@ -4572,17 +4622,17 @@ def mainWindow():
         j = 0
         while i < item_num:
             item_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x11C
                 )
                 + 0x1EC * j
             )
-            item_exist = data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
+            item_exist = PVZ_data.PVZ_memory.read_bytes(item_addresss + 0x20, 1)
             if item_exist == b"\x00":
-                it = data.item(item_addresss)
+                it = PVZ_data.item(item_addresss)
                 if it.type == 3:
                     ladders_data[it.row - 1][it.col - 1] = 1
                 i = i + 1
@@ -4607,7 +4657,7 @@ def mainWindow():
             for c in range(0, 9):
                 for p in plants_data[r][c]:
                     print(p)
-                    print(data.plantsType[p])
+                    print(PVZ_data.plantsType[p])
                     pvz.putPlant(r, c, p)
                 if ladders_data[r][c] == 1:
                     pvz.putLadder(r, c)
@@ -4633,10 +4683,10 @@ def mainWindow():
     def refresh_slot_list():
         slot_list.clear()
         try:
-            slot_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            slot_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x144
                 )
@@ -4647,16 +4697,16 @@ def mainWindow():
         i = 0
         while i < slot_num:
             slot_addresss = (
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x144
                 )
                 + 0x28
                 + 0x50 * i
             )
-            slot_list.append(data.slot(slot_addresss))
+            slot_list.append(PVZ_data.slot(slot_addresss))
             i = i + 1
 
     slot_type_comboboxes = []
@@ -4679,7 +4729,7 @@ def mainWindow():
         slot_type_combobox = ttk.Combobox(
             slots_frame,
             width=12,
-            values=data.plantsType,
+            values=PVZ_data.plantsType,
             state="readonly",
             bootstyle="secondary",
         )
@@ -4811,10 +4861,10 @@ def mainWindow():
     slots_num_combobox.pack(side=LEFT)
 
     def setSlotsNum(event):
-        data.PVZ_memory.write_int(
-            data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x768
+        PVZ_data.PVZ_memory.write_int(
+            PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                 )
                 + 0x144
             )
@@ -4840,7 +4890,7 @@ def mainWindow():
     change_all_combobox = ttk.Combobox(
         change_all_frame,
         width=12,
-        values=data.plantsType,
+        values=PVZ_data.plantsType,
         state="readonly",
         bootstyle="secondary",
     )
@@ -5014,9 +5064,9 @@ def mainWindow():
     def select_slots_config():
         card_list = [999] * 14
         try:
-            selected_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x774
+            selected_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                 )
                 + 0xD24
             )
@@ -5032,9 +5082,9 @@ def mainWindow():
                 if i == 48:
                     i = i + 27
                 if (
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x774
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                         )
                         + 0xC8
                         + 0x3C * i
@@ -5043,9 +5093,10 @@ def mainWindow():
                 ):
                     n = int(
                         (
-                            data.PVZ_memory.read_int(
-                                data.PVZ_memory.read_int(
-                                    data.PVZ_memory.read_int(data.baseAddress) + 0x774
+                            PVZ_data.PVZ_memory.read_int(
+                                PVZ_data.PVZ_memory.read_int(
+                                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress)
+                                    + 0x774
                                 )
                                 + 0xA4
                                 + 0x3C * i
@@ -5054,21 +5105,21 @@ def mainWindow():
                         )
                         / 51
                     )
-                    print("卡槽第" + str(n) + "张卡为" + data.plantsType[i])
+                    print("卡槽第" + str(n) + "张卡为" + PVZ_data.plantsType[i])
                     card_list[n] = i
                     j = j + 1
                 i = i + 1
         for c in slot_type_comboboxes:
-            selected_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x774
+            selected_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                 )
                 + 0xD24
             )
-            limit_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(data.baseAddress) + 0x768
+            limit_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                     )
                     + 0x144
                 )
@@ -5105,9 +5156,9 @@ def mainWindow():
     def clear_slots():
         card_list = [999] * 14
         try:
-            selected_num = data.PVZ_memory.read_int(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(data.baseAddress) + 0x774
+            selected_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                 )
                 + 0xD24
             )
@@ -5121,17 +5172,17 @@ def mainWindow():
                 if i == 48:
                     i = i + 27
                 if (
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x774
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                         )
                         + 0xC8
                         + 0x3C * i
                     )
                     == 1
-                    or data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x774
+                    or PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x774
                         )
                         + 0xC8
                         + 0x3C * i
@@ -5140,9 +5191,10 @@ def mainWindow():
                 ):
                     n = int(
                         (
-                            data.PVZ_memory.read_int(
-                                data.PVZ_memory.read_int(
-                                    data.PVZ_memory.read_int(data.baseAddress) + 0x774
+                            PVZ_data.PVZ_memory.read_int(
+                                PVZ_data.PVZ_memory.read_int(
+                                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress)
+                                    + 0x774
                                 )
                                 + 0xA4
                                 + 0x3C * i
@@ -5151,7 +5203,7 @@ def mainWindow():
                         )
                         / 51
                     )
-                    print("卡槽第" + str(n) + "张卡为" + data.plantsType[i])
+                    print("卡槽第" + str(n) + "张卡为" + PVZ_data.plantsType[i])
                     card_list[n] = i
                     j = j + 1
                 i = i + 1
@@ -5213,7 +5265,7 @@ def mainWindow():
     slot_1_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5223,7 +5275,7 @@ def mainWindow():
     slot_2_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5233,7 +5285,7 @@ def mainWindow():
     slot_3_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5243,7 +5295,7 @@ def mainWindow():
     slot_4_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5253,7 +5305,7 @@ def mainWindow():
     slot_5_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5263,7 +5315,7 @@ def mainWindow():
     slot_6_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5273,7 +5325,7 @@ def mainWindow():
     slot_7_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5283,7 +5335,7 @@ def mainWindow():
     slot_8_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5293,7 +5345,7 @@ def mainWindow():
     slot_9_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5303,7 +5355,7 @@ def mainWindow():
     slot_10_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5313,7 +5365,7 @@ def mainWindow():
     slot_11_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5323,7 +5375,7 @@ def mainWindow():
     slot_12_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5333,7 +5385,7 @@ def mainWindow():
     slot_13_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5343,7 +5395,7 @@ def mainWindow():
     slot_14_key = ttk.Combobox(
         card_select_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5356,7 +5408,7 @@ def mainWindow():
     slot_shovel_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5368,7 +5420,7 @@ def mainWindow():
     slot_zombie_hp_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5380,7 +5432,7 @@ def mainWindow():
     slot_plant_hp_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5392,7 +5444,7 @@ def mainWindow():
     slot_top_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5404,7 +5456,7 @@ def mainWindow():
     slot_speed_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5415,7 +5467,7 @@ def mainWindow():
     slot_bag_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5426,29 +5478,29 @@ def mainWindow():
     slot_15_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
     slot_15_key.grid(row=1, column=3)
-    slot_15_key.current(data.keyTpye.index("T"))
+    slot_15_key.current(PVZ_data.keyTpye.index("T"))
     slot_16_key_label = ttk.Label(function_key_frame, text="16:")
     slot_16_key_label.grid(row=1, column=4)
     slot_16_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
     slot_16_key.grid(row=1, column=5)
-    slot_16_key.current(data.keyTpye.index("Y"))
+    slot_16_key.current(PVZ_data.keyTpye.index("Y"))
     reserved3_key_label = ttk.Label(function_key_frame, text="预留快捷:")
     reserved3_key_label.grid(row=1, column=6)
     slot_reserved3_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5459,7 +5511,7 @@ def mainWindow():
     slot_reserved4_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5470,7 +5522,7 @@ def mainWindow():
     slot_reserved5_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5481,7 +5533,7 @@ def mainWindow():
     slot_reserved6_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5492,7 +5544,7 @@ def mainWindow():
     slot_reserved7_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5503,7 +5555,7 @@ def mainWindow():
     slot_reserved8_key = ttk.Combobox(
         function_key_frame,
         width=3,
-        values=data.keyTpye,
+        values=PVZ_data.keyTpye,
         font=("黑体", 8),
         state=READONLY,
     )
@@ -5945,10 +5997,10 @@ def mainWindow():
                 pass
         try:
             slots_num_value.set(
-                data.PVZ_memory.read_int(
-                    data.PVZ_memory.read_int(
-                        data.PVZ_memory.read_int(
-                            data.PVZ_memory.read_int(data.baseAddress) + 0x768
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(
+                            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
                         )
                         + 0x144
                     )
@@ -6134,7 +6186,7 @@ def mainWindow():
         for bullet in bullets:
             bullet_type, x, y, v_x, v_y = bullet.split(", ")
             try:
-                bullet_index = data.bulletType.index(bullet_type)
+                bullet_index = PVZ_data.bulletType.index(bullet_type)
                 bullets_list.append(
                     (bullet_index, int(x), int(y), float(v_x), float(v_y))
                 )
@@ -6145,7 +6197,7 @@ def mainWindow():
 
     # 创建下拉框
     bullet_type_combobox = ttk.Combobox(
-        bullet_creat_frame, values=data.bulletType, width=8
+        bullet_creat_frame, values=PVZ_data.bulletType, width=8
     )
     bullet_type_combobox.grid(row=0, column=0, columnspan=2)
 
@@ -6229,7 +6281,7 @@ def mainWindow():
     zombies = {}
 
     def update_weights():
-        for zombie_name in data.zombieSpaw:
+        for zombie_name in PVZ_data.zombieSpaw:
             if checkboxes[zombie_name].get():
                 weight_var = weight_vars[zombie_name]
                 weight = weight_var.get()
@@ -6240,7 +6292,7 @@ def mainWindow():
                     messagebox.showerror("错误", f"无效的权重值: {weight}")
         selected_ids = [
             str(idx)
-            for idx, zombie_name in enumerate(data.zombieSpaw)
+            for idx, zombie_name in enumerate(PVZ_data.zombieSpaw)
             if checkboxes[zombie_name].get()
         ]
         print(selected_ids)
@@ -6249,7 +6301,7 @@ def mainWindow():
 
     try:
         # 创建界面元素
-        for idx, zombie_name in enumerate(data.zombieSpaw):
+        for idx, zombie_name in enumerate(PVZ_data.zombieSpaw):
             row = idx // 4
             col = idx % 4
             var = ttk.IntVar()
@@ -6257,7 +6309,7 @@ def mainWindow():
             chk.grid(row=row, column=col * 2, sticky=W)
             checkboxes[zombie_name] = var
 
-            zombie = data.zombieType(idx)
+            zombie = PVZ_data.zombieType(idx)
             zombies[zombie_name] = zombie
             weight_var = ttk.IntVar(value=zombie.weight)
             weight_vars[zombie_name] = weight_var
@@ -6292,7 +6344,7 @@ def mainWindow():
         if name:
             configurations = load_configurations()
             current_data = {"selected": {}, "weights": {}}
-            for zombie_name in data.zombieSpaw:
+            for zombie_name in PVZ_data.zombieSpaw:
                 current_data["selected"][zombie_name] = checkboxes[zombie_name].get()
                 current_data["weights"][zombie_name] = weight_vars[zombie_name].get()
             configurations[name] = current_data
@@ -6305,7 +6357,7 @@ def mainWindow():
         name = combobox.get()
         if name:
             configurations = load_configurations()
-            for zombie_name in data.zombieSpaw:
+            for zombie_name in PVZ_data.zombieSpaw:
                 configurations[name]["selected"][zombie_name] = checkboxes[
                     zombie_name
                 ].get()
@@ -6318,7 +6370,7 @@ def mainWindow():
     def apply_configuration(name):
         configurations = load_configurations()
         if name in configurations:
-            for zombie_name in data.zombieSpaw:
+            for zombie_name in PVZ_data.zombieSpaw:
                 checkboxes[zombie_name].set(
                     configurations[name]["selected"].get(zombie_name, False)
                 )
@@ -6328,11 +6380,11 @@ def mainWindow():
 
     # 添加按钮
     update_btn = ttk.Button(spaw_type_frame, text="应用配置", command=update_weights)
-    update_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=4)
+    update_btn.grid(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1, column=4)
 
     # 创建下拉框和按钮
     combobox = ttk.Combobox(spaw_type_frame, width=12)
-    combobox.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=0, columnspan=2)
+    combobox.grid(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1, column=0, columnspan=2)
     combobox.bind(
         "<<ComboboxSelected>>", lambda event: apply_configuration(combobox.get())
     )
@@ -6340,12 +6392,12 @@ def mainWindow():
     create_btn = ttk.Button(
         spaw_type_frame, text="新建配置", command=create_new_configuration
     )
-    create_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=2)
+    create_btn.grid(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1, column=2)
 
     modify_btn = ttk.Button(
         spaw_type_frame, text="保存配置", command=modify_current_configuration
     )
-    modify_btn.grid(row=(len(data.zombieSpaw) - 1) // 4 + 1, column=3)
+    modify_btn.grid(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1, column=3)
 
     # 初始化下拉框选项
     update_combobox_options()
