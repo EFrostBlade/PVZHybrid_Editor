@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.38"
+current_version = "0.39"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -279,6 +279,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.4" in window_name:
+                PVZ_data.update_PVZ_version(2.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -349,6 +357,14 @@ def chooseGame():
                 )
             elif "2.3" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.3)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.4" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.4)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1065,6 +1081,14 @@ def mainWindow():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.4" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             process_label["text"] = (
@@ -1756,12 +1780,14 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 30):
+        for i in range(0, 34):
             pvz.completeMiniGame(i)
+        for i in range(0, 20):
+            pvz.completePuzzle(i)
 
     miniGame_complete_button = ttk.Button(
         game_save_frame,
-        text="完成迷你游戏",
+        text="完成更多模式",
         bootstyle=(SUCCESS, OUTLINE),
         padding=0,
         command=lambda: complete_miniGame(),
@@ -1772,12 +1798,14 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 30):
+        for i in range(0, 34):
             pvz.lockMiniGame(i)
+        for i in range(0, 20):
+            pvz.lockPuzzle(i)
 
     miniGame_lock_button = ttk.Button(
         game_save_frame,
-        text="锁定迷你游戏",
+        text="锁定更多模式",
         bootstyle=(DANGER, OUTLINE),
         padding=0,
         command=lambda: lock_miniGame(),

@@ -86,6 +86,11 @@ zombiesType = [
     "防爆门僵尸",
     "骑鸭僵尸",
     "小推车小鬼僵尸",
+    "罐子僵尸",  # 59
+    "催眠师僵尸",  # 60
+    "园丁僵尸",  # 61
+    "红眼舞王",  # 62
+    "巨人伴舞",  # 63
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -273,6 +278,12 @@ plantsType = [
     "促销坚果",
     "促销花盆",
     "天使向日葵",
+    "回收高坚果",  # 161
+    "彩虹糖果",  # 162
+    "百变高坚果",  # 163
+    "逆时闹钟",  # 164
+    "阳光加农炮",  # 165
+    "禁忌寒冰菇",  # 166
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -336,6 +347,11 @@ plantsType = plantsType + [
     "防爆门僵尸",
     "骑鸭僵尸",
     "小推车小鬼僵尸",
+    "罐子僵尸",  # 315
+    "催眠师僵尸",  # 316
+    "园丁僵尸",  # 317
+    "红眼舞王",  # 318
+    "巨人伴舞",  # 319
 ]
 
 
@@ -1303,8 +1319,14 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 2.35 or PVZ_version >= 2.36:
+            elif PVZ_version == 2.35 or PVZ_version == 2.36 or PVZ_version == 2.37:
                 self.addr = 0x0088B05D + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
+            elif PVZ_version == 2.4:
+                self.addr = 0x0088B072 + (type - 256) * 0x4
                 self.sun = PVZ_memory.read_int(self.addr)
                 self.cd = 0
                 self.canAttack = True
@@ -1366,7 +1388,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 59:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
-        elif PVZ_version == 2.35 or PVZ_version >= 2.36:
+        elif PVZ_version == 2.35 or PVZ_version == 2.36 or PVZ_version == 2.37:
             if type <= 58:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
@@ -1379,6 +1401,20 @@ class zombieType:
             elif type == 61:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 62:
+                self.weight = PVZ_memory.read_uchar(0x008D05F7)
+        elif PVZ_version == 2.4:
+            if type <= 63:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 64:
+                self.weight = PVZ_memory.read_uchar(0x008D0896)
+            elif type == 65:
+                self.weight = PVZ_memory.read_uchar(0x008D0743)
+            elif type == 66:
+                self.weight = PVZ_memory.read_uchar(0x008D051C)
+            elif type == 67:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
 
     def setAnime(self, anime):
@@ -1422,7 +1458,7 @@ class zombieType:
                 PVZ_memory.write_uchar(0x008D051C, weight)
             elif self.type == 59:
                 PVZ_memory.write_uchar(0x008D05F7, weight)
-        elif PVZ_version == 2.35 or PVZ_version >= 2.36:
+        elif PVZ_version == 2.35 or PVZ_version == 2.36 or PVZ_version == 2.37:
             if self.type <= 58:
                 PVZ_memory.write_int(self.addr + 0x14, weight)
             elif self.type == 59:
@@ -1432,4 +1468,15 @@ class zombieType:
             elif self.type == 61:
                 PVZ_memory.write_uchar(0x008D051C, weight)
             elif self.type == 62:
+                PVZ_memory.write_uchar(0x008D05F7, weight)
+        elif PVZ_version == 2.4:
+            if self.type <= 63:
+                PVZ_memory.write_int(self.addr + 0x14, weight)
+            elif self.type == 64:
+                PVZ_memory.write_uchar(0x008D0896, weight)
+            elif self.type == 65:
+                PVZ_memory.write_uchar(0x008D0743, weight)
+            elif self.type == 66:
+                PVZ_memory.write_uchar(0x008D051C, weight)
+            elif self.type == 67:
                 PVZ_memory.write_uchar(0x008D05F7, weight)
