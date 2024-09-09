@@ -207,7 +207,7 @@ def getRandomPlant(isPut=False):
     if isPut is False:
         return plantType
     else:
-        ExcludedCards = [105, 112, 113, 118, 133, 144, 151, 157]
+        ExcludedCards = [105, 112, 113, 118, 133, 144, 151, 157, 163]
         while plantType in ExcludedCards:
             plantType = getRandomPlant(True)
         return plantType
@@ -741,14 +741,24 @@ def randomSlots_operstion(randomSlots_event, haszombie):
             )
             + 0x144
         )
-        for i in range(0, 14):
-            if haszombie is False:
-                plant = getRandomPlant(False)
-            else:
-                plant = getRandomZombie(True) + 256
-            PVZ_data.PVZ_memory.write_int(
-                PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
-            )
+        if PVZ_data.PVZ_version < 2.35:
+            for i in range(0, 14):
+                if haszombie is False:
+                    plant = getRandomPlant(False)
+                else:
+                    plant = getRandomZombie(True) + 256
+                PVZ_data.PVZ_memory.write_int(
+                    PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
+                )
+        else:
+            for i in range(0, 16):
+                if haszombie is False:
+                    plant = getRandomPlant(False)
+                else:
+                    plant = getRandomZombie(True) + 256
+                PVZ_data.PVZ_memory.write_int(
+                    PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
+                )
 
 
 randomSlots_event = Event()
@@ -6715,3 +6725,62 @@ def fix_nut_gargantuar(f):
         PVZ_data.PVZ_memory.write_bytes(0x008A60E0, b"\x90\x90\x90\x90\x90\x90\x90", 7)
     else:
         PVZ_data.PVZ_memory.write_bytes(0x008A60E0, b"\x6a\x01\xe8\x49\xad\xc8\xff", 7)
+
+
+def put_vase(skin, type, plant_type, zombie_type, sun, row, column):
+    class VasePut:
+        def __init__(self, skin, type, plant_type, zombie_type, sun, row, column):
+            self.skin = skin  # 3问号 4植物 5僵尸 6隐形
+            self.type = type  # 0空罐 1植物 2僵尸 3阳光
+            self.plant_type = plant_type
+            self.zombie_type = zombie_type
+            self.sun = sun
+            self.row = row
+            self.column = column
+
+        def creat_asm(self, startAddress):
+            vase_put_asm = asm.Asm(startAddress)
+            vase_put_asm.push_dword(0)
+            vase_put_asm.push_dword(self.skin)
+            vase_put_asm.push_dword(self.type)
+            vase_put_asm.push_dword(self.plant_type)
+            vase_put_asm.push_dword(self.zombie_type)
+            vase_put_asm.push_dword(self.sun)
+            vase_put_asm.mov_exx(asm.EDI, self.row)
+            vase_put_asm.push_dword(self.column)
+            vase_put_asm.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
+            vase_put_asm.call_label("ZX")
+            vase_put_asm.jmp_label("end")
+            vase_put_asm.create_label("ZX")
+            vase_put_asm.push_exx(asm.ESI)
+            vase_put_asm.mov_exx_eyy(asm.ESI, asm.EAX)
+            vase_put_asm.add_exx_dword(asm.ESI, 0x11C)
+            vase_put_asm.mov_exx(asm.ECX, 0x0041E1C0)
+            vase_put_asm.call_exx(asm.ECX)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ESP, 0x08)
+            vase_put_asm.mov_exx_eyy(asm.ECX, asm.EDI)
+            vase_put_asm.imul_exx_eyy_dword(asm.ECX, asm.ECX, 0x2710)
+            vase_put_asm.add_exx_dword(asm.ECX, 0x49BB0)
+            vase_put_asm.mov_ptr_exx_add_byte_dword(asm.EAX, 0x08, 7)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x1C, asm.ECX)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x10, asm.EDX)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x14, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x0C)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x50, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x10)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x3C, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x14)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x40, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x18)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x44, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x1C)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x0C, asm.EDI)
+            vase_put_asm.mov_exx_dword_ptr_eyy_add_byte(asm.EDI, asm.ESP, 0x20)
+            vase_put_asm.mov_ptr_exx_add_byte_eyy(asm.EAX, 0x54, asm.EDI)
+            vase_put_asm.pop_exx(asm.ESI)
+            vase_put_asm.ret_word(0x001C)
+            vase_put_asm.create_label("end")
+            return vase_put_asm
+
+    asm.runThread(VasePut(skin, type, plant_type, zombie_type, sun, row, column))

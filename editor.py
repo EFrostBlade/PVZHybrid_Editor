@@ -53,13 +53,14 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.39"
+current_version = "0.40"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
 zombie_select = None
 plant_select = None
 item_select = None
+vase_select = None
 plant_characteristic_type = None
 shortcut_entries = []
 shortcut_buttons = []
@@ -527,6 +528,11 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.40\n"
+        "新增益智游戏选项卡，包含罐子监视及放罐子功能\n"
+        "b0.39\n"
+        "适配杂交2.4\n"
+        "仅修复僵王血量地址\n"
         "b0.38\n"
         "适配杂交2.3.7 16卡槽\n"
         "仅修复僵王血量地址\n"
@@ -4699,6 +4705,650 @@ def mainWindow():
     )
     set_game_formation_button.pack(side=LEFT, padx=2)
 
+    global vase_select
+    vase_page = ttk.Frame(page_tab)
+    vase_page.pack()
+    page_tab.add(vase_page, text="益智模式")
+    vase_list_frame = ttk.LabelFrame(vase_page, text="罐子列表", bootstyle=WARNING)
+    vase_list_frame.place(x=0, y=0, anchor=NW, height=260, width=240)
+    vase_list_box_scrollbar = ttk.Scrollbar(vase_list_frame, bootstyle=WARNING)
+    vase_list_box = ttk.Treeview(
+        vase_list_frame,
+        show=TREE,
+        selectmode=BROWSE,
+        padding=0,
+        columns=("vase_list"),
+        yscrollcommand=vase_list_box_scrollbar.set,
+        bootstyle=WARNING,
+    )
+    vase_list_box_scrollbar.configure(command=vase_list_box.yview)
+    vase_list_box.place(x=0, y=0, anchor=NW, height=240, width=50)
+    vase_list_box_scrollbar.place(x=45, y=0, height=240, anchor=NW)
+    vase_list = list()
+
+    def refresh_vase_list():
+        vase_list.clear()
+        vase_list_box.delete(*vase_list_box.get_children())
+        try:
+            vase_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
+                )
+                + 0x12C
+            )
+        except:
+            return
+        i = 0
+        j = 0
+        while i < vase_num:
+            vase_addresss = (
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(
+                        PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
+                    )
+                    + 0x11C
+                )
+                + 0x1EC * j
+            )
+            vase_exist = PVZ_data.PVZ_memory.read_bytes(vase_addresss + 0x20, 1)
+            if vase_exist == b"\x00":
+                item = PVZ_data.item(vase_addresss)
+                if item.type == 7:
+                    vase_list.append(item)
+                i = i + 1
+            j = j + 1
+        n = 0
+        for k in range(len(vase_list)):
+            vase_list_box.insert("", END, iid=n, text=str(vase_list[k].no))
+            if vase_select is not None:
+                if vase_select.exist == 0:
+                    if vase_select.no == vase_list[k].no:
+                        vase_list_box.selection_set((str(n),))
+            n = n + 1
+
+    refresh_vase_list()
+    vase_attribute_frame = ttk.Frame(vase_list_frame)
+    vase_attribute_frame.place(x=80, y=0, height=240, width=155)
+    vase_state_frame = ttk.Frame(vase_attribute_frame)
+    vase_state_frame.grid(row=0, column=0, columnspan=12, sticky=W)
+    ttk.Label(vase_state_frame, text="内容:").grid(row=0, column=0, sticky=W)
+    vase_type_combobox = ttk.Combobox(
+        vase_state_frame,
+        width=10,
+        values=["空", "植物", "僵尸", "阳光"],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_type_combobox.grid(row=0, column=1, columnspan=5, sticky=W)
+
+    def setvaseType(event):
+        vase_select.setVaseType(vase_type_combobox.current())
+        vase_state_frame.focus_set()
+
+    vase_type_combobox.bind("<<ComboboxSelected>>", setvaseType)
+
+    ttk.Label(vase_state_frame, text="皮肤:").grid(row=1, column=0, sticky=W)
+    vase_skin_combobox = ttk.Combobox(
+        vase_state_frame,
+        width=10,
+        values=["问号", "植物", "僵尸", "隐形"],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_skin_combobox.grid(row=1, column=1, sticky=W)
+
+    def setvaseState(event):
+        vase_select.setVaseSkin(vase_skin_combobox.current() + 3)
+        vase_state_frame.focus_set()
+
+    vase_skin_combobox.bind("<<ComboboxSelected>>", setvaseState)
+    vase_position_frame = ttk.LabelFrame(
+        vase_attribute_frame, text="位置", bootstyle=WARNING
+    )
+    vase_position_frame.grid(row=2, column=0, columnspan=4, sticky=W)
+    vase_row_combobox = ttk.Combobox(
+        vase_position_frame,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_row_combobox.grid(row=2, column=1, columnspan=3, sticky=W)
+    ttk.Label(vase_position_frame, text="行").grid(row=2, column=4, sticky=W)
+
+    def setvaseRow(event):
+        vase_select.setRow(vase_row_combobox.current() + 1)
+        vase_position_frame.focus_set()
+
+    vase_row_combobox.bind("<<ComboboxSelected>>", setvaseRow)
+    vase_col_combobox = ttk.Combobox(
+        vase_position_frame,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_col_combobox.grid(row=2, column=5, columnspan=3, sticky=W)
+    ttk.Label(vase_position_frame, text="列").grid(row=2, column=8, sticky=W)
+
+    def setvaseCol(event):
+        vase_select.setCol(vase_col_combobox.current() + 1)
+        vase_position_frame.focus_set()
+
+    vase_col_combobox.bind("<<ComboboxSelected>>", setvaseCol)
+
+    ttk.Label(vase_attribute_frame, text="植物:").grid(row=3, column=0, sticky=W)
+    vase_plant_combobox = ttk.Combobox(
+        vase_attribute_frame,
+        width=12,
+        values=PVZ_data.plantsType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_plant_combobox.grid(row=3, column=1, columnspan=3, sticky=W)
+
+    def wait_select_vase_plant(event, vase_plant_combobox):
+        open_card_select_window(vase_plant_combobox)
+        card_select_window.wait_window()
+        set_vase_plant()
+
+        def closeCombobox(vase_plant_combobox):
+            vase_plant_combobox.event_generate("<Escape>")
+
+        vase_plant_combobox.after(100, lambda: closeCombobox(vase_plant_combobox))
+
+    vase_plant_combobox.bind(
+        "<Button-1>", lambda event: wait_select_vase_plant(event, vase_plant_combobox)
+    )
+
+    def set_vase_plant(index=0):
+        vase_select.setVasePlant(vase_plant_combobox.current())
+        vase_attribute_frame.focus_set()
+
+    vase_plant_combobox.bind("<<ComboboxSelected>>", set_vase_plant)
+
+    ttk.Label(vase_attribute_frame, text="僵尸:").grid(row=4, column=0, sticky=W)
+    vase_zombie_combobox = ttk.Combobox(
+        vase_attribute_frame,
+        width=12,
+        values=PVZ_data.zombiesType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_zombie_combobox.grid(row=4, column=1, columnspan=3, sticky=W)
+
+    def wait_select_vase_zombie(event, vase_zombie_combobox):
+        open_zombie_select_window(vase_zombie_combobox)
+        zombie_select_window.wait_window()
+        set_vase_zombie()
+
+        def closeCombobox(vase_zombie_combobox):
+            vase_zombie_combobox.event_generate("<Escape>")
+
+        vase_zombie_combobox.after(100, lambda: closeCombobox(vase_zombie_combobox))
+
+    vase_zombie_combobox.bind(
+        "<Button-1>", lambda event: wait_select_vase_zombie(event, vase_zombie_combobox)
+    )
+
+    def set_vase_zombie(index=0):
+        vase_select.setVaseZombie(vase_zombie_combobox.current())
+        vase_attribute_frame.focus_set()
+
+    vase_zombie_combobox.bind("<<ComboboxSelected>>", set_vase_zombie)
+
+    ttk.Label(vase_attribute_frame, text="阳光:").grid(row=5, column=0, sticky=W)
+    vase_sun_combobox = ttk.Combobox(
+        vase_attribute_frame,
+        width=12,
+        values=[1, 2, 3, 4, 5],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_sun_combobox.grid(row=5, column=1, columnspan=3, sticky=W)
+    ttk.Label(vase_attribute_frame, text="个").grid(row=5, column=4, sticky=W)
+
+    def set_vase_sun(index=0):
+        vase_select.setVaseSun(vase_sun_combobox.current() + 1)
+        vase_attribute_frame.focus_set()
+
+    vase_sun_combobox.bind("<<ComboboxSelected>>", set_vase_sun)
+
+    def get_vase_select(event):
+        global vase_select
+        try:
+            index = int(vase_list_box.selection()[0])
+            vase_select = vase_list[index]
+        except:
+            return
+
+    def get_vase_attribute():
+        global vase_select
+        if vase_select is not None:
+            try:
+                vase_type_combobox.current(vase_select.vase_type)
+                vase_skin_combobox.current(vase_select.vase_skin - 3)
+                vase_row_combobox.current(vase_select.row - 1)
+                vase_col_combobox.current(vase_select.col - 1)
+                vase_plant_combobox.current(
+                    vase_select.vase_plant if vase_select.vase_plant >= 0 else 0
+                )
+                vase_zombie_combobox.current(
+                    vase_select.vase_zombie if vase_select.vase_zombie >= 0 else 0
+                )
+                vase_sun_combobox.current(
+                    (vase_select.vase_sun - 1) if vase_select.vase_sun > 0 else 0
+                )
+            except:
+                pass
+
+    vase_list_box.bind("<<TreeviewSelect>>", get_vase_select)
+
+    vase_put_frame = ttk.LabelFrame(vase_page, text="放置罐子", bootstyle=SECONDARY)
+    vase_put_frame.place(x=245, y=0, anchor=NW, height=260, width=340)
+    ttk.Label(vase_put_frame, text="皮肤", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=0, column=0
+    )
+    vase_put_skin_combobox = ttk.Combobox(
+        vase_put_frame,
+        width=10,
+        values=["问号", "植物", "僵尸", "隐形"],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_put_skin_combobox.grid(padx=2, pady=2, row=0, column=1, columnspan=4, sticky=W)
+    vase_put_skin_combobox.current(0)
+    random_skin_status = ttk.BooleanVar(vase_put_frame)
+    random_skin_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="随机皮肤",
+        variable=random_skin_status,
+        bootstyle="secondary-round-toggle",
+    )
+    random_skin_check.grid(padx=2, pady=2, row=0, column=4)
+    include_skin_status = ttk.BooleanVar(vase_put_frame)
+    include_skin_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="包含隐形",
+        variable=include_skin_status,
+        bootstyle="secondary",
+    )
+    include_skin_check.grid(padx=2, pady=2, row=0, column=5, columnspan=2, sticky=W)
+    ttk.Label(vase_put_frame, text="内容", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=1, column=0
+    )
+    vase_put_type_combobox = ttk.Combobox(
+        vase_put_frame,
+        width=10,
+        values=["空", "植物", "僵尸", "阳光"],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_put_type_combobox.grid(padx=2, pady=2, row=1, column=1, columnspan=4, sticky=W)
+    vase_put_type_combobox.current(0)
+    random_type_status = ttk.BooleanVar(vase_put_frame)
+    random_type_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="随机内容",
+        variable=random_type_status,
+        bootstyle="secondary-round-toggle",
+    )
+    random_type_check.grid(padx=2, pady=2, row=1, column=4)
+    include_type_status = ttk.BooleanVar(vase_put_frame)
+    include_type_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="空",
+        variable=include_type_status,
+        bootstyle="secondary",
+    )
+    include_type_check.grid(padx=2, pady=2, row=1, column=5, sticky=W)
+    include_type2_status = ttk.BooleanVar(vase_put_frame)
+    include_type2_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="阳光",
+        variable=include_type2_status,
+        bootstyle="secondary",
+    )
+    include_type2_check.grid(padx=2, pady=2, row=1, column=6)
+    ttk.Label(vase_put_frame, text="植物", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=2, column=0
+    )
+    vase_put_plantType_combobox = ttk.Combobox(
+        vase_put_frame,
+        width=10,
+        values=PVZ_data.plantsType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_put_plantType_combobox.grid(
+        padx=2, pady=2, row=2, column=1, columnspan=4, sticky=W
+    )
+    vase_put_plantType_combobox.current(0)
+    random_plantType_status = ttk.BooleanVar(vase_put_frame)
+    random_plantType_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="随机植物",
+        variable=random_plantType_status,
+        bootstyle="secondary-round-toggle",
+    )
+    random_plantType_check.grid(padx=2, pady=2, row=2, column=4)
+    ttk.Label(vase_put_frame, text="僵尸", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=3, column=0
+    )
+    vase_put_zombieType_combobox = ttk.Combobox(
+        vase_put_frame,
+        width=10,
+        values=PVZ_data.zombiesType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_put_zombieType_combobox.grid(
+        padx=2, pady=2, row=3, column=1, columnspan=4, sticky=W
+    )
+    vase_put_zombieType_combobox.current(0)
+    random_zombieType_status = ttk.BooleanVar(vase_put_frame)
+    random_zombieType_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="随机僵尸",
+        variable=random_zombieType_status,
+        bootstyle="secondary-round-toggle",
+    )
+    random_zombieType_check.grid(padx=2, pady=2, row=3, column=4)
+    include_boss_status = ttk.BooleanVar(vase_put_frame)
+    include_boss_check = ttk.Checkbutton(
+        vase_put_frame,
+        text="僵王",
+        variable=include_boss_status,
+        bootstyle="secondary",
+    )
+    include_boss_check.grid(padx=2, pady=2, row=3, column=5)
+    vase_put_sun_frame = ttk.Frame(vase_put_frame)
+    vase_put_sun_frame.grid(pady=2, row=4, column=0, columnspan=4, sticky=W)
+    ttk.Label(vase_put_sun_frame, text="阳光", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=4, column=0
+    )
+    vase_put_sun_combobox = ttk.Combobox(
+        vase_put_sun_frame,
+        width=10,
+        values=[1, 2, 3, 4, 5],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vase_put_sun_combobox.grid(padx=2, pady=2, row=4, column=1, columnspan=4, sticky=W)
+    vase_put_sun_combobox.current(0)
+    ttk.Label(vase_put_sun_frame, text="个", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=4, column=5
+    )
+    ttk.Label(vase_put_frame, text="第", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=5, column=0
+    )
+    vasePut_start_row_value = ttk.IntVar(vase_put_frame)
+    vasePut_start_row_combobox = ttk.Combobox(
+        vase_put_frame,
+        textvariable=vasePut_start_row_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vasePut_start_row_combobox.grid(padx=2, pady=2, row=5, column=1)
+    vasePut_start_row_value.set(1)
+    ttk.Label(vase_put_frame, text="行", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=5, column=2
+    )
+    vasePut_start_col_value = ttk.IntVar(vase_put_frame)
+    vasePut_start_col_combobox = ttk.Combobox(
+        vase_put_frame,
+        textvariable=vasePut_start_col_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vasePut_start_col_combobox.grid(padx=2, pady=2, row=5, column=3)
+    vasePut_start_col_value.set(1)
+    ttk.Label(vase_put_frame, text="列", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=5, column=4, sticky=W
+    )
+    ttk.Label(vase_put_frame, text="至", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=6, column=0
+    )
+    vasePut_end_row_value = ttk.IntVar(vase_put_frame)
+    vasePut_end_row_combobox = ttk.Combobox(
+        vase_put_frame,
+        textvariable=vasePut_end_row_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vasePut_end_row_combobox.grid(padx=2, pady=2, row=6, column=1)
+    vasePut_end_row_value.set(1)
+    ttk.Label(vase_put_frame, text="行", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=6, column=2
+    )
+    vasePut_end_col_value = ttk.IntVar(vase_put_frame)
+    vasePut_end_col_combobox = ttk.Combobox(
+        vase_put_frame,
+        textvariable=vasePut_end_col_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    vasePut_end_col_combobox.grid(padx=2, pady=2, row=6, column=3)
+    vasePut_end_col_value.set(1)
+    ttk.Label(vase_put_frame, text="列", font=("黑体", 8)).grid(
+        padx=2, pady=2, row=6, column=4, sticky=W
+    )
+
+    def get_config_setting():
+        config = load_config(config_file_path)
+        try:
+            vase_put_skin_combobox.current(
+                config["plungins"]["vasebreaker"]["vase_put_skin_combobox"]
+            )
+        except:
+            pass
+        try:
+            random_skin_status.set(
+                config["plungins"]["vasebreaker"]["random_skin_status"]
+            )
+        except:
+            pass
+        try:
+            include_skin_status.set(
+                config["plungins"]["vasebreaker"]["include_skin_status"]
+            )
+        except:
+            pass
+        try:
+            vase_put_type_combobox.current(
+                config["plungins"]["vasebreaker"]["vase_put_type_combobox"]
+            )
+        except:
+            pass
+        try:
+            random_type_status.set(
+                config["plungins"]["vasebreaker"]["random_type_status"]
+            )
+        except:
+            pass
+        try:
+            include_type_status.set(
+                config["plungins"]["vasebreaker"]["include_type_status"]
+            )
+        except:
+            pass
+        try:
+            include_type2_status.set(
+                config["plungins"]["vasebreaker"]["include_type2_status"]
+            )
+        except:
+            pass
+        try:
+            vase_put_plantType_combobox.current(
+                config["plungins"]["vasebreaker"]["vase_put_plantType_combobox"]
+            )
+        except:
+            pass
+        try:
+            random_plantType_status.set(
+                config["plungins"]["vasebreaker"]["random_plantType_status"]
+            )
+        except:
+            pass
+        try:
+            vase_put_zombieType_combobox.current(
+                config["plungins"]["vasebreaker"]["vase_put_zombieType_combobox"]
+            )
+        except:
+            pass
+        try:
+            random_zombieType_status.set(
+                config["plungins"]["vasebreaker"]["random_zombieType_status"]
+            )
+        except:
+            pass
+        try:
+            include_boss_status.set(
+                config["plungins"]["vasebreaker"]["include_boss_status"]
+            )
+        except:
+            pass
+        try:
+            vase_put_sun_combobox.current(
+                config["plungins"]["vasebreaker"]["vase_put_sun_combobox"]
+            )
+        except:
+            pass
+        try:
+            vasePut_start_row_value.set(
+                config["plungins"]["vasebreaker"]["vasePut_start_row_value"]
+            )
+        except:
+            pass
+        try:
+            vasePut_start_col_value.set(
+                config["plungins"]["vasebreaker"]["vasePut_start_col_value"]
+            )
+        except:
+            pass
+        try:
+            vasePut_end_row_value.set(
+                config["plungins"]["vasebreaker"]["vasePut_end_row_value"]
+            )
+        except:
+            pass
+        try:
+            vasePut_end_col_value.set(
+                config["plungins"]["vasebreaker"]["vasePut_end_col_value"]
+            )
+        except:
+            pass
+
+    get_config_setting()
+
+    def putVases(random_location_status):
+        if pvz.getMap is not False:
+            rows = pvz.getMap() - 1
+        if random_location_status == 1:
+            r = random.randint(0, rows)
+            c = random.randint(0, 8)
+            startRow = r
+            endRow = r
+            startCol = c
+            endCol = c
+        elif random_location_status == 2:
+            c = random.randint(0, 8)
+            startRow = 0
+            endRow = rows
+            startCol = c
+            endCol = c
+        elif random_location_status == 0:
+            startRow = vasePut_start_row_value.get() - 1
+            startCol = vasePut_start_col_value.get() - 1
+            endRow = vasePut_end_row_value.get() - 1
+            endCol = vasePut_end_col_value.get() - 1
+        # sun=100
+        if startRow > rows:
+            startRow = rows
+        if endRow > rows:
+            endRow = rows
+        if startRow > endRow or startCol > endCol:
+            Messagebox.show_error("起始行列大于终止行列", title="输入错误")
+        else:
+            for i in range(startRow, endRow + 1):
+                for j in range(startCol, endCol + 1):
+                    if random_skin_status.get():
+                        if include_skin_status.get():
+                            skin = random.randint(3, 6)
+                        else:
+                            skin = random.randint(3, 5)
+                    else:
+                        skin = vase_put_skin_combobox.current() + 3
+                    if random_type_status.get():
+                        if include_type_status.get():
+                            if include_type2_status.get():
+                                type = random.randint(0, 3)
+                            else:
+                                type = random.randint(0, 2)
+                        else:
+                            if include_type2_status.get():
+                                type = random.randint(1, 3)
+                            else:
+                                type = random.randint(1, 2)
+                    else:
+                        type = vase_put_type_combobox.current()
+                    if random_plantType_status.get():
+                        plantType = pvz.getRandomPlant(False)
+                    else:
+                        plantType = vase_put_plantType_combobox.current()
+                    if random_zombieType_status.get():
+                        if include_boss_status.get():
+                            zombieType = pvz.getRandomZombie(True)
+                        else:
+                            zombieType = pvz.getRandomZombie(False)
+                    else:
+                        zombieType = vase_put_zombieType_combobox.current()
+                    sun = int(vase_put_sun_combobox.get())
+                    # print(plantType, skin, type, zombieType, sun, i, j)
+                    pvz.put_vase(skin, type, plantType, zombieType, sun, i, j)
+
+    vase_button_frame = ttk.Frame(vase_put_frame)
+    vase_button_frame.grid(row=7, column=0, columnspan=10)
+    ttk.Button(
+        vase_button_frame, text="放置", bootstyle=SECONDARY, command=lambda: putVases(0)
+    ).pack(side=LEFT, padx=2)
+    ttk.Button(
+        vase_button_frame,
+        text="随机放置一个",
+        bootstyle=SECONDARY,
+        command=lambda: putVases(1),
+    ).pack(side=LEFT, padx=2)
+    ttk.Button(
+        vase_button_frame,
+        text="随机放置一列",
+        bootstyle=SECONDARY,
+        command=lambda: putVases(2),
+    ).pack(side=LEFT, padx=2)
+
     slot_page = ttk.Frame(page_tab)
     slot_page.pack()
     page_tab.add(slot_page, text="卡槽修改")
@@ -6458,10 +7108,14 @@ def mainWindow():
                 refresh_item_list()
                 get_item_attribute()
         if page_tab.index("current") == 4:
+            if pvz.getMap() is not False:
+                refresh_vase_list()
+                get_vase_attribute()
+        if page_tab.index("current") == 5:
             if slots_configuration_mode.get() is False:
                 refresh_slot_list()
                 get_slot_attribute()
-        if page_tab.index("current") == 5:
+        if page_tab.index("current") == 6:
             try:
                 if main_window.focus_get() != endless_round_entry:
                     endless_round.set(pvz.getEndlessRound())
