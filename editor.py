@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.40"
+current_version = "0.41"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -109,18 +109,6 @@ default_config = {
     }
 }
 # 点击关闭退出
-
-
-def exit_editor(file_path, window, section="main_window_position"):
-    config = load_config(file_path)
-    config[section] = {"x": window.winfo_x(), "y": window.winfo_y()}
-    save_config(config, file_path)
-    os._exit(0)
-
-
-def exit_with_delete_config(config_file_path):
-    os.remove(config_file_path)
-    os._exit(0)
 
 
 def resource_path(relative_path):
@@ -528,6 +516,10 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.41\n"
+        "新增益智游戏选项卡，包含罐子监视及放罐子功能\n"
+        "新增益智游戏选项卡，包含我是僵尸相关功能\n"
+        "常用功能新增罐子透视\n"
         "b0.40\n"
         "新增益智游戏选项卡，包含罐子监视及放罐子功能\n"
         "b0.39\n"
@@ -1385,6 +1377,20 @@ def mainWindow():
     ToolTip(
         Infinite_Items_check,
         text="银币、金币、钻石和商店物品锁定为9999",
+        bootstyle=(INFO, INVERSE),
+    )
+    vase_perspect_status = ttk.BooleanVar(quick_start_frame)
+    vase_perspect_check = ttk.Checkbutton(
+        quick_start_frame,
+        text="罐子透视",
+        variable=vase_perspect_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.vase_perspect(vase_perspect_status.get()),
+    )
+    vase_perspect_check.grid(row=7, column=0, sticky=W)
+    ToolTip(
+        vase_perspect_check,
+        text="可以看到罐子的内容",
         bootstyle=(INFO, INVERSE),
     )
     # pause_pro_status = ttk.BooleanVar(quick_start_frame)
@@ -4706,10 +4712,10 @@ def mainWindow():
     set_game_formation_button.pack(side=LEFT, padx=2)
 
     global vase_select
-    vase_page = ttk.Frame(page_tab)
-    vase_page.pack()
-    page_tab.add(vase_page, text="益智模式")
-    vase_list_frame = ttk.LabelFrame(vase_page, text="罐子列表", bootstyle=WARNING)
+    puzzle_page = ttk.Frame(page_tab)
+    puzzle_page.pack()
+    page_tab.add(puzzle_page, text="益智模式")
+    vase_list_frame = ttk.LabelFrame(puzzle_page, text="罐子列表", bootstyle=WARNING)
     vase_list_frame.place(x=0, y=0, anchor=NW, height=260, width=240)
     vase_list_box_scrollbar = ttk.Scrollbar(vase_list_frame, bootstyle=WARNING)
     vase_list_box = ttk.Treeview(
@@ -4867,7 +4873,6 @@ def mainWindow():
     )
 
     def set_vase_plant(index=0):
-        vase_select.setVasePlant(vase_plant_combobox.current())
         vase_attribute_frame.focus_set()
 
     vase_plant_combobox.bind("<<ComboboxSelected>>", set_vase_plant)
@@ -4951,7 +4956,7 @@ def mainWindow():
 
     vase_list_box.bind("<<TreeviewSelect>>", get_vase_select)
 
-    vase_put_frame = ttk.LabelFrame(vase_page, text="放置罐子", bootstyle=SECONDARY)
+    vase_put_frame = ttk.LabelFrame(puzzle_page, text="放置罐子", bootstyle=SECONDARY)
     vase_put_frame.place(x=245, y=0, anchor=NW, height=260, width=340)
     ttk.Label(vase_put_frame, text="皮肤", font=("黑体", 8)).grid(
         padx=2, pady=2, row=0, column=0
@@ -5042,6 +5047,30 @@ def mainWindow():
         bootstyle="secondary-round-toggle",
     )
     random_plantType_check.grid(padx=2, pady=2, row=2, column=4)
+
+    def wait_select_vase_put_plantType(event, vase_put_plantType_combobox):
+        open_card_select_window(vase_put_plantType_combobox)
+        card_select_window.wait_window()
+        set_vase_plantType()
+
+        def closeCombobox(vase_put_plantType_combobox):
+            vase_put_plantType_combobox.event_generate("<Escape>")
+
+        vase_put_plantType_combobox.after(
+            100, lambda: closeCombobox(vase_put_plantType_combobox)
+        )
+
+    vase_put_plantType_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_vase_put_plantType(
+            event, vase_put_plantType_combobox
+        ),
+    )
+
+    def set_vase_plantType(index=0):
+        vase_put_frame.focus_set()
+
+    vase_put_plantType_combobox.bind("<<ComboboxSelected>>", set_vase_plantType)
     ttk.Label(vase_put_frame, text="僵尸", font=("黑体", 8)).grid(
         padx=2, pady=2, row=3, column=0
     )
@@ -5056,6 +5085,30 @@ def mainWindow():
     vase_put_zombieType_combobox.grid(
         padx=2, pady=2, row=3, column=1, columnspan=4, sticky=W
     )
+
+    def wait_select_vase_put_zombieType(event, vase_put_zombieType_combobox):
+        open_zombie_select_window(vase_put_zombieType_combobox)
+        zombie_select_window.wait_window()
+        set_vase_zombieType()
+
+        def closeCombobox(vase_put_zombieType_combobox):
+            vase_put_zombieType_combobox.event_generate("<Escape>")
+
+        vase_put_zombieType_combobox.after(
+            100, lambda: closeCombobox(vase_put_zombieType_combobox)
+        )
+
+    vase_put_zombieType_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_vase_put_zombieType(
+            event, vase_put_zombieType_combobox
+        ),
+    )
+
+    def set_vase_zombieType(index=0):
+        vase_put_frame.focus_set()
+
+    vase_put_zombieType_combobox.bind("<<ComboboxSelected>>", set_vase_zombieType)
     vase_put_zombieType_combobox.current(0)
     random_zombieType_status = ttk.BooleanVar(vase_put_frame)
     random_zombieType_check = ttk.Checkbutton(
@@ -5348,6 +5401,268 @@ def mainWindow():
         bootstyle=SECONDARY,
         command=lambda: putVases(2),
     ).pack(side=LEFT, padx=2)
+
+    iz_frame = ttk.LabelFrame(puzzle_page, text="我是僵尸", bootstyle=DANGER)
+    iz_frame.place(x=0, y=265, anchor=NW, height=300, width=320)
+
+    iz_first_row = ttk.Frame(iz_frame)
+    iz_first_row.pack()
+
+    nosun_frame = ttk.Frame(iz_first_row)
+    nosun_frame.pack(pady=5, side=LEFT)
+
+    no_sun_status = ttk.BooleanVar(nosun_frame)
+    no_sun_check = ttk.Checkbutton(
+        nosun_frame,
+        text="不产阳光",
+        variable=no_sun_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.noSun(no_sun_status.get()),
+    )
+    no_sun_check.pack(side=LEFT)
+    red_line_frame = ttk.Frame(iz_first_row)
+    red_line_frame.pack(pady=5, padx=5, side=LEFT)
+    red_line_value = ttk.IntVar(red_line_frame)
+    ttk.Label(red_line_frame, text="红线位置").pack(side=LEFT)
+
+    def set_red_line():
+        global config
+        pvz.setZombieRedLine(red_line_value.get())
+        config = load_config(config_file_path)
+        config["plungins"]["iamzombie"]["red_line_value"] = red_line_value.get()
+        save_config(config, config_file_path)
+
+    red_line_spinbox = ttk.Spinbox(
+        red_line_frame,
+        width=3,
+        from_=1,
+        to=9,
+        textvariable=red_line_value,
+        command=lambda: set_red_line(),
+    )
+    red_line_spinbox.pack(side=LEFT)
+    config = load_config(config_file_path)
+    if "plungins" not in config:
+        config["plungins"] = {}
+    if "iamzombie" not in config["plungins"]:
+        config["plungins"]["iamzombie"] = {}
+    if "red_line_value" not in config["plungins"]["iamzombie"]:
+        config["plungins"]["iamzombie"]["red_line_value"] = 5
+    save_config(config, config_file_path)
+
+    red_line_value.set(config["plungins"]["iamzombie"]["red_line_value"])
+
+    def put_random_plant():
+        pvz.iz_random_formation()
+
+    random_button_row_frame = ttk.Frame(iz_first_row)
+    random_button_row_frame.pack(pady=5, side=LEFT)
+    ttk.Button(
+        random_button_row_frame, text="随机布阵", command=lambda: put_random_plant()
+    ).pack(side=LEFT, padx=10)
+
+    change_head_frame = ttk.LabelFrame(iz_frame, text="礼盒僵尸", bootstyle=DANGER)
+    change_head_frame.pack()
+    change_head_status = ttk.BooleanVar(change_head_frame)
+    global change_head_zombie_type
+    change_head_zombie_type = ttk.IntVar(change_head_frame)
+    change_head_zombie_combobox = ttk.Combobox(
+        change_head_frame,
+        width=8,
+        values=PVZ_data.zombiesType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    change_head_zombie_combobox.pack(side=LEFT)
+
+    def wait_select_change_head_zombie(event, change_head_zombie_combobox):
+        open_zombie_select_window(change_head_zombie_combobox)
+        zombie_select_window.wait_window()
+        set_change_head_zombie_type()
+
+        def closeCombobox(change_head_zombie_combobox):
+            change_head_zombie_combobox.event_generate("<Escape>")
+
+        change_head_zombie_combobox.after(
+            100, lambda: closeCombobox(change_head_zombie_combobox)
+        )
+
+    change_head_zombie_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_change_head_zombie(
+            event, change_head_zombie_combobox
+        ),
+    )
+
+    def set_change_head_zombie_type(event):
+        change_head_zombie_type.set(change_head_zombie_combobox.current())
+        config = load_config(config_file_path)
+        config["plungins"]["iamzombie"]["change_head_zombie_type"] = (
+            change_head_zombie_type.get()
+        )
+        config["plungins"]["iamzombie"]["dead_boss_weight"] = dead_boss_weight.get()
+        save_config(config, config_file_path)
+
+    change_head_zombie_combobox.bind(
+        "<<ComboboxSelected>>", set_change_head_zombie_type
+    )
+
+    def gift_zombie():
+        pvz.changeZombieHead(change_head_status.get(), change_head_zombie_type.get())
+        pvz.zombieDeadZombie(
+            change_head_status.get(),
+            change_head_zombie_type.get(),
+            dead_boss_weight.get(),
+            0,
+        )
+
+    ttk.Checkbutton(
+        change_head_frame,
+        text="启用礼盒僵尸",
+        bootstyle="round-toggle-success",
+        variable=change_head_status,
+        command=lambda: gift_zombie(),
+    ).pack(side=LEFT)
+    dead_boss_weight = ttk.IntVar(change_head_frame)
+    ttk.Label(change_head_frame, text="僵王概率").pack(side=LEFT)
+    ttk.Spinbox(
+        change_head_frame,
+        textvariable=dead_boss_weight,
+        from_=0,
+        to=999,
+        width=4,
+    ).pack(side=LEFT)
+    ttk.Label(change_head_frame, text="‰").pack(side=LEFT)
+    config = load_config(config_file_path)
+    if "change_head_zombie_type" not in config["plungins"]["iamzombie"]:
+        config["plungins"]["iamzombie"]["change_head_zombie_type"] = 0
+    if "dead_boss_weight" not in config["plungins"]["iamzombie"]:
+        config["plungins"]["iamzombie"]["dead_boss_weight"] = 10
+    save_config(config, config_file_path)
+    change_head_zombie_type.set(
+        config["plungins"]["iamzombie"]["change_head_zombie_type"]
+    )
+    change_head_zombie_combobox.current(change_head_zombie_type.get())
+    dead_boss_weight.set(config["plungins"]["iamzombie"]["dead_boss_weight"])
+
+    random_zombie_slots_frame = ttk.Frame(iz_frame)
+    random_zombie_slots_frame.pack(pady=5)
+    start_zombie_slot_value = ttk.IntVar()
+    end_zombie_slot_value = ttk.IntVar()
+
+    def set_start_zombie_slot():
+        global start_zombie_slot
+        start_zombie_slot = start_zombie_slot_value.get()
+        print(start_zombie_slot)
+        config = load_config(config_file_path)
+        config["plungins"]["iamzombie"]["start_zombie_slot"] = start_zombie_slot
+        save_config(config, config_file_path)
+
+    ttk.Label(random_zombie_slots_frame, text="第").pack(side=LEFT)
+    start_zombie_slot_spinbox = ttk.Spinbox(
+        random_zombie_slots_frame,
+        textvariable=start_zombie_slot_value,
+        from_=1,
+        to=14,
+        width=3,
+        command=lambda: set_start_zombie_slot(),
+    )
+    start_zombie_slot_spinbox.pack(side=LEFT)
+
+    def set_end_zombie_slot():
+        global end_zombie_slot
+        end_zombie_slot = end_zombie_slot_value.get()
+        print(end_zombie_slot)
+        config = load_config(config_file_path)
+        config["plungins"]["iamzombie"]["end_zombie_slot"] = end_zombie_slot
+        save_config(config, config_file_path)
+
+    ttk.Label(random_zombie_slots_frame, text="槽至第").pack(side=LEFT)
+    end_zombie_slot_spinbox = ttk.Spinbox(
+        random_zombie_slots_frame,
+        textvariable=end_zombie_slot_value,
+        from_=1,
+        to=14,
+        width=3,
+        command=lambda: set_end_zombie_slot(),
+    )
+    end_zombie_slot_spinbox.pack(side=LEFT)
+    ttk.Label(random_zombie_slots_frame, text="槽").pack(side=LEFT)
+    start_zombie_slot_value.set(config["plungins"]["iamzombie"]["start_zombie_slot"])
+    start_zombie_slot = start_zombie_slot_value.get()
+    end_zombie_slot_value.set(config["plungins"]["iamzombie"]["end_zombie_slot"])
+    end_zombie_slot = end_zombie_slot_value.get()
+
+    random_zombie_slots_status = ttk.BooleanVar(random_zombie_slots_frame)
+    random_zombie_slots_check = ttk.Checkbutton(
+        random_zombie_slots_frame,
+        text="随机僵尸卡槽",
+        variable=random_zombie_slots_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.randomZombieSlots(
+            random_zombie_slots_status.get(), start_zombie_slot, end_zombie_slot
+        ),
+    )
+    random_zombie_slots_check.pack(fill=Y, expand=True)
+
+    zombie_sun_frame = ttk.Labelframe(
+        iz_frame,
+        text="阳光消耗(仅我是僵尸模式)",
+        bootstyle=DANGER,
+    )
+    zombie_sun_frame.pack(
+        pady=5,
+    )
+    zombie_type_combobox = ttk.Combobox(
+        zombie_sun_frame,
+        width=10,
+        values=PVZ_data.zombiesType,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+
+    def wait_select_zombie_sun_card(event, zombie_type_combobox):
+        open_zombie_select_window(zombie_type_combobox)
+        zombie_select_window.wait_window()
+        get_zombie_type()
+
+        def closeCombobox(zombie_type_combobox):
+            zombie_type_combobox.event_generate("<Escape>")
+
+        zombie_type_combobox.after(100, lambda: closeCombobox(zombie_type_combobox))
+
+    zombie_type_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_zombie_sun_card(event, zombie_type_combobox),
+    )
+    zombie_type_combobox.grid(row=0, column=0, sticky=W)
+    ttk.Label(zombie_sun_frame, text="阳光:").grid(row=0, column=1)
+    zombie_sun_sun_value = ttk.IntVar(zombie_sun_frame)
+    zombie_sun_sun_entry = ttk.Entry(
+        zombie_sun_frame,
+        textvariable=zombie_sun_sun_value,
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    zombie_sun_sun_entry.grid(row=0, column=2, ipady=0)
+
+    def setZombieCharacteristicSun(event):
+        zombie_sun_type.setSun(zombie_sun_sun_value.get())
+        zombie_sun_frame.focus_set()
+
+    zombie_sun_sun_entry.bind("<Return>", setZombieCharacteristicSun)
+
+    def get_zombie_type():
+        global zombie_sun_type
+        zombie_sun_type = PVZ_data.plantCharacteristic(
+            zombie_type_combobox.current() + 256
+        )
+        print(hex(zombie_sun_type.addr))
+        zombie_sun_sun_value.set(zombie_sun_type.sun)
+        zombie_sun_frame.focus_set()
 
     slot_page = ttk.Frame(page_tab)
     slot_page.pack()
@@ -7225,10 +7540,77 @@ def mainWindow():
     main_window.after(100, process_queue, main_window)
     main_window.after(100, refreshData)
 
+    def exit_editor(file_path, window, section="main_window_position"):
+        config = load_config(file_path)
+        if "plungins" not in config:
+            config["plungins"] = {}
+        if "vasebreaker" not in config["plungins"]:
+            config["plungins"]["vasebreaker"] = {}
+        config["plungins"]["vasebreaker"]["vase_put_skin_combobox"] = (
+            vase_put_skin_combobox.current()
+        )
+        config["plungins"]["vasebreaker"]["random_skin_status"] = (
+            random_skin_status.get()
+        )
+        config["plungins"]["vasebreaker"]["include_skin_status"] = (
+            include_skin_status.get()
+        )
+        config["plungins"]["vasebreaker"]["vase_put_type_combobox"] = (
+            vase_put_type_combobox.current()
+        )
+        config["plungins"]["vasebreaker"]["random_type_status"] = (
+            random_type_status.get()
+        )
+        config["plungins"]["vasebreaker"]["include_type_status"] = (
+            include_type_status.get()
+        )
+        config["plungins"]["vasebreaker"]["include_type2_status"] = (
+            include_type2_status.get()
+        )
+        config["plungins"]["vasebreaker"]["vase_put_plantType_combobox"] = (
+            vase_put_plantType_combobox.current()
+        )
+        config["plungins"]["vasebreaker"]["random_plantType_status"] = (
+            random_plantType_status.get()
+        )
+        config["plungins"]["vasebreaker"]["vase_put_zombieType_combobox"] = (
+            vase_put_zombieType_combobox.current()
+        )
+        config["plungins"]["vasebreaker"]["random_zombieType_status"] = (
+            random_zombieType_status.get()
+        )
+        config["plungins"]["vasebreaker"]["include_boss_status"] = (
+            include_boss_status.get()
+        )
+        config["plungins"]["vasebreaker"]["vase_put_sun_combobox"] = (
+            vase_put_sun_combobox.current()
+        )
+        config["plungins"]["vasebreaker"]["vasePut_start_row_value"] = (
+            vasePut_start_row_value.get()
+        )
+        config["plungins"]["vasebreaker"]["vasePut_start_col_value"] = (
+            vasePut_start_col_value.get()
+        )
+        config["plungins"]["vasebreaker"]["vasePut_end_row_value"] = (
+            vasePut_end_row_value.get()
+        )
+        config["plungins"]["vasebreaker"]["vasePut_end_col_value"] = (
+            vasePut_end_col_value.get()
+        )
+
+        config[section] = {"x": window.winfo_x(), "y": window.winfo_y()}
+        save_config(config, file_path)
+        os._exit(0)
+
     main_window.protocol(
         "WM_DELETE_WINDOW", lambda: exit_editor(config_file_path, main_window)
     )
     main_window.mainloop()
+
+
+def exit_with_delete_config(config_file_path):
+    os.remove(config_file_path)
+    os._exit(0)
 
 
 if __name__ == "__main__":

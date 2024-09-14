@@ -354,6 +354,76 @@ plantsType = plantsType + [
     "巨人伴舞",  # 319
 ]
 
+ExcludedPutCards = [
+    "阳光豆",
+    "墓碑埋雷者",
+    "豌豆睡莲",
+    "毁灭海草",
+    "随机植物盒子",
+    "毁灭加农炮",
+    "宝藏吞噬者",
+    "全息卡牌投影",
+    "成长咖啡豆",
+    "荧光木槌",
+    "生命重塑者",
+    "幸运四叶草",
+    "黄金向日葵",
+    "土豆加农炮",
+    "备用物资",
+    "僵尸豆",
+    "莲叶壳",
+    "抽奖盒子豪华版",
+    "坚果保龄球",
+    "进化豆",
+    "医用咖啡豆",
+    "寒冰加农炮",
+    "黄金西瓜投手",
+    "自费盒子",
+    "制冰豆",
+    "促销豆",
+    "阳光豆",
+    "咖啡伞",
+    "豌豆许愿池",
+    "天使向日葵",
+    "阳光加农炮",
+]
+DownPlantCards = [
+    "小盆菇",
+    "阳光花盆",
+    "猫砂盆",
+    "花盆睡莲",
+    "促销花盆",
+]
+PumpkinPlantCards = [
+    "忧郁南瓜头",
+    "阳光南瓜掌",
+    "烈火南瓜头",
+]
+AshPlantCards = [
+    "阳光炸弹",
+    "雪花寒冰菇",
+    "魅惑毁灭菇",
+    "樱桃辣椒",
+    "仙人三叶草",
+    "寒冰三叶草",
+    "黄油JOKER",
+    "大蒜辣椒",
+    "魅惑菇射手",
+    "头脑风暴",
+    "寒光菇",
+    "双生樱桃",
+    "惩戒牢笼",
+    "禁忌毁灭菇",
+    "消消乐糖果",
+    "流星",
+    "苹果闹钟",
+    "寒冰菇王",
+    "辣椒重塑者",
+    "彩虹糖果",
+    "逆时闹钟",
+    "禁忌寒冰菇",
+]
+
 
 def get_zombies_HP_addresses(PVZ_version):
     print("PVZ_version", PVZ_version)
@@ -1307,7 +1377,7 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 2.1 or PVZ_version >= 2.2:
+            elif PVZ_version == 2.1 or PVZ_version == 2.2:
                 self.addr = 0x0088B018 + type - 256
                 self.sun = PVZ_memory.read_uchar(self.addr)
                 self.cd = 0

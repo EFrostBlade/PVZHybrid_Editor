@@ -3624,10 +3624,62 @@ def globalSpawModify(f, zombieTypes):
 
 
 def changeZombieHead(f, zombieType):
-    print("changehead" + str(f))
+    # print("changehead" + str(f))
     global newmem_changeZombieHead
     global newmem_changeZombieDeadHead
-    if PVZ_data.PVZ_version == 2.0:
+    if PVZ_data.PVZ_version == 0:
+        if f:
+            newmem_changeZombieHead = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_changeZombieHead)
+            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+            shellcode.jne_long_offset(0x4E)
+            shellcode.pushad()
+            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+            shellcode.push_byte(0xFF)
+            shellcode.push_dword(0x0065851C)
+            shellcode.call(0x005331C0)
+            shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
+            shellcode.push_byte(0xFF)
+            shellcode.push_dword(0x00658110)
+            shellcode.call(0x005331C0)
+            shellcode.mov_exx_dword_ptr_eyy(asm.EAX, asm.ESI)
+            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.EAX, 0x820)
+            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EDX, asm.ECX, 0x8)
+            shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.ESI, 0x118)
+            shellcode.and_eax_dword(0xFFFF)
+            shellcode.lea_exx_eyy_ezz_times(asm.EBX, asm.EAX, asm.EAX, 4)
+            shellcode.shl_exx_byte(asm.EBX, 5)
+            shellcode.add_exx_ptr_eyy(asm.EBX, asm.EDX)
+            shellcode.push_dword_ptr(0x006A7A08)
+            shellcode.mov_exx(asm.EAX, 0x00658500)
+            shellcode.mov_exx_eyy(asm.ECX, asm.EBX)
+            shellcode.call(0x00473490)
+            shellcode.popad()
+            shellcode.mov_exx_dword_ptr_eyy_add_byte(asm.EAX, asm.ESI, 0x58)
+            shellcode.add_dword_ptr_exx_add_byte_byte(asm.ESI, 0x54, 0xFF)
+            shellcode.jmp(0x0052AF92)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_changeZombieHead,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0052AF8B,
+                b"\xe9"
+                + calculate_call_address(newmem_changeZombieHead - 0x0052AF90)
+                + b"\x90\x90",
+                7,
+            )
+        else:
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0052AF8B, b"\x8b\x46\x58\x83\x46\x54\xff", 7
+            )
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_changeZombieHead
+            )
+    elif PVZ_data.PVZ_version == 2.0:
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
                 PVZ_data.PVZ_memory.process_handle, 256
@@ -4007,8 +4059,16 @@ def zombieDeadZombie(f, deadZombieType, bossWeight, bosshp):
             shellcode.mov_exx(asm.EAX, 44)
         elif PVZ_data.PVZ_version == 2.2:
             shellcode.mov_exx(asm.EAX, 51)
-        else:
+        elif PVZ_data.PVZ_version == 2.3:
             shellcode.mov_exx(asm.EAX, 56)
+        elif (
+            PVZ_data.PVZ_version == 2.35
+            or PVZ_data.PVZ_version == 2.36
+            or PVZ_data.PVZ_version == 2.37
+        ):
+            shellcode.mov_exx(asm.EAX, 59)
+        elif PVZ_data.PVZ_version == 2.4:
+            shellcode.mov_exx(asm.EAX, 63)
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
         shellcode.je_label("RZ")
@@ -4315,12 +4375,6 @@ def bungeeFix(f):
         pymem.memory.free_memory(
             PVZ_data.PVZ_memory.process_handle, newmem_bungeePutFix
         )
-
-
-def setZombieRedLine(row):
-    print(row)
-    PVZ_data.PVZ_memory.write_int(0x004255DD, row)
-    PVZ_data.PVZ_memory.write_int(0x004253F7, 20 + row * 80)
 
 
 def findBoss():
@@ -6784,3 +6838,165 @@ def put_vase(skin, type, plant_type, zombie_type, sun, row, column):
             return vase_put_asm
 
     asm.runThread(VasePut(skin, type, plant_type, zombie_type, sun, row, column))
+
+
+def vase_perspect(f):
+    if f:
+        PVZ_data.PVZ_memory.write_bytes(
+            0x0044E5CC, b"\xc7\x47\x4c\x64\x00\x00\x00\x5e\x59\xc3", 10
+        )
+    else:
+        PVZ_data.PVZ_memory.write_bytes(
+            0x0044E5CC, b"\x85\xc0\x7e\x06\x83\xc0\xff\x89\x47\x4c", 10
+        )
+
+
+def setZombieRedLine(row):
+    print(row)
+    PVZ_data.PVZ_memory.write_int(0x004255DD, row)
+    PVZ_data.PVZ_memory.write_int(0x004253F7, 20 + row * 80)
+    for i in range(0, 10):
+        PVZ_data.PVZ_memory.write_uchar(0x008E4C7F + i, row)
+        PVZ_data.PVZ_memory.write_int(0x008E4A76 + i * 4, 32 + row * 80)
+
+
+def iz_random_formation():
+    def is_plant_type_in_list(plant_type, plant_list):
+        return PVZ_data.plantsType[plant_type] in plant_list
+
+    clearPlants()
+    red_line_value = PVZ_data.PVZ_memory.read_int(0x004255DD)
+    rows = getMap()
+    pausePro(1)
+    for r in range(0, rows):
+        for c in range(0, red_line_value):
+            while True:
+                plantType = getRandomPlant(True)
+                if is_plant_type_in_list(
+                    plantType, PVZ_data.ExcludedPutCards
+                ) or is_plant_type_in_list(plantType, PVZ_data.AshPlantCards):
+                    continue
+                elif is_plant_type_in_list(plantType, PVZ_data.DownPlantCards):
+                    print(r, c, PVZ_data.plantsType[plantType])
+                    putPlant(r, c, plantType)
+                    time.sleep(0.03)
+                    while True:
+                        plantType = getRandomPlant(True)
+                        if (
+                            is_plant_type_in_list(plantType, PVZ_data.ExcludedPutCards)
+                            or is_plant_type_in_list(plantType, PVZ_data.AshPlantCards)
+                            or is_plant_type_in_list(plantType, PVZ_data.DownPlantCards)
+                        ):
+                            continue
+                        elif is_plant_type_in_list(
+                            plantType, PVZ_data.PumpkinPlantCards
+                        ):
+                            print(r, c, PVZ_data.plantsType[plantType])
+                            putPlant(r, c, plantType)
+                            time.sleep(0.03)
+                            while True:
+                                plantType = getRandomPlant(True)
+                                if (
+                                    is_plant_type_in_list(
+                                        plantType, PVZ_data.ExcludedPutCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.AshPlantCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.DownPlantCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.PumpkinPlantCards
+                                    )
+                                ):
+                                    continue
+                                else:
+                                    break
+                            break
+                    break
+                elif is_plant_type_in_list(plantType, PVZ_data.PumpkinPlantCards):
+                    print(r, c, PVZ_data.plantsType[plantType])
+                    putPlant(r, c, plantType)
+                    time.sleep(0.03)
+                    while True:
+                        plantType = getRandomPlant(True)
+                        if (
+                            is_plant_type_in_list(plantType, PVZ_data.ExcludedPutCards)
+                            or is_plant_type_in_list(plantType, PVZ_data.AshPlantCards)
+                            or is_plant_type_in_list(
+                                plantType, PVZ_data.PumpkinPlantCards
+                            )
+                        ):
+                            continue
+                        elif is_plant_type_in_list(plantType, PVZ_data.DownPlantCards):
+                            print(r, c, PVZ_data.plantsType[plantType])
+                            putPlant(r, c, plantType)
+                            time.sleep(0.03)
+                            while True:
+                                plantType = getRandomPlant(True)
+                                if (
+                                    is_plant_type_in_list(
+                                        plantType, PVZ_data.ExcludedPutCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.AshPlantCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.DownPlantCards
+                                    )
+                                    or is_plant_type_in_list(
+                                        plantType, PVZ_data.PumpkinPlantCards
+                                    )
+                                ):
+                                    continue
+                                else:
+                                    break
+                            break
+                    break
+                else:
+                    break
+            print(r, c, PVZ_data.plantsType[plantType])
+            putPlant(r, c, plantType)
+            time.sleep(0.03)
+    pausePro(0)
+
+
+def randomZombieSlots_operstion(
+    randomSlots_event,
+    start_slot,
+    end_slot,
+):
+    while not randomSlots_event.is_set():
+        plant1addr = (
+            PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x768
+            )
+            + 0x144
+        )
+        for i in range(start_slot - 1, end_slot):
+            slot = getRandomZombie(False)
+            slot = slot + 256
+            PVZ_data.PVZ_memory.write_int(
+                PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, slot
+            )
+
+
+randomZombieSlots_event = Event()
+randomZombieSlots_thread = None
+
+
+def randomZombieSlots(f, start_slot, end_slot):
+    global randomZombieSlots_thread
+    if f:
+        if not randomZombieSlots_thread or not randomZombieSlots_thread.is_alive():
+            randomZombieSlots_event.clear()
+            randomZombieSlots_thread = Thread(
+                target=randomZombieSlots_operstion,
+                args=(randomZombieSlots_event, start_slot, end_slot),
+            )
+            randomZombieSlots_thread.start()
+    else:
+        # 设置事件标志，通知线程停止
+        randomZombieSlots_event.set()
+        randomZombieSlots_thread.join()  # 等待线程结束
