@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.41"
+current_version = "0.42"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -276,6 +276,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.5" in window_name:
+                PVZ_data.update_PVZ_version(2.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -354,6 +362,14 @@ def chooseGame():
                 )
             elif "2.4" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.5)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -516,6 +532,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.42\n"
+        "适配杂交2.5\n"
         "b0.41\n"
         "新增益智游戏选项卡，包含罐子监视及放罐子功能\n"
         "新增益智游戏选项卡，包含我是僵尸相关功能\n"
@@ -1087,6 +1105,14 @@ def mainWindow():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             process_label["text"] = (
@@ -1387,7 +1413,7 @@ def mainWindow():
         bootstyle="success-round-toggle",
         command=lambda: pvz.vase_perspect(vase_perspect_status.get()),
     )
-    vase_perspect_check.grid(row=7, column=0, sticky=W)
+    vase_perspect_check.grid(row=8, column=0, sticky=W)
     ToolTip(
         vase_perspect_check,
         text="可以看到罐子的内容",
@@ -1405,7 +1431,7 @@ def mainWindow():
         bootstyle=(SUCCESS, OUTLINE),
         command=lambda: pvz.win(),
     )
-    win_button.grid(row=8, column=0, sticky=W, pady=(2, 2))
+    win_button.grid(row=9, column=0, sticky=W, pady=(2, 2))
     ToolTip(
         win_button, text="当前的游戏关卡直接进行胜利结算", bootstyle=(INFO, INVERSE)
     )
@@ -1416,7 +1442,7 @@ def mainWindow():
         bootstyle=(SUCCESS, OUTLINE),
         command=lambda: pvz.defeat(),
     )
-    defeat_button.grid(row=9, column=0, sticky=W, pady=(2, 2))
+    defeat_button.grid(row=10, column=0, sticky=W, pady=(2, 2))
     ToolTip(
         defeat_button, text="当前的游戏关卡直接进行失败结算", bootstyle=(INFO, INVERSE)
     )
@@ -1427,7 +1453,7 @@ def mainWindow():
         bootstyle=(SUCCESS, OUTLINE),
         command=lambda: pvz.killAllZombies(),
     )
-    kill_all_button.grid(row=10, column=0, sticky=W, pady=(2, 2))
+    kill_all_button.grid(row=11, column=0, sticky=W, pady=(2, 2))
     ToolTip(kill_all_button, text="秒杀当前场上的所有僵尸", bootstyle=(INFO, INVERSE))
     unlock_button = ttk.Button(
         quick_start_frame,
@@ -1436,14 +1462,14 @@ def mainWindow():
         bootstyle=(SUCCESS, OUTLINE),
         command=lambda: pvz.unlock(1),
     )
-    unlock_button.grid(row=11, column=0, sticky=W, pady=(2, 2))
+    unlock_button.grid(row=12, column=0, sticky=W, pady=(2, 2))
     ToolTip(
         unlock_button,
         text="在本次游戏中临时解锁图鉴中的所有植物(包括尚无法获得的隐藏植物)",
         bootstyle=(INFO, INVERSE),
     )
     save_load_frame = ttk.Frame(quick_start_frame)
-    save_load_frame.grid(row=12, column=0, sticky=W, pady=(2, 2))
+    save_load_frame.grid(row=13, column=0, sticky=W, pady=(2, 2))
     save_button = ttk.Button(
         save_load_frame,
         text="存档",
@@ -1794,7 +1820,7 @@ def mainWindow():
         # ):
         for i in range(0, 34):
             pvz.completeMiniGame(i)
-        for i in range(0, 20):
+        for i in range(0, 40):
             pvz.completePuzzle(i)
 
     miniGame_complete_button = ttk.Button(
@@ -1812,7 +1838,7 @@ def mainWindow():
         # ):
         for i in range(0, 34):
             pvz.lockMiniGame(i)
-        for i in range(0, 20):
+        for i in range(0, 40):
             pvz.lockPuzzle(i)
 
     miniGame_lock_button = ttk.Button(
@@ -5589,6 +5615,10 @@ def mainWindow():
     )
     end_zombie_slot_spinbox.pack(side=LEFT)
     ttk.Label(random_zombie_slots_frame, text="槽").pack(side=LEFT)
+    if "start_zombie_slot" not in config["plungins"]["iamzombie"]:
+        config["plungins"]["iamzombie"]["start_zombie_slot"] = 1
+    if "end_zombie_slot" not in config["plungins"]["iamzombie"]:
+        config["plungins"]["iamzombie"]["end_zombie_slot"] = 16
     start_zombie_slot_value.set(config["plungins"]["iamzombie"]["start_zombie_slot"])
     start_zombie_slot = start_zombie_slot_value.get()
     end_zombie_slot_value.set(config["plungins"]["iamzombie"]["end_zombie_slot"])

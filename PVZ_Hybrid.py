@@ -80,6 +80,11 @@ def getMap():
             or map == 30
             or map == 31
             or map == 32
+            or map == 34
+            or map == 35
+            or map == 37
+            or map == 38
+            or map == 41
         ):
             return 5
         elif (
@@ -94,6 +99,10 @@ def getMap():
             or map == 23
             or map == 25
             or map == 26
+            or map == 33
+            or map == 36
+            or map == 39
+            or map == 40
         ):
             return 6
         else:
@@ -156,6 +165,30 @@ def getNowFlag():
         return False
 
 
+def get_zombie_num():
+    if PVZ_data.PVZ_version == 0:
+        zombie_num = 33
+    elif PVZ_data.PVZ_version == 2.0:
+        zombie_num = 42
+    elif PVZ_data.PVZ_version == 2.1:
+        zombie_num = 45
+    elif PVZ_data.PVZ_version == 2.2:
+        zombie_num = 51
+    elif PVZ_data.PVZ_version == 2.3:
+        zombie_num = 56
+    elif (
+        PVZ_data.PVZ_version == 2.35
+        or PVZ_data.PVZ_version == 2.36
+        or PVZ_data.PVZ_version == 2.37
+    ):
+        zombie_num = 59
+    elif PVZ_data.PVZ_version == 2.4:
+        zombie_num = 64
+    elif PVZ_data.PVZ_version == 2.5:
+        zombie_num = 66
+    return zombie_num
+
+
 def getRandomZombie(hasBoss=False):
     if PVZ_data.PVZ_version == 0:
         zombieType = random.randint(0, 32)
@@ -175,6 +208,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 58)
     elif PVZ_data.PVZ_version == 2.4:
         zombieType = random.randint(0, 63)
+    elif PVZ_data.PVZ_version == 2.5:
+        zombieType = random.randint(0, 65)
     if hasBoss is True:
         return zombieType
     else:
@@ -202,6 +237,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 133)
     elif PVZ_data.PVZ_version == 2.4:
         plantType = random.randint(0, 139)
+    elif PVZ_data.PVZ_version == 2.5:
+        plantType = random.randint(0, 149)
     if plantType >= 48:
         plantType = plantType + 27
     if isPut is False:
@@ -644,7 +681,7 @@ def unlock(f):
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_unlock)
         if 2.37 >= PVZ_data.PVZ_version >= 2.3:
             PVZ_data.PVZ_memory.write_bytes(0x00453B20, b"\xe9\x4b\xcf\x3e\x00", 5)
-        elif PVZ_data.PVZ_version >= 2.4:
+        elif PVZ_data.PVZ_version >= 2.4 or PVZ_data.PVZ_version == 2.5:
             PVZ_data.PVZ_memory.write_bytes(0x00453B20, b"\xe9\xdb\xc4\x4d\x00", 5)
 
 
@@ -3621,6 +3658,42 @@ def globalSpawModify(f, zombieTypes):
             pymem.memory.free_memory(
                 PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
             )
+    elif PVZ_data.PVZ_version == 2.5:
+        if f:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 66):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0082401F,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x00824024)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            PVZ_data.PVZ_memory.write_bytes(0x0082401F, b"\x0f\x85\x21\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
 
 
 def changeZombieHead(f, zombieType):
@@ -4053,22 +4126,7 @@ def zombieDeadZombie(f, deadZombieType, bossWeight, bosshp):
         shellcode.cmp_exx_dword(asm.EAX, bossWeight)
         shellcode.mov_exx(asm.EAX, 25)
         shellcode.jl_label("CZ")
-        if PVZ_data.PVZ_version == 2.0:
-            shellcode.mov_exx(asm.EAX, 41)
-        elif PVZ_data.PVZ_version == 2.1:
-            shellcode.mov_exx(asm.EAX, 44)
-        elif PVZ_data.PVZ_version == 2.2:
-            shellcode.mov_exx(asm.EAX, 51)
-        elif PVZ_data.PVZ_version == 2.3:
-            shellcode.mov_exx(asm.EAX, 56)
-        elif (
-            PVZ_data.PVZ_version == 2.35
-            or PVZ_data.PVZ_version == 2.36
-            or PVZ_data.PVZ_version == 2.37
-        ):
-            shellcode.mov_exx(asm.EAX, 59)
-        elif PVZ_data.PVZ_version == 2.4:
-            shellcode.mov_exx(asm.EAX, 63)
+        shellcode.mov_exx(asm.EAX, get_zombie_num())
         shellcode.call(0x005AF400)
         shellcode.cmp_exx_byte(asm.EAX, 25)
         shellcode.je_label("RZ")
