@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.42"
+current_version = "0.43"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -284,6 +284,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.6" in window_name:
+                PVZ_data.update_PVZ_version(2.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -370,6 +378,14 @@ def chooseGame():
                 )
             elif "2.5" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.6" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.6)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -532,6 +548,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.43\n"
+        "适配杂交2.6\n"
+        "血量修改仅修复僵王血量地址\n"
         "b0.42\n"
         "适配杂交2.5\n"
         "b0.41\n"
@@ -1105,8 +1124,8 @@ def mainWindow():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
-            elif "2.5" in win32gui.GetWindowText(hwnd):
-                PVZ_data.update_PVZ_version(2.5)
+            elif "2.6" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.6)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1786,7 +1805,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 132):
+        for i in range(0, 150):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -1802,7 +1821,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 132):
+        for i in range(0, 150):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(
@@ -1818,10 +1837,12 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 34):
+        for i in range(0, 38):
             pvz.completeMiniGame(i)
         for i in range(0, 40):
             pvz.completePuzzle(i)
+        for i in range(0, 20):
+            pvz.completeHero(i)
 
     miniGame_complete_button = ttk.Button(
         game_save_frame,
@@ -1840,6 +1861,8 @@ def mainWindow():
             pvz.lockMiniGame(i)
         for i in range(0, 40):
             pvz.lockPuzzle(i)
+        for i in range(0, 20):
+            pvz.lockHero(i)
 
     miniGame_lock_button = ttk.Button(
         game_save_frame,
@@ -2152,7 +2175,7 @@ def mainWindow():
                     )
                     + 0x90
                 )
-                + 0x204 * j
+                + PVZ_data.zombie_size * j
             )
             zombie_exist = PVZ_data.PVZ_memory.read_bytes(zombie_addresss + 0xEC, 1)
             if zombie_exist == b"\x00":
@@ -3034,7 +3057,7 @@ def mainWindow():
                     )
                     + 0xAC
                 )
-                + 0x204 * j
+                + PVZ_data.plant_size * j
             )
             plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
@@ -3525,7 +3548,7 @@ def mainWindow():
                     )
                     + 0xAC
                 )
-                + 0x204 * j
+                + PVZ_data.plant_size * j
             )
             plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
@@ -4665,7 +4688,7 @@ def mainWindow():
                     )
                     + 0xAC
                 )
-                + 0x204 * j
+                + PVZ_data.plant_size * j
             )
             plant_exist = PVZ_data.PVZ_memory.read_bytes(plant_addresss + 0x141, 1)
             if plant_exist == b"\x00":
@@ -7340,7 +7363,10 @@ def mainWindow():
             entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
     except Exception as e:
         print(zombie_name)
-        messagebox.showerror("错误", f"创建界面元素时出现错误: {e}")
+        messagebox.showerror(
+            "错误",
+            f"游戏版本与修改器版本可能不匹配，部分功能可能无法使用，请更新游戏或修改器",
+        )
 
     # 读取配置方案
     def load_configurations():

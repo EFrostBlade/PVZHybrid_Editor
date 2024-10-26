@@ -4,11 +4,19 @@ PVZ_memory = Pymem()
 PVZ_pid = 0
 PVZ_version = "未找到游戏"
 zombies_HP_addresses = None
+plant_size = 304
+zombie_size = 304
 
 
 def update_PVZ_memory(memory):
-    global PVZ_memory
+    global PVZ_memory, plant_size, zombie_size
     PVZ_memory = memory
+    try:
+        plant_size = PVZ_memory.read_int(0x41C965)
+        zombie_size = PVZ_memory.read_int(0x41C905)
+    except:  # noqa: E722
+        plant_size = 304
+        zombie_size = 304
 
 
 def update_PVZ_pid(pid):
@@ -93,6 +101,15 @@ zombiesType = [
     "巨人伴舞",  # 63
     "影子僵尸",  # 64
     "矿工地刺小鬼",  # 65
+    "冲锋黑橄榄红眼巨人僵尸",  # 66
+    "冲锋黑橄榄红眼小鬼僵尸",  # 67
+    "红眼冰车僵尸",  # 68
+    "双发仙人掌僵尸",  # 69
+    "套盒坚果僵尸",  # 70
+    "至尊VIP坚果僵尸",  # 71
+    "三线玉米投手僵尸",  # 72
+    "冰霜巨人僵尸",  # 73
+    "埃德加二世",  # 74
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -296,6 +313,13 @@ plantsType = [
     "冰焰南瓜头",  # 174
     "至尊VIP树桩",  # 175
     "灵魂豆",  # 176
+    "星星盒子",  # 177
+    "猫窝",  # 178
+    "黄金锤子",  # 179
+    "车轮重塑者",  # 180
+    "迷幻投手",  # 181
+    "玉米旋转机",  # 182
+    "雷果子",  # 183
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -366,6 +390,15 @@ plantsType = plantsType + [
     "巨人伴舞",  # 319
     "影子僵尸",  # 320
     "矿工地刺小鬼",  # 321
+    "冲锋黑橄榄红眼巨人僵尸",  # 322
+    "冲锋黑橄榄红眼小鬼僵尸",  # 323
+    "红眼冰车僵尸",  # 324
+    "双发仙人掌僵尸",  # 325
+    "套盒坚果僵尸",  # 326
+    "至尊VIP坚果僵尸",  # 327
+    "三线玉米投手僵尸",  # 328
+    "冰霜巨人僵尸",  # 329
+    "埃德加二世",  # 330
 ]
 
 ExcludedPutCards = [
@@ -725,7 +758,7 @@ def get_zombies_HP_addresses(PVZ_version):
             "小摔哥的睡帽": 0x008D0EA8,
             "小黄鸭的路障": 0x008D0E44,
             "小黄鸭的铁桶": 0x008D0E11,
-            "僵王": 0x008D0EDA,
+            "僵王": 0x008D0F0B,
             "橄榄巨人": 0x008D0F01,
             "橄榄巨人头盔": 0x008D0F15,
             "橄榄小鬼": 0x005227BB,
@@ -968,6 +1001,11 @@ bulletType = [
     "大型赤焰豌豆",  # 48
     "大型紫焰豌豆",  # 49
     "大型烈焰豌豆",  # 50
+    "魅惑菇(伤害)",  # 51
+    "魅惑菇(短暂魅惑)",  # 52
+    "魅惑菇(自残)",  # 53
+    "油炸玉米粒",  # 54
+    "爆米花",  # 55
 ]
 keyTpye = [
     "无",
@@ -1421,7 +1459,13 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 2.4 or PVZ_version == 2.5:
+            elif PVZ_version == 2.4 or PVZ_version == 2.5 or PVZ_version == 2.51:
+                self.addr = 0x0088B072 + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
+            elif PVZ_version == 2.6:
                 self.addr = 0x0088B072 + (type - 256) * 0x4
                 self.sun = PVZ_memory.read_int(self.addr)
                 self.cd = 0
@@ -1512,7 +1556,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 67:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
-        elif PVZ_version == 2.5:
+        elif PVZ_version == 2.5 or PVZ_version == 2.51:
             if type <= 65:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
@@ -1526,6 +1570,20 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D051C)
             elif type == 69:
                 self.weight = PVZ_memory.read_uchar(0x008D05F7)
+        elif PVZ_version == 2.6:
+            if type <= 74:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 75:
+                self.weight = PVZ_memory.read_uchar(0x008D08C7)
+            elif type == 76:
+                self.weight = PVZ_memory.read_uchar(0x008D0774)
+            elif type == 77:
+                self.weight = PVZ_memory.read_uchar(0x008D0528)
+            elif type == 78:
+                self.weight = PVZ_memory.read_uchar(0x008D061B)
 
     def setAnime(self, anime):
         PVZ_memory.write_int(self.addr + 0x4, anime)
