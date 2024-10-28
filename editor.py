@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.43"
+current_version = "0.44"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -548,6 +548,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.44\n"
+        "卡槽修改和放置植物新增英雄植物和薯条、可乐\n"
+        "攻速修改重做，现在可以修改攻速为任意倍率\n"
         "b0.43\n"
         "适配杂交2.6\n"
         "血量修改仅修复僵王血量地址\n"
@@ -758,8 +761,8 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 60:
-        index = index + 15
+    if 256 > index >= 64:
+        index = index + 11
     combobox.current(index)
     window.destroy()
 
@@ -3727,34 +3730,44 @@ def mainWindow():
     ).pack(side=RIGHT)
     attack_speed_frame = ttk.Frame(bullet_frame)
     attack_speed_frame.pack(anchor=W)
-    attack_speed_label = ttk.Label(attack_speed_frame, text="植物攻速倍率:")
-    attack_speed_label.pack(side=LEFT)
-    ToolTip(
-        attack_speed_label, text="过高会导致植物无法攻击", bootstyle=(INFO, INVERSE)
-    )
+    attack_speed_status = ttk.BooleanVar(random_bullet_frame)
     attack_speed_multiple = ttk.IntVar(attack_speed_frame)
     attack_speed_multiple.set(1)
+    attack_speed_checkbutton = ttk.Checkbutton(
+        attack_speed_frame,
+        variable=attack_speed_status,
+        text="植物攻速倍率:",
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.setAttackSpeed(
+            attack_speed_status.get(), attack_speed_multiple.get()
+        ),
+    )
+
+    attack_speed_checkbutton.pack(side=LEFT)
+    # ToolTip(
+    #     attack_speed_label, text="过高会导致植物无法攻击", bootstyle=(INFO, INVERSE)
+    # )
     attack_speed_entry = ttk.Entry(
         attack_speed_frame,
         font=("黑体", 8),
-        width=3,
+        width=5,
         textvariable=attack_speed_multiple,
     )
     attack_speed_entry.pack(side=LEFT)
-    attack_animation_status = ttk.BooleanVar(attack_speed_frame)
-    attack_animation_check = ttk.Checkbutton(
-        attack_speed_frame,
-        variable=attack_animation_status,
-        text="攻击无视动画",
-        bootstyle="success-round-toggle",
-        command=lambda: pvz.cancelAttackAnimation(attack_animation_status.get()),
-    )
-    attack_animation_check.pack(side=LEFT)
-    ToolTip(
-        attack_animation_check,
-        text="部分植物有效，可无视动画进行攻击，提高攻速上限",
-        bootstyle=(INFO, INVERSE),
-    )
+    # attack_animation_status = ttk.BooleanVar(attack_speed_frame)
+    # attack_animation_check = ttk.Checkbutton(
+    #     attack_speed_frame,
+    #     variable=attack_animation_status,
+    #     text="攻击无视动画",
+    #     bootstyle="success-round-toggle",
+    #     command=lambda: pvz.cancelAttackAnimation(attack_animation_status.get()),
+    # )
+    # attack_animation_check.pack(side=LEFT)
+    # ToolTip(
+    #     attack_animation_check,
+    #     text="部分植物有效，可无视动画进行攻击，提高攻速上限",
+    #     bootstyle=(INFO, INVERSE),
+    # )
     bullet_size_frame = ttk.Frame(bullet_frame)
     bullet_size_frame.pack(anchor=W)
     bullet_size = ttk.IntVar(bullet_size_frame)
@@ -3777,7 +3790,7 @@ def mainWindow():
     ).pack(side=RIGHT)
 
     def setAttackSpeed(event):
-        pvz.setAttackSpeed(attack_speed_multiple.get())
+        pvz.setAttackSpeed(attack_speed_status.get(), attack_speed_multiple.get())
         attack_speed_frame.focus_set()
 
     attack_speed_entry.bind("<Return>", setAttackSpeed)

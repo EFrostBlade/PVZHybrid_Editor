@@ -2565,8 +2565,159 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
         PVZ_data.PVZ_memory.write_bytes(0x0088CE91, b"\xe8\x1a\x1e\xbe\xff", 5)
 
 
-def setAttackSpeed(multiple):
-    PVZ_data.PVZ_memory.write_uchar(0x045F8AC, 256 - 1 * multiple)
+newmem_setAttackSpeed = None
+newmem_setAttackSpeed2 = None
+
+
+def setAttackSpeed(f, multiple):
+    # PVZ_data.PVZ_memory.write_uchar(0x045F8AC, 256 - 1 * multiple)
+    global newmem_setAttackSpeed
+    global newmem_setAttackSpeed2
+    # [ENABLE]
+    # //code from here to '[DISABLE]' will be used to enable the cheat
+    # alloc(newmem,2048)
+    # label(returnhere)
+    # label(originalcode)
+    # label(exit)
+
+    # newmem: //this is allocated memory, you have read,write,execute access
+    # //place your code here
+    # push esi
+    # mov esi,0
+    # xh:
+    # pushad
+    # mov eax,edi
+    # call 464820
+    # popad
+    # inc esi
+    # cmp esi,#1000
+    # jl xh
+    # pop esi
+
+    # originalcode:
+    # cmp dword ptr [edi+00000204],00
+
+    # exit:
+    # jmp returnhere
+
+    # 9D080F:
+    # jmp newmem
+    # nop 2
+    # returnhere:
+
+    # [DISABLE]
+    # //code from here till the end of the code will be used to disable the cheat
+    # dealloc(newmem)
+    # 9D080F:
+    # db 83 BF 04 02 00 00 00
+    # //cmp dword ptr [edi+00000204],00
+
+    # [ENABLE]
+    # //code from here to '[DISABLE]' will be used to enable the cheat
+    # alloc(newmem,2048)
+    # label(returnhere)
+    # label(originalcode)
+    # label(exit)
+
+    # newmem: //this is allocated memory, you have read,write,execute access
+    # //place your code here
+    # push esi
+    # mov esi,0
+    # xh:
+    # pushad
+    # mov eax,edi
+    # call 45f8a0
+    # popad
+    # inc esi
+    # cmp esi,#1000
+    # jl xh
+    # pop esi
+
+    # originalcode:
+    # cmp dword ptr [edi+00000204],00
+
+    # exit:
+    # jmp returnhere
+
+    # 9D040F:
+    # jmp newmem
+    # nop 2
+    # returnhere:
+
+    # [DISABLE]
+    # //code from here till the end of the code will be used to disable the cheat
+    # dealloc(newmem)
+    # 9D040F:
+    # db 83 BF 04 02 00 00 00
+    # //cmp dword ptr [edi+00000204],00
+    if f:
+        newmem_setAttackSpeed = pymem.memory.allocate_memory(
+            PVZ_data.PVZ_memory.process_handle, 256
+        )
+        shellcode = asm.Asm(newmem_setAttackSpeed)
+        shellcode.push_exx(asm.ESI)
+        shellcode.mov_exx(asm.ESI, 0)
+        shellcode.create_label("xh")
+        shellcode.pushad()
+        shellcode.mov_exx_eyy(asm.EAX, asm.EDI)
+        shellcode.call(0x00464820)
+        shellcode.popad()
+        shellcode.inc_exx(asm.ESI)
+        shellcode.cmp_exx_dword(asm.ESI, multiple)
+        shellcode.jl_label("xh")
+        shellcode.pop_exx(asm.ESI)
+        shellcode.cmp_dword_ptr_exx_add_dword_dword(asm.EDI, 0x204, 0)
+        shellcode.jmp(0x009D0814)
+        PVZ_data.PVZ_memory.write_bytes(
+            newmem_setAttackSpeed,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        PVZ_data.PVZ_memory.write_bytes(
+            0x009D080F,
+            b"\xe9"
+            + calculate_call_address(newmem_setAttackSpeed - 0x009D0814)
+            + b"\x90\x90",
+            7,
+        )
+        newmem_setAttackSpeed2 = pymem.memory.allocate_memory(
+            PVZ_data.PVZ_memory.process_handle, 256
+        )
+        shellcode2 = asm.Asm(newmem_setAttackSpeed2)
+        shellcode2.push_exx(asm.ESI)
+        shellcode2.mov_exx(asm.ESI, 0)
+        shellcode2.create_label("xh")
+        shellcode2.pushad()
+        shellcode2.mov_exx_eyy(asm.EAX, asm.EDI)
+        shellcode2.call(0x0045F8A0)
+        shellcode2.popad()
+        shellcode2.inc_exx(asm.ESI)
+        shellcode2.cmp_exx_dword(asm.ESI, multiple)
+        shellcode2.jl_label("xh")
+        shellcode2.pop_exx(asm.ESI)
+        shellcode2.cmp_dword_ptr_exx_add_dword_dword(asm.EDI, 0x204, 0)
+        shellcode2.jmp(0x009D0414)
+        PVZ_data.PVZ_memory.write_bytes(
+            newmem_setAttackSpeed2,
+            bytes(shellcode2.code[: shellcode2.index]),
+            shellcode2.index,
+        )
+        PVZ_data.PVZ_memory.write_bytes(
+            0x009D040F,
+            b"\xe9"
+            + calculate_call_address(newmem_setAttackSpeed2 - 0x009D0414)
+            + b"\x90\x90",
+            7,
+        )
+    else:
+        PVZ_data.PVZ_memory.write_bytes(0x009D080F, b"\x83\xbf\x04\x02\x00\x00\x00", 7)
+        pymem.memory.free_memory(
+            PVZ_data.PVZ_memory.process_handle, newmem_setAttackSpeed
+        )
+        PVZ_data.PVZ_memory.write_bytes(0x009D040F, b"\x83\xbf\x04\x02\x00\x00\x00", 7)
+        pymem.memory.free_memory(
+            PVZ_data.PVZ_memory.process_handle, newmem_setAttackSpeed2
+        )
 
 
 def cancelAttackAnimation(f):
