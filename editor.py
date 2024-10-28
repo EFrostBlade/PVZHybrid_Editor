@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.44"
+current_version = "0.441"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -548,6 +548,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.441\n"
+        "修复薯条之后卡槽错位的问题\n"
         "b0.44\n"
         "卡槽修改和放置植物新增英雄植物和薯条、可乐\n"
         "攻速修改重做，现在可以修改攻速为任意倍率\n"
@@ -761,8 +763,8 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 64:
-        index = index + 11
+    if 256 > index >= 65:
+        index = index + 10
     combobox.current(index)
     window.destroy()
 
