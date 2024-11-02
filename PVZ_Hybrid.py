@@ -189,6 +189,8 @@ def get_zombie_num():
         zombie_num = 66
     elif PVZ_data.PVZ_version == 2.6:
         zombie_num = 75
+    elif PVZ_data.PVZ_version == 2.61:
+        zombie_num = 76
     return zombie_num
 
 
@@ -215,6 +217,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 65)
     elif PVZ_data.PVZ_version == 2.6:
         zombieType = random.randint(0, 74)
+    elif PVZ_data.PVZ_version == 2.61:
+        zombieType = random.randint(0, 75)
     if hasBoss is True:
         return zombieType
     else:
@@ -244,7 +248,7 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 139)
     elif PVZ_data.PVZ_version == 2.5:
         plantType = random.randint(0, 149)
-    elif PVZ_data.PVZ_version == 2.6:
+    elif PVZ_data.PVZ_version == 2.6 or PVZ_data.PVZ_version == 2.61:
         plantType = random.randint(0, 156)
     if plantType >= 48:
         plantType = plantType + 27
@@ -3908,6 +3912,42 @@ def globalSpawModify(f, zombieTypes):
             pymem.memory.free_memory(
                 PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
             )
+    elif PVZ_data.PVZ_version == 2.61:
+        if f:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 76):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0082401F,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x00824024)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            PVZ_data.PVZ_memory.write_bytes(0x0082401F, b"\x0f\x85\x21\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
 
 
 def changeZombieHead(f, zombieType):
@@ -4132,6 +4172,7 @@ def changeZombieHead(f, zombieType):
         PVZ_data.PVZ_version == 2.5
         or PVZ_data.PVZ_version == 2.51
         or PVZ_data.PVZ_version == 2.6
+        or PVZ_data.PVZ_version == 2.61
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -7357,3 +7398,13 @@ def randomZombieSlots(f, start_slot, end_slot):
         # 设置事件标志，通知线程停止
         randomZombieSlots_event.set()
         randomZombieSlots_thread.join()  # 等待线程结束
+
+
+def setBossHP(no, hp):
+    if PVZ_data.PVZ_version == 2.61:
+        if no == 1:
+            PVZ_data.PVZ_memory.write_int(0x008D0F0B, hp)
+        elif no == 2:
+            PVZ_data.PVZ_memory.write_int(0x008D2987, hp)
+        elif no == 3:
+            PVZ_data.PVZ_memory.write_int(0x008D29A5, hp)

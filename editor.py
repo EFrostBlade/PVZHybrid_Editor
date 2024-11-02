@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.441"
+current_version = "0.45"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -284,6 +284,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "2.6.1" in window_name:
+                PVZ_data.update_PVZ_version(2.61)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             elif "2.6" in window_name:
                 PVZ_data.update_PVZ_version(2.6)
                 main_window.title(
@@ -378,6 +386,14 @@ def chooseGame():
                 )
             elif "2.5" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.6.1" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.61)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -548,6 +564,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.45\n"
+        "适配杂交2.61\n"
+        "僵尸血量修改废弃，新增BOSS血量修改功能\n"
         "b0.441\n"
         "修复薯条之后卡槽错位的问题\n"
         "b0.44\n"
@@ -1123,6 +1142,14 @@ def mainWindow():
                 )
             elif "2.4" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "2.6.1" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(2.61)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -2614,8 +2641,72 @@ def mainWindow():
     )
     pausee_spawn_check.grid(row=0, column=0, sticky=W)
 
-    # zombie_characteristic_frame=ttk.Labelframe(zombie_page,text="基础属性",bootstyle=DANGER)
-    # zombie_characteristic_frame.place(x=280,y=210,anchor=NW,height=200,width=150)
+    zombie_characteristic_frame = ttk.Labelframe(
+        zombie_page, text="BOSS血量", bootstyle=DANGER
+    )
+    zombie_characteristic_frame.place(x=280, y=230, anchor=NW, height=150, width=150)
+    ttk.Label(zombie_characteristic_frame, text="僵王博士:").grid(row=0, column=0)
+    boss1_hp_value = ttk.IntVar(zombie_characteristic_frame)
+    boss1_hp_entry = ttk.Entry(
+        zombie_characteristic_frame,
+        textvariable=boss1_hp_value,
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    boss1_hp_entry.grid(row=0, column=1, ipady=0)
+
+    def setboss1HP(event):
+        pvz.setBossHP(1, boss1_hp_value.get())
+        zombie_characteristic_frame.focus_set()
+
+    boss1_hp_entry.bind("<Return>", setboss1HP)
+
+    ttk.Label(zombie_characteristic_frame, text="冰霜巨人:").grid(row=1, column=0)
+    boss2_hp_value = ttk.IntVar(zombie_characteristic_frame)
+    boss2_hp_entry = ttk.Entry(
+        zombie_characteristic_frame,
+        textvariable=boss2_hp_value,
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    boss2_hp_entry.grid(row=1, column=1, ipady=0)
+
+    def setboss2HP(event):
+        pvz.setBossHP(2, boss2_hp_value.get())
+        zombie_characteristic_frame.focus_set()
+
+    boss2_hp_entry.bind("<Return>", setboss2HP)
+
+    ttk.Label(zombie_characteristic_frame, text="埃德加二世:").grid(row=2, column=0)
+    boss3_hp_value = ttk.IntVar(zombie_characteristic_frame)
+    boss3_hp_entry = ttk.Entry(
+        zombie_characteristic_frame,
+        textvariable=boss3_hp_value,
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    boss3_hp_entry.grid(row=2, column=1, ipady=0)
+
+    def setboss3HP(event):
+        pvz.setBossHP(3, boss3_hp_value.get())
+        zombie_characteristic_frame.focus_set()
+
+    boss3_hp_entry.bind("<Return>", setboss3HP)
+
+    def setBossHP():
+        pvz.setBossHP(1, boss1_hp_value.get())
+        pvz.setBossHP(2, boss2_hp_value.get())
+        pvz.setBossHP(3, boss3_hp_value.get())
+
+    boss_hp_button = ttk.Button(
+        zombie_characteristic_frame,
+        text="修改",
+        command=lambda: setBossHP(),
+    )
+    boss_hp_button.grid(row=3, column=0, columnspan=2, sticky=E)
 
     zombie_spoils_frame = ttk.LabelFrame(zombie_page, text="击杀掉落", bootstyle=DANGER)
     zombie_spoils_frame.place(x=0, y=260, anchor=NW, height=200, width=275)
@@ -2930,7 +3021,7 @@ def mainWindow():
 
     zombie_HP_button = ttk.Button(
         zombie_page,
-        text="血量修改",
+        text="血量修改(已废弃)",
         bootstyle=DANGER,
         command=lambda: open_zombie_hp_window(),
     )
