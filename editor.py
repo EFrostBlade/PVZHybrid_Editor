@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.45"
+current_version = "0.46"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -300,6 +300,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "3.0" in window_name:
+                PVZ_data.update_PVZ_version(3.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -402,6 +410,14 @@ def chooseGame():
                 )
             elif "2.6" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "3.0" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.0)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -564,6 +580,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.46\n"
+        "适配杂交3.0\n"
         "b0.45\n"
         "适配杂交2.61\n"
         "僵尸血量修改废弃，新增BOSS血量修改功能\n"
@@ -1158,6 +1176,14 @@ def mainWindow():
                 )
             elif "2.6" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "3.0" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.0)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1778,7 +1804,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 89):
+        for i in range(0, 96):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
@@ -1794,7 +1820,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 89):
+        for i in range(0, 96):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
@@ -1837,7 +1863,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 150):
+        for i in range(0, 162):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -1853,7 +1879,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 150):
+        for i in range(0, 162):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(

@@ -111,6 +111,14 @@ zombiesType = [
     "冰霜巨人僵尸",  # 73
     "埃德加二世",  # 74
     "机枪冰车僵尸",  # 75
+    "干扰车僵尸",  # 76
+    "向日葵僵尸",  # 77
+    "农夫僵尸",  # 78
+    "财主僵尸",  # 79
+    "跳跳舞王僵尸",  # 80
+    "跳跳舞伴僵尸",  # 81
+    "投冰车僵尸",  # 82
+    "幽灵僵尸",  # 83
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -321,6 +329,30 @@ plantsType = [
     "迷幻投手",  # 181
     "玉米旋转机",  # 182
     "雷果子",  # 183
+    "保龄球彩蛋",  # 184
+    "叶子高坚果",  # 185
+    "西瓜大喷菇",  # 186
+    "南瓜加农炮",  # 187
+    "小喷菇投手",  # 188
+    "玉米卷迫击炮",  # 189
+    "火炬辣椒",  # 190
+    "僵尸向日葵 ",  # 191
+    "大嘴阳光菇",  # 192
+    "花盆睡莲",  # 193
+    "机枪花盆",  # 194
+    "大海菇",  # 195
+    "咖啡三叶草",  # 196
+    "僵尸加农炮",  # 197
+    "阳光魅惑菇",  # 198
+    "墓碑爆破者",  # 199
+    "火炬保护伞",  # 200
+    "地刺伞",  # 201
+    "磁力土豆雷",  # 202
+    "地刺西瓜投手",  # 203
+    "磁力地刺王",  # 204
+    "南瓜灯",  # 205
+    "卡牌模仿者",  # 206
+    "烈焰毁灭菇",  # 207
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -401,6 +433,14 @@ plantsType = plantsType + [
     "冰霜巨人僵尸",  # 329
     "埃德加二世",  # 330
     "机枪冰车僵尸",  # 331
+    "干扰车僵尸",  # 332
+    "向日葵僵尸",  # 333
+    "农夫僵尸",  # 334
+    "财主僵尸",  # 335
+    "跳跳舞王僵尸",  # 336
+    "跳跳舞伴僵尸",  # 337
+    "投冰车僵尸",  # 338
+    "幽灵僵尸",  # 339
 ]
 
 ExcludedPutCards = [
@@ -435,6 +475,7 @@ ExcludedPutCards = [
     "豌豆许愿池",
     "天使向日葵",
     "阳光加农炮",
+    "黄金锤子",  # 179
 ]
 DownPlantCards = [
     "小盆菇",
@@ -444,12 +485,16 @@ DownPlantCards = [
     "促销花盆",
     "荷包蛋",  # 172
     "忧郁咖啡豆",  # 171
+    "猫窝",  # 178
+    "花盆睡莲",  # 193
+    "机枪花盆",  # 194
 ]
 PumpkinPlantCards = [
     "忧郁南瓜头",
     "阳光南瓜掌",
     "烈火南瓜头",
     "冰焰南瓜头",  # 174
+    "南瓜灯",  # 205
 ]
 AshPlantCards = [
     "阳光炸弹",
@@ -476,6 +521,10 @@ AshPlantCards = [
     "禁忌寒冰菇",
     "豌豆炸弹",  # 168
     "灵魂豆",  # 176
+    "车轮重塑者",  # 180
+    "火炬辣椒",  # 190
+    "咖啡三叶草",  # 196
+    "墓碑爆破者",  # 199
 ]
 
 
@@ -569,8 +618,6 @@ def get_zombies_HP_addresses(PVZ_version):
             "雪橇车": 0x00523139,
             "雪橇小队": 0x008D0B94,
             "雪橇小队上限": 0x008D0B9E,
-            "海豚": 0x00522D64,
-            "海豚的路障": 0x008D06FD,
             "小丑": 0x00522FC7,
             "小丑的路障": 0x008D00EA,
             "气球": 0x005234BF,
@@ -1008,6 +1055,12 @@ bulletType = [
     "魅惑菇(自残)",  # 53
     "油炸玉米粒",  # 54
     "爆米花",  # 55
+    "南瓜炮",  # 56
+    "炸游戏(卷心菜迫击炮)",  # 57
+    "炸游戏(玉米迫击炮)",  # 58
+    "罐子",  # 59
+    "地刺",  # 60
+    "雪球",  # 61
 ]
 keyTpye = [
     "无",
@@ -1473,6 +1526,12 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
+            elif PVZ_version == 3.0:
+                self.addr = 0x0088B0F9 + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -1599,6 +1658,20 @@ class zombieType:
             elif type == 78:
                 self.weight = PVZ_memory.read_uchar(0x008D0528)
             elif type == 79:
+                self.weight = PVZ_memory.read_uchar(0x008D061B)
+        elif PVZ_version == 3.0:
+            if type <= 83:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 84:
+                self.weight = PVZ_memory.read_uchar(0x008D08C7)
+            elif type == 85:
+                self.weight = PVZ_memory.read_uchar(0x008D0774)
+            elif type == 86:
+                self.weight = PVZ_memory.read_uchar(0x008D0528)
+            elif type == 87:
                 self.weight = PVZ_memory.read_uchar(0x008D061B)
 
     def setAnime(self, anime):
