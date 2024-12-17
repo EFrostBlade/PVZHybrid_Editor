@@ -7459,3 +7459,29 @@ def setBossHP(no, hp):
             PVZ_data.PVZ_memory.write_int(0x008D298A, hp)
         elif no == 3:
             PVZ_data.PVZ_memory.write_int(0x008D29A8, hp)
+
+
+newmem_more_hero = None
+
+
+def more_hero(f):
+    if f:
+        newmem_more_hero = pymem.memory.allocate_memory(
+            PVZ_data.PVZ_memory.process_handle, 2048
+        )
+        shellcode = asm.Asm(newmem_more_hero)
+        shellcode.mov_byte_ptr_exx_add_byte_byte(asm.EDI, 0x48, 1)
+        shellcode.jmp(0x009F108E)
+        PVZ_data.PVZ_memory.write_bytes(
+            newmem_more_hero,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        PVZ_data.PVZ_memory.write_bytes(
+            0x009F1057,
+            b"\xe9" + calculate_call_address(newmem_more_hero - 0x009F105C) + b"\x90",
+            6,
+        )
+    else:
+        PVZ_data.PVZ_memory.write_bytes(0x009F1057, b"\x56\x50\x51\x52\x6a\x00", 6)
+        pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_more_hero)

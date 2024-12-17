@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.47"
+current_version = "0.48"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -7271,6 +7271,15 @@ def mainWindow():
         command=lambda: pvz.fix_nut_gargantuar(fix_nut_gargantuar_status.get()),
     )
     fix_nut_gargantuar_check.pack()
+    more_hero_status = ttk.BooleanVar(other_toggle_frame)
+    more_hero_check = ttk.Checkbutton(
+        other_toggle_frame,
+        text="英雄植物可多种",
+        variable=more_hero_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.more_hero(more_hero_status.get()),
+    )
+    more_hero_check.pack()
     endless_frame = ttk.Frame(other_page)
     endless_frame.pack(anchor=W)
     ttk.Label(endless_frame, text="无尽轮数").pack(side=LEFT)
