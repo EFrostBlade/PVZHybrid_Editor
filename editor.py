@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.48"
+current_version = "0.50"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -580,6 +580,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.50\n"
+        "新增七色花等部分隐藏植物\n新增英雄植物可多种功能，位于暂未分类标签页"
         "b0.47\n"
         "修复植物和僵尸图片顺序错误的问题\n"
         "b0.46\n"
