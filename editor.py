@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.50"
+current_version = "0.51"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -804,8 +804,8 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 65:
-        index = index + 10
+    if 256 > index >= 71:
+        index = index + 4
     combobox.current(index)
     window.destroy()
 
