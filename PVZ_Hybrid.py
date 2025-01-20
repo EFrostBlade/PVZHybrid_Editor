@@ -193,6 +193,8 @@ def get_zombie_num():
         zombie_num = 76
     elif PVZ_data.PVZ_version == 3.0:
         zombie_num = 83
+    elif PVZ_data.PVZ_version == 3.1:
+        zombie_num = 89
     return zombie_num
 
 
@@ -223,10 +225,12 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 75)
     elif PVZ_data.PVZ_version == 3.0:
         zombieType = random.randint(0, 82)
+    elif PVZ_data.PVZ_version == 3.1:
+        zombieType = random.randint(0, 88)
     if hasBoss is True:
         return zombieType
     else:
-        if zombieType == 25:
+        if zombieType == 25 or zombieType == 73 or zombieType == 74:
             zombieType = getRandomZombie(False)
         return zombieType
 
@@ -256,6 +260,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 156)
     elif PVZ_data.PVZ_version == 3.0:
         plantType = random.randint(0, 179)
+    elif PVZ_data.PVZ_version == 3.1:
+        plantType = random.randint(0, 195)
     if plantType >= 48:
         plantType = plantType + 27
     if isPut is False:
@@ -409,6 +415,27 @@ def setSun(sun):
         + 0x5560
     )
     PVZ_data.PVZ_memory.write_int(sunAddr, int(sun))
+
+
+def getShovel():
+    shovelAddr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1CAC
+    )
+    shovelNow = PVZ_data.PVZ_memory.read_int(shovelAddr)
+    return shovelNow
+
+
+def setShovel(shovel):
+    shovelAddr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1CAC
+    )
+    PVZ_data.PVZ_memory.write_int(shovelAddr, shovel)
 
 
 def cancalSunFall(f):
@@ -3990,6 +4017,42 @@ def globalSpawModify(f, zombieTypes):
             pymem.memory.free_memory(
                 PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
             )
+    elif PVZ_data.PVZ_version == 3.1:
+        if f:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 89):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0082405A,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x0082405F)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            PVZ_data.PVZ_memory.write_bytes(0x0082405A, b"\x0f\x85\xc0\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
 
 
 def changeZombieHead(f, zombieType):
@@ -4216,6 +4279,7 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 2.6
         or PVZ_data.PVZ_version == 2.61
         or PVZ_data.PVZ_version == 3.0
+        or PVZ_data.PVZ_version == 3.1
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -7459,6 +7523,13 @@ def setBossHP(no, hp):
             PVZ_data.PVZ_memory.write_int(0x008D298A, hp)
         elif no == 3:
             PVZ_data.PVZ_memory.write_int(0x008D29A8, hp)
+    elif PVZ_data.PVZ_version == 3.1:
+        if no == 1:
+            PVZ_data.PVZ_memory.write_int(0x008D0F75, hp)
+        elif no == 2:
+            PVZ_data.PVZ_memory.write_int(0x008D29F1, hp)
+        elif no == 3:
+            PVZ_data.PVZ_memory.write_int(0x008D2A0F, hp)
 
 
 newmem_more_hero = None

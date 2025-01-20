@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.51"
+current_version = "0.52"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -308,6 +308,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "3.1" in window_name:
+                PVZ_data.update_PVZ_version(3.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -424,6 +432,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "3.1" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.1)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
@@ -479,7 +495,7 @@ def chooseGame():
     choose_process_window.tk.call("tk", "scaling", 4 / 3)
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    choose_process_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
+    choose_process_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
     label = ttk.Label(
         choose_process_window,
         text="如果未开启游戏请开启游戏后点击寻找游戏按钮",
@@ -543,7 +559,7 @@ def support():
     support_window.tk.call("tk", "scaling", 4 / 3)
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    support_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
+    support_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
     ttk.Label(
         support_window, text="本软件完全免费", font=("黑体", 18), bootstyle=SUCCESS
     ).pack(pady=10)
@@ -580,6 +596,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.52\n"
+        "适配杂交版3.1\n"
+        "新增修改铲子功能\n"
         "b0.50\n"
         "新增七色花等部分隐藏植物\n新增英雄植物可多种功能，位于暂未分类标签页"
         "b0.47\n"
@@ -752,12 +771,6 @@ def support():
         font=("黑体", 8),
         bootstyle=WARNING,
     ).pack()
-    ttk.Label(
-        support_window,
-        text=r"群里有好东西，赞助后请务必进群\^o^/",
-        font=("黑体", 8),
-        bootstyle=WARNING,
-    ).pack()
     image_frame = ttk.Frame(support_window)
     image_frame.pack()
     AliPay = ttk.PhotoImage(file=resource_path(r"res/support/AliPay.png"))
@@ -783,7 +796,7 @@ def delete_config():
     deete_config_window.tk.call("tk", "scaling", 4 / 3)
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    deete_config_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
+    deete_config_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
     ttk.Label(
         deete_config_window,
         text="读取配置文件时发生错误\n将删除配置文件并关闭程序\n请重新启动程序",
@@ -804,8 +817,8 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 71:
-        index = index + 4
+    if 256 > index >= 72:
+        index = index + 3
     combobox.current(index)
     window.destroy()
 
@@ -816,7 +829,7 @@ def open_card_select_window(combobox):
     card_select_window.title("选择卡片")
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    card_select_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
+    card_select_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
 
     notebook = ttk.Notebook(card_select_window)
     notebook.pack(fill="both", expand=True)
@@ -873,7 +886,7 @@ def open_zombie_select_window(combobox):
     zombie_select_window.title("选择僵尸")
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    zombie_select_window.geometry(f"+{main_window_x+50}+{main_window_y + 50}")
+    zombie_select_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
 
     notebook = ttk.Notebook(zombie_select_window)
     notebook.pack(fill="both", expand=True)
@@ -942,7 +955,7 @@ def mainWindow():
         update_window.tk.call("tk", "scaling", 4 / 3)
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()
-        update_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
+        update_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
         ttk.Label(
             update_window,
             text="检测到新版本{}".format(latest_version),
@@ -1036,12 +1049,6 @@ def mainWindow():
         ttk.Label(
             update_window,
             text="进群可享受功能优先适配、1对1解决问题等服务",
-            font=("黑体", 8),
-            bootstyle=WARNING,
-        ).pack()
-        ttk.Label(
-            update_window,
-            text=r"群里有好东西，赞助后请务必进群\^o^/",
             font=("黑体", 8),
             bootstyle=WARNING,
         ).pack()
@@ -1188,6 +1195,14 @@ def mainWindow():
                 )
             elif "3.0" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "3.1" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.1)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1681,8 +1696,23 @@ def mainWindow():
         else:
             pvz.pauseProKey(False, 0, 0, 0, 0)
 
+    shovel_frame = ttk.Frame(common_page)
+    shovel_frame.place(x=0, y=285, anchor=NW)
+    shovel_label = ttk.Label(
+        shovel_frame, text="铲子修改", font=("黑体", 12), bootstyle=DARK
+    )
+    shovel_label.grid(row=0, column=0)
+    shovel_combobox = ttk.Combobox(
+        shovel_frame, values=PVZ_data.shovelType, state=READONLY, width=10
+    )
+    shovel_combobox.grid(row=0, column=1)
+
+    shovel_combobox.bind(
+        "<<ComboboxSelected>>", lambda event: pvz.setShovel(shovel_combobox.current())
+    )
+
     game_speed_frame = ttk.LabelFrame(common_page, text="游戏速度", bootstyle=DARK)
-    game_speed_frame.place(x=0, y=285, anchor=NW)
+    game_speed_frame.place(x=0, y=315, anchor=NW)
     game_speed_label = ttk.Label(game_speed_frame, text="1", bootstyle=DARK)
     game_speed_label.grid(row=0, column=0)
     game_speed_frame.columnconfigure(0, minsize=30)
@@ -1775,7 +1805,7 @@ def mainWindow():
     # ).grid(row=0, column=2, padx=5)
 
     game_save_frame = ttk.LabelFrame(common_page, text="存档修改", bootstyle=DARK)
-    game_save_frame.place(x=0, y=325, anchor=NW)
+    game_save_frame.place(x=0, y=355, anchor=NW)
     # ttk.Label(game_save_frame, text="冒险第").grid(row=0, column=0)
     # adventure_start_level_value = ttk.IntVar(game_save_frame)
     # adventure_start_level_combobox = ttk.Combobox(
@@ -1867,7 +1897,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 162):
+        for i in range(0, 171):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -1883,7 +1913,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 162):
+        for i in range(0, 171):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(
@@ -2100,7 +2130,7 @@ def mainWindow():
         change_shortcut_window.tk.call("tk", "scaling", 4 / 3)
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()
-        change_shortcut_window.geometry(f"+{main_window_x+200}+{main_window_y + 200}")
+        change_shortcut_window.geometry(f"+{main_window_x + 200}+{main_window_y + 200}")
 
         label = ttk.Label(change_shortcut_window, text="请按下新的快捷键")
         label.pack()
@@ -3020,7 +3050,7 @@ def mainWindow():
         zombie_hp_window.title("修改僵尸血量")
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()
-        zombie_hp_window.geometry(f"+{main_window_x+50}+{main_window_y+50}")
+        zombie_hp_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
         zombie_hp_values = {}
         row = None
         for i, (zombie_name, address) in enumerate(
@@ -4583,7 +4613,7 @@ def mainWindow():
 
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()
-        formation_plant_window.geometry(f"+{main_window_x+150}+{main_window_y + 150}")
+        formation_plant_window.geometry(f"+{main_window_x + 150}+{main_window_y + 150}")
         # 列表框
         listbox = Listbox(formation_plant_window, height=10, font=small_font)
         listbox.pack()
@@ -7507,7 +7537,7 @@ def mainWindow():
             entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
             entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
     except Exception as e:
-        print(zombie_name)
+        print(zombie_name, e)
         messagebox.showerror(
             "错误",
             f"游戏版本与修改器版本可能不匹配，部分功能可能无法使用，请更新游戏或修改器",
@@ -7599,6 +7629,7 @@ def mainWindow():
     def refreshData():
         if page_tab.index("current") == 0:
             # gameDifficult.set(pvz.getDifficult())
+            shovel_combobox.current(pvz.getShovel())
             if pvz.getMap() is not False:
                 try:
                     if main_window.focus_get() != sun_value_entry:
@@ -7706,7 +7737,7 @@ def mainWindow():
         recruit_window.tk.call("tk", "scaling", 4 / 3)
         main_window_x = main_window.winfo_x()
         main_window_y = main_window.winfo_y()
-        recruit_window.geometry(f"+{main_window_x+100}+{main_window_y + 100}")
+        recruit_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
         ttk.Label(
             recruit_window,
             text="抖音最强植物工会，0抽点\n一对一教学搭建起号\n主播有24小时运营\n在播主播人均月收五位数\n欢迎各位加入",

@@ -119,6 +119,12 @@ zombiesType = [
     "跳跳舞伴僵尸",  # 81
     "投冰车僵尸",  # 82
     "幽灵僵尸",  # 83
+    "模仿者僵尸",  # 84
+    "树人僵尸",  # 85
+    "僵尸虫子",  # 86
+    "橄榄撑杆僵尸",  # 87
+    "矿工巨人僵尸",  # 88
+    "矿工小鬼僵尸",  # 89
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -143,6 +149,22 @@ itemType = [
     "未知13",
     "未知14",
     "小黄鸭",
+]
+shovelType = [
+    "普通铲子",  # 0
+    "银铲子",  # 1
+    "金铲子",  # 2
+    "钻石铲子",  # 3
+    "星星铲子",  # 4
+    "寒冰铲子",  # 5
+    "辣椒铲子",  # 6
+    "骷髅铲子",  # 7
+    "旋风铲子",  # 8
+    "南瓜铲子",  # 9
+    "礼盒铲子",  # 10
+    "魅惑铲子",  # 11
+    "汉堡铲子",  # 12
+    "豪华铲子",  # 13
 ]
 plantsType = [
     "豌豆向日葵",
@@ -216,7 +238,7 @@ plantsType = [
     "七色花",  # 68
     "腾腾游记四叶草",  # 69
     "地刺子弹",  # 70
-    "空",
+    "瓜子",  # 71
     "空",
     "空",
     "空",
@@ -353,6 +375,22 @@ plantsType = [
     "南瓜灯",  # 205
     "卡牌模仿者",  # 206
     "烈焰毁灭菇",  # 207
+    "丛林散装豌豆",  # 208
+    "火炬辣椒豆",  # 209
+    "禁忌咖啡豆",  # 210
+    "南瓜投手",  # 211
+    "南瓜盒子",  # 212
+    "坚果向日葵",  # 213
+    "寒冰炸弹",  # 214
+    "杨桃三线射手",  # 215
+    "缠绕灯草",  # 216
+    "冰炬魅惑菇",  # 217
+    "土豆窝瓜雷",  # 218
+    "樱桃豆",  # 219
+    "杨桃树桩",  # 220
+    "鬼影魅惑菇",  # 221
+    "迷你汉堡射手",  # 222
+    "浴火三线射手",  # 223
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -441,6 +479,12 @@ plantsType = plantsType + [
     "跳跳舞伴僵尸",  # 337
     "投冰车僵尸",  # 338
     "幽灵僵尸",  # 339
+    "模仿者僵尸",  # 340
+    "树人僵尸",  # 341
+    "僵尸虫子",  # 342
+    "橄榄撑杆僵尸",  # 343
+    "矿工巨人僵尸",  # 344
+    "矿工小鬼僵尸",  # 345
 ]
 
 ExcludedPutCards = [
@@ -475,6 +519,7 @@ ExcludedPutCards = [
     "豌豆许愿池",
     "天使向日葵",
     "阳光加农炮",
+    "生命重塑者",
     "黄金锤子",  # 179
 ]
 DownPlantCards = [
@@ -525,6 +570,8 @@ AshPlantCards = [
     "火炬辣椒",  # 190
     "咖啡三叶草",  # 196
     "墓碑爆破者",  # 199
+    "寒冰炸弹",  # 214
+    "樱桃豆",  # 219
 ]
 
 
@@ -1061,6 +1108,16 @@ bulletType = [
     "罐子",  # 59
     "地刺",  # 60
     "雪球",  # 61
+    "炸游戏(火焰卷心菜迫击炮)",  # 62
+    "炸游戏(火焰玉米迫击炮)",  # 63
+    "炸游戏(火焰玉米迫击炮)",  # 64
+    "玉米粒",  # 65
+    "蛋糕",  # 66
+    "分裂星星",  # 67
+    "火焰星星",  # 68
+    "火焰分裂星星",  # 69
+    "红温豌豆",  # 70
+    "烈火红温豌豆",  # 71
 ]
 keyTpye = [
     "无",
@@ -1532,6 +1589,12 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
+            elif PVZ_version == 3.1:
+                self.addr = 0x0088B0F9 + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -1673,6 +1736,20 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0528)
             elif type == 87:
                 self.weight = PVZ_memory.read_uchar(0x008D061B)
+        elif PVZ_version == 3.1:
+            if type <= 89:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 90:
+                self.weight = PVZ_memory.read_uchar(0x008D0927)
+            elif type == 91:
+                self.weight = PVZ_memory.read_uchar(0x008D07C4)
+            elif type == 92:
+                self.weight = PVZ_memory.read_uchar(0x008D0529)
+            elif type == 93:
+                self.weight = PVZ_memory.read_uchar(0x008D066B)
 
     def setAnime(self, anime):
         PVZ_memory.write_int(self.addr + 0x4, anime)
