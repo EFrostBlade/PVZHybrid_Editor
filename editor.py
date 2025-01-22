@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.52"
+current_version = "0.53"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -308,6 +308,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "3.1.5" in window_name:
+                PVZ_data.update_PVZ_version(3.15)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             elif "3.1" in window_name:
                 PVZ_data.update_PVZ_version(3.1)
                 main_window.title(
@@ -426,6 +434,14 @@ def chooseGame():
                 )
             elif "3.0" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "3.1.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.15)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -596,6 +612,10 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.53\n"
+        "适配杂交版3.15\n"
+        "修复了番外关卡无法一键完成的问题\n"
+        "新增解锁全部成就功能\n"
         "b0.52\n"
         "适配杂交版3.1\n"
         "新增修改铲子功能\n"
@@ -1201,6 +1221,14 @@ def mainWindow():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "3.1.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.15)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             elif "3.1" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.1)
                 main_window.title(
@@ -1531,17 +1559,26 @@ def mainWindow():
     ToolTip(
         win_button, text="当前的游戏关卡直接进行胜利结算", bootstyle=(INFO, INVERSE)
     )
-    defeat_button = ttk.Button(
+    # defeat_button = ttk.Button(
+    #     quick_start_frame,
+    #     text="当前关卡失败",
+    #     padding=0,
+    #     bootstyle=(SUCCESS, OUTLINE),
+    #     command=lambda: pvz.defeat(),
+    # )
+    # defeat_button.grid(row=10, column=0, sticky=W, pady=(2, 2))
+    # ToolTip(
+    #     defeat_button, text="当前的游戏关卡直接进行失败结算", bootstyle=(INFO, INVERSE)
+    # )
+    achevement_button = ttk.Button(
         quick_start_frame,
-        text="当前关卡失败",
+        text="完成所有成就",
         padding=0,
         bootstyle=(SUCCESS, OUTLINE),
-        command=lambda: pvz.defeat(),
+        command=lambda: pvz.achevement(),
     )
-    defeat_button.grid(row=10, column=0, sticky=W, pady=(2, 2))
-    ToolTip(
-        defeat_button, text="当前的游戏关卡直接进行失败结算", bootstyle=(INFO, INVERSE)
-    )
+    achevement_button.grid(row=10, column=0, sticky=W, pady=(2, 2))
+    ToolTip(achevement_button, text="完成所有游戏成就", bootstyle=(INFO, INVERSE))
     kill_all_button = ttk.Button(
         quick_start_frame,
         text="秒杀所有僵尸",
@@ -1838,7 +1875,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 96):
+        for i in range(0, 186):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
@@ -1854,7 +1891,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 96):
+        for i in range(0, 186):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
@@ -1929,7 +1966,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 38):
+        for i in range(0, 42):
             pvz.completeMiniGame(i)
         for i in range(0, 40):
             pvz.completePuzzle(i)
@@ -1949,7 +1986,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 34):
+        for i in range(0, 42):
             pvz.lockMiniGame(i)
         for i in range(0, 40):
             pvz.lockPuzzle(i)

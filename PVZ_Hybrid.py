@@ -993,6 +993,21 @@ def lockMiniGame(level):
     PVZ_data.PVZ_memory.write_int(challengeAddr + level * 4, 0)
 
 
+def achevement():
+    for i in range(0, 35):
+        completeAchievement(i)
+
+
+def completeAchievement(no):
+    achievementAddr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1CDC
+    )
+    PVZ_data.PVZ_memory.write_uchar(achievementAddr + no, 1)
+
+
 def noHole(d, t, b):
     global newmem_noHole
     if d and not b and not t:

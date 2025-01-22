@@ -1589,7 +1589,7 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
-            elif PVZ_version == 3.1:
+            elif PVZ_version == 3.1 or PVZ_version == 3.15:
                 self.addr = 0x0088B0F9 + (type - 256) * 0x4
                 self.sun = PVZ_memory.read_int(self.addr)
                 self.cd = 0
@@ -1736,7 +1736,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0528)
             elif type == 87:
                 self.weight = PVZ_memory.read_uchar(0x008D061B)
-        elif PVZ_version == 3.1:
+        elif PVZ_version == 3.1 or PVZ_version == 3.15:
             if type <= 89:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
