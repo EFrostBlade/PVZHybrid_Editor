@@ -391,6 +391,9 @@ plantsType = [
     "鬼影魅惑菇",  # 221
     "迷你汉堡射手",  # 222
     "浴火三线射手",  # 223
+    "猫猫星机枪",  # 224
+    "潜艇烟花",  # 225
+    "升值豆",  # 226
 ]
 for _ in range(len(plantsType), 256):
     plantsType.append("占位")
@@ -521,6 +524,9 @@ ExcludedPutCards = [
     "阳光加农炮",
     "生命重塑者",
     "黄金锤子",  # 179
+    "火炬辣椒豆",  # 209
+    "禁忌咖啡豆",  # 210
+    "升值豆",  # 226
 ]
 DownPlantCards = [
     "小盆菇",
@@ -1118,6 +1124,9 @@ bulletType = [
     "火焰分裂星星",  # 69
     "红温豌豆",  # 70
     "烈火红温豌豆",  # 71
+    "金豌豆",  # 72
+    "火焰爆炸星星",  # 73
+    "爆炸星星",  # 74
 ]
 keyTpye = [
     "无",
@@ -1595,6 +1604,12 @@ class plantCharacteristic:
                 self.cd = 0
                 self.canAttack = True
                 self.attackInterval = 0
+            elif PVZ_version == 3.2 or PVZ_version == 3.21:
+                self.addr = 0x0088B119 + (type - 256) * 0x4
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = 0
+                self.canAttack = True
+                self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -1736,7 +1751,12 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0528)
             elif type == 87:
                 self.weight = PVZ_memory.read_uchar(0x008D061B)
-        elif PVZ_version == 3.1 or PVZ_version == 3.15:
+        elif (
+            PVZ_version == 3.1
+            or PVZ_version == 3.15
+            or PVZ_version == 3.2
+            or PVZ_version == 3.21
+        ):
             if type <= 89:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
