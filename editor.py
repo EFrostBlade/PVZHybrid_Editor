@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.54"
+current_version = "0.55"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -340,6 +340,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.3" in window_name:
+                PVZ_data.update_PVZ_version(3.3)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -482,6 +490,14 @@ def chooseGame():
                 )
             elif "v3.2" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.3" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -644,6 +660,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.55\n"
+        "适配杂交版3.3\n"
         "b0.54\n"
         "适配杂交版3.2、3.21\n"
         "b0.53\n"
@@ -871,8 +889,6 @@ def delete_config():
 
 def on_card_image_click(event, window, combobox):
     index = int(event.widget.cget("text"))
-    if 256 > index >= 72:
-        index = index + 3
     combobox.current(index)
     window.destroy()
 
@@ -903,8 +919,8 @@ def open_card_select_window(combobox):
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=i // 18, column=i % 18)
-        r = i // 18
+        label.grid(row=i // 25, column=i % 25)
+        r = i // 25
 
     # Create a tab for zombies
     zombie_tab = ttk.Frame(notebook)
@@ -920,7 +936,7 @@ def open_card_select_window(combobox):
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=r + 1 + i // 18, column=i % 18)
+        label.grid(row=r + 1 + i // 25, column=i % 25)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -957,7 +973,7 @@ def open_zombie_select_window(combobox):
             "<Button-1>",
             lambda event: on_zombie_image_click(event, zombie_select_window, combobox),
         )
-        label.grid(row=i // 18, column=i % 18)
+        label.grid(row=i // 25, column=i % 25)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -1281,6 +1297,14 @@ def mainWindow():
                 )
             elif "v3.2" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.2)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.3" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.3)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -7755,9 +7779,9 @@ def mainWindow():
                     endless_round.set(pvz.getEndlessRound())
             except:
                 pass
-        recruit_button.configure(
-            bootstyle=random.choice(["danger", "success", "warning", "primary"])
-        )
+        # recruit_button.configure(
+        #     bootstyle=random.choice(["danger", "success", "warning", "primary"])
+        # )
         main_window.after(100, refreshData)
 
     def load_plugin(main_window):
@@ -7813,39 +7837,39 @@ def mainWindow():
     )
     plugin_button.place(x=100, y=0, relx=0, rely=1, anchor="sw")
 
-    def recruit():
-        global main_window
-        recruit_window = ttk.Toplevel(topmost=True)
-        recruit_window.title("主播招募")
-        recruit_window.geometry("300x460")
-        recruit_window.iconphoto(
-            False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
-        )
-        recruit_window.tk.call("tk", "scaling", 4 / 3)
-        main_window_x = main_window.winfo_x()
-        main_window_y = main_window.winfo_y()
-        recruit_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
-        ttk.Label(
-            recruit_window,
-            text="抖音最强植物工会，0抽点\n一对一教学搭建起号\n主播有24小时运营\n在播主播人均月收五位数\n欢迎各位加入",
-            font=("黑体", 14),
-            bootstyle=PRIMARY,
-        ).pack(pady=10)
+    # def recruit():
+    #     global main_window
+    #     recruit_window = ttk.Toplevel(topmost=True)
+    #     recruit_window.title("主播招募")
+    #     recruit_window.geometry("300x460")
+    #     recruit_window.iconphoto(
+    #         False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
+    #     )
+    #     recruit_window.tk.call("tk", "scaling", 4 / 3)
+    #     main_window_x = main_window.winfo_x()
+    #     main_window_y = main_window.winfo_y()
+    #     recruit_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
+    #     ttk.Label(
+    #         recruit_window,
+    #         text="抖音最强植物工会，0抽点\n一对一教学搭建起号\n主播有24小时运营\n在播主播人均月收五位数\n欢迎各位加入",
+    #         font=("黑体", 14),
+    #         bootstyle=PRIMARY,
+    #     ).pack(pady=10)
 
-        WeChat = ttk.PhotoImage(file=resource_path(r"res/support/WeChat.png"))
-        AliPay_image = ttk.Label(recruit_window, image=WeChat)
-        AliPay_image.pack(pady=10)
-        recruit_window.mainloop()
+    #     WeChat = ttk.PhotoImage(file=resource_path(r"res/support/WeChat.png"))
+    #     AliPay_image = ttk.Label(recruit_window, image=WeChat)
+    #     AliPay_image.pack(pady=10)
+    #     recruit_window.mainloop()
 
-    recruit_button = ttk.Button(
-        main_window,
-        text="想做主播点这里",
-        padding=0,
-        bootstyle="danger",
-        cursor="hand2",
-        command=lambda: recruit(),
-    )
-    recruit_button.place(x=180, y=0, relx=0, rely=1, anchor="sw")
+    # recruit_button = ttk.Button(
+    #     main_window,
+    #     text="想做主播点这里",
+    #     padding=0,
+    #     bootstyle="danger",
+    #     cursor="hand2",
+    #     command=lambda: recruit(),
+    # # )
+    # recruit_button.place(x=180, y=0, relx=0, rely=1, anchor="sw")
 
     support_button = ttk.Button(
         main_window,
