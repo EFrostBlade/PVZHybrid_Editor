@@ -950,7 +950,10 @@ def open_card_select_window(combobox):
     for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(zombie_tab, image=photo, text=str(i + 256))
+        if PVZ_data.PVZ_version < 3.4:
+            label = tk.Label(zombie_tab, image=photo, text=str(i + 256))
+        else:
+            label = tk.Label(zombie_tab, image=photo, text=str(i + 512))
         label.image = photo  # keep a reference to the image
         label.bind(
             "<Button-1>",
@@ -6019,9 +6022,14 @@ def mainWindow():
 
     def get_zombie_type():
         global zombie_sun_type
-        zombie_sun_type = PVZ_data.plantCharacteristic(
-            zombie_type_combobox.current() + 256
-        )
+        if PVZ_data.PVZ_version < 3.4:
+            zombie_sun_type = PVZ_data.plantCharacteristic(
+                zombie_type_combobox.current() + 256
+            )
+        else:
+            zombie_sun_type = PVZ_data.plantCharacteristic(
+                zombie_type_combobox.current() + 512
+            )
         print(hex(zombie_sun_type.addr))
         zombie_sun_sun_value.set(zombie_sun_type.sun)
         zombie_sun_frame.focus_set()
