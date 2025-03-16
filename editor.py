@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.55"
+current_version = "0.56"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -348,6 +348,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.4" in window_name:
+                PVZ_data.update_PVZ_version(3.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -498,6 +506,14 @@ def chooseGame():
                 )
             elif "v3.3" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.3)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.4" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.4)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -660,6 +676,10 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.56\n"
+        "适配杂交版3.4\n"
+        "完成更多模式会完成商店关卡\n"
+        "新增智慧树高度修改\n"
         "b0.55\n"
         "适配杂交版3.3\n"
         "b0.54\n"
@@ -1305,6 +1325,14 @@ def mainWindow():
                 )
             elif "v3.3" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.3)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.4" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.4)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -2008,7 +2036,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 171):
+        for i in range(0, 180):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -2024,7 +2052,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 171):
+        for i in range(0, 180):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(
@@ -2046,6 +2074,8 @@ def mainWindow():
             pvz.completePuzzle(i)
         for i in range(0, 20):
             pvz.completeHero(i)
+        for i in range(0, 62):
+            pvz.completeStore(i)
 
     miniGame_complete_button = ttk.Button(
         game_save_frame,
@@ -2066,6 +2096,8 @@ def mainWindow():
             pvz.lockPuzzle(i)
         for i in range(0, 20):
             pvz.lockHero(i)
+        for i in range(0, 62):
+            pvz.lockStore(i)
 
     miniGame_lock_button = ttk.Button(
         game_save_frame,
@@ -7332,6 +7364,22 @@ def mainWindow():
             )
         except:
             pass
+
+    garden_page = ttk.Frame(page_tab)
+    garden_page.pack()
+    page_tab.add(garden_page, text="花园相关")
+    tree_frame = ttk.LabelFrame(garden_page, text="智慧树")
+    tree_frame.pack(anchor=W)
+    tree_hight = ttk.IntVar(tree_frame)
+    tree_hight.set(0)
+    tree_hight_entry = ttk.Entry(tree_frame, width=8, textvariable=tree_hight)
+    tree_hight_entry.pack(side=LEFT, padx=5)
+    ttk.Button(
+        tree_frame,
+        text="设置高度",
+        command=lambda: pvz.treeHight(tree_hight.get()),
+    ).pack(side=LEFT)
+    tree_hight_entry.bind("<Return>", lambda x: pvz.treeHight(tree_hight.get()))
 
     other_page = ttk.Frame(page_tab)
     other_page.pack()

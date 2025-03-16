@@ -171,6 +171,8 @@ shovelType = [
     "魅惑铲子",  # 11
     "汉堡铲子",  # 12
     "豪华铲子",  # 13
+    "卡牌铲",  # 14
+    "智慧铲",  # 15
 ]
 plantsType = [
     "豌豆向日葵",
@@ -417,8 +419,21 @@ plantsType = [
     "刺球子弹",  # 241
     "大蒜三线射手",  # 242
     "樱桃大喷菇",  # 243
+    "肥料高坚果",  # 244
+    "蜗牛大嘴花",  # 245
+    "巧克力坚果",  # 246
+    "搬运车花盆",  # 247
+    "巧克力",  # 248
+    "卷心菜重炮连",  # 249
+    "财运树桩",  # 250
+    "杀虫剂大喷菇",  # 251
+    "金色向日葵",  # 252
+    "手套豆",  # 253
+    "聚宝盆",  # 254
+    "唱片机胆小菇",  # 255
+    "水壶投手",  # 256
 ]
-for _ in range(len(plantsType), 256):
+for _ in range(len(plantsType), 512):
     plantsType.append("占位")
 plantsType = plantsType + [
     "普僵",
@@ -1165,6 +1180,12 @@ bulletType = [
     "樱桃子弹",  # 81
     "大蒜子弹",  # 82
     "黑蒜子弹",  # 83
+    "炸游戏(卷心菜重炮)",  # 84
+    "炸游戏(火焰卷心菜重炮)",  # 85
+    "金钱阳光",  # 86
+    "音符",  # 87
+    "重音符",  # 88
+    "水弹",  # 89
 ]
 keyTpye = [
     "无",
@@ -1587,67 +1608,82 @@ class slot:
 class plantCharacteristic:
     def __init__(self, type):
         self.type = type
-        if type < 256:
-            self.addr = 0x007A2010 + type * 0x24
-            self.sun = PVZ_memory.read_int(self.addr)
-            self.cd = PVZ_memory.read_int(self.addr + 0x4)
-            self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
-            self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+        if PVZ_version < 3.4:
+            if type < 256:
+                self.addr = 0x007A2010 + type * 0x24
+                self.sun = PVZ_memory.read_int(self.addr)
+                self.cd = PVZ_memory.read_int(self.addr + 0x4)
+                self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
+                self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+            else:
+                if PVZ_version == 2.0:
+                    self.addr = 0x008452C8 + type - 256
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 2.1 or PVZ_version == 2.2:
+                    self.addr = 0x0088B018 + type - 256
+                    self.sun = PVZ_memory.read_uchar(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 2.3:
+                    self.addr = 0x00088B04D + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 2.35 or PVZ_version == 2.36 or PVZ_version == 2.37:
+                    self.addr = 0x0088B05D + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 2.4 or PVZ_version == 2.5 or PVZ_version == 2.51:
+                    self.addr = 0x0088B072 + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 2.6 or PVZ_version == 2.61:
+                    self.addr = 0x0088B072 + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 3.0:
+                    self.addr = 0x0088B0F9 + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 3.1 or PVZ_version == 3.15:
+                    self.addr = 0x0088B0F9 + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
+                elif PVZ_version == 3.2 or PVZ_version == 3.21 or PVZ_version == 3.3:
+                    self.addr = 0x0088B119 + (type - 256) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
         else:
-            if PVZ_version == 2.0:
-                self.addr = 0x008452C8 + type - 256
+            if type < 512:
+                self.addr = 0x007A2010 + type * 0x24
                 self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.1 or PVZ_version == 2.2:
-                self.addr = 0x0088B018 + type - 256
-                self.sun = PVZ_memory.read_uchar(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.3:
-                self.addr = 0x00088B04D + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.35 or PVZ_version == 2.36 or PVZ_version == 2.37:
-                self.addr = 0x0088B05D + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.4 or PVZ_version == 2.5 or PVZ_version == 2.51:
-                self.addr = 0x0088B072 + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 2.6 or PVZ_version == 2.61:
-                self.addr = 0x0088B072 + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 3.0:
-                self.addr = 0x0088B0F9 + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 3.1 or PVZ_version == 3.15:
-                self.addr = 0x0088B0F9 + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
-            elif PVZ_version == 3.2 or PVZ_version == 3.21 or PVZ_version == 3.3:
-                self.addr = 0x0088B119 + (type - 256) * 0x4
-                self.sun = PVZ_memory.read_int(self.addr)
-                self.cd = 0
-                self.canAttack = True
-                self.attackInterval = 0
+                self.cd = PVZ_memory.read_int(self.addr + 0x4)
+                self.canAttack = PVZ_memory.read_bool(self.addr + 0x8)
+                self.attackInterval = PVZ_memory.read_int(self.addr + 0xC)
+            else:
+                if PVZ_version == 3.4:
+                    self.addr = 0x0088B119 + (type - 512) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -1809,7 +1845,7 @@ class zombieType:
             elif type == 93:
                 self.weight = PVZ_memory.read_uchar(0x008D066B)
 
-        elif PVZ_version == 3.3:
+        elif PVZ_version == 3.3 or PVZ_version == 3.4:
             if type <= 95:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)

@@ -200,7 +200,7 @@ def get_zombie_num():
         or PVZ_data.PVZ_version == 3.21
     ):
         zombie_num = 89
-    elif PVZ_data.PVZ_version == 3.3:
+    elif PVZ_data.PVZ_version == 3.3 or PVZ_data.PVZ_version == 3.4:
         zombie_num = 95
     return zombie_num
 
@@ -239,7 +239,7 @@ def getRandomZombie(hasBoss=False):
         or PVZ_data.PVZ_version == 3.21
     ):
         zombieType = random.randint(0, 88)
-    elif PVZ_data.PVZ_version == 3.3:
+    elif PVZ_data.PVZ_version == 3.3 or PVZ_data.PVZ_version == 3.4:
         zombieType = random.randint(0, 94)
     if hasBoss is True:
         return zombieType
@@ -280,9 +280,11 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 198)
     elif PVZ_data.PVZ_version == 3.3:
         plantType = random.randint(0, 218)
+    elif PVZ_data.PVZ_version == 3.4:
+        plantType = random.randint(0, 228)
     if plantType >= 48:
         plantType = plantType + 27
-    IllegalCards = [241]
+    IllegalCards = [241, 249]
     while plantType in IllegalCards:
         plantType = getRandomPlant(isPut)
     if isPut is False:
@@ -852,12 +854,21 @@ def randomSlots_operstion(randomSlots_event, haszombie):
                 PVZ_data.PVZ_memory.write_int(
                     PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
                 )
-        else:
+        elif PVZ_data.PVZ_version < 3.4:
             for i in range(0, 16):
                 if haszombie is False:
                     plant = getRandomPlant(False)
                 else:
                     plant = getRandomZombie(True) + 256
+                PVZ_data.PVZ_memory.write_int(
+                    PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
+                )
+        else:
+            for i in range(0, 16):
+                if haszombie is False:
+                    plant = getRandomPlant(False)
+                else:
+                    plant = getRandomZombie(True) + 512
                 PVZ_data.PVZ_memory.write_int(
                     PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, plant
                 )
@@ -1012,6 +1023,26 @@ def lockMiniGame(level):
         + 0x202C
     )
     PVZ_data.PVZ_memory.write_int(challengeAddr + level * 4, 0)
+
+
+def completeStore(level):
+    storeAddr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0xF50
+    )
+    PVZ_data.PVZ_memory.write_int(storeAddr + level * 4, 1)
+
+
+def lockStore(level):
+    storeAddr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0xF50
+    )
+    PVZ_data.PVZ_memory.write_int(storeAddr + level * 4, 0)
 
 
 def achevement():
@@ -4087,7 +4118,7 @@ def globalSpawModify(f, zombieTypes):
                 6,
             )
             spawisModified()
-    elif PVZ_data.PVZ_version == 3.3:
+    elif PVZ_data.PVZ_version == 3.3 or PVZ_data.PVZ_version == 3.4:
         if f:
             PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
             PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
@@ -4354,6 +4385,7 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 3.2
         or PVZ_data.PVZ_version == 3.21
         or PVZ_data.PVZ_version == 3.3
+        or PVZ_data.PVZ_version == 3.4
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -6685,7 +6717,8 @@ def overPlant(f):
         # data.PVZ_memory.write_bytes(0x0084A3EB, b"\xe9\x6a\x3f\xbc\xff\x90", 6)
         PVZ_data.PVZ_memory.write_bytes(0x00410BA2, b"\xeb\x06", 2)
         PVZ_data.PVZ_memory.write_bytes(0x00410967, b"\xeb\x39", 2)
-        PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\xeb\x2d", 2)
+        if PVZ_data.PVZ_version < 3.4:
+            PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\xeb\x2d", 2)
     else:
         PVZ_data.PVZ_memory.write_bytes(0x00425634, b"\x83\xf8\xff\x74\x18", 5)
         PVZ_data.PVZ_memory.write_bytes(0x0040FE2D, b"\x85\xc0\x0f\x84\x1f\x09\x00", 7)
@@ -6719,7 +6752,8 @@ def overPlant(f):
         # data.PVZ_memory.write_bytes(0x0084A3EB, b"\x0f\x85\x69\x3f\xbc\xff", 6)
         PVZ_data.PVZ_memory.write_bytes(0x00410BA2, b"\x75\x06", 2)
         PVZ_data.PVZ_memory.write_bytes(0x00410967, b"\x75\x39", 2)
-        PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\x75\x2d", 2)
+        if PVZ_data.PVZ_version < 3.4:
+            PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\x75\x2d", 2)
 
 
 def column(f):
@@ -7555,7 +7589,10 @@ def randomZombieSlots_operstion(
         )
         for i in range(start_slot - 1, end_slot):
             slot = getRandomZombie(False)
-            slot = slot + 256
+            if PVZ_data.PVZ_version < 3.4:
+                slot = slot + 256
+            else:
+                slot = slot + 512
             PVZ_data.PVZ_memory.write_int(
                 PVZ_data.PVZ_memory.read_int(plant1addr) + 0x5C + 0x50 * i, slot
             )
@@ -7603,6 +7640,7 @@ def setBossHP(no, hp):
         or PVZ_data.PVZ_version == 3.2
         or PVZ_data.PVZ_version == 3.21
         or PVZ_data.PVZ_version == 3.3
+        or PVZ_data.PVZ_version == 3.4
     ):
         if no == 1:
             PVZ_data.PVZ_memory.write_int(0x008D0F75, hp)
@@ -7636,3 +7674,13 @@ def more_hero(f):
     else:
         PVZ_data.PVZ_memory.write_bytes(0x009F1057, b"\x56\x50\x51\x52\x6a\x00", 6)
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_more_hero)
+
+
+def treeHight(height):
+    tree_hight_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0xF4
+    )
+    PVZ_data.PVZ_memory.write_int(tree_hight_address, height)
