@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.56"
+current_version = "0.57"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -61,6 +61,7 @@ zombie_select = None
 plant_select = None
 item_select = None
 vase_select = None
+potted_select = None
 plant_characteristic_type = None
 shortcut_entries = []
 shortcut_buttons = []
@@ -676,6 +677,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.57\n"
+        "增加大量花园相关修改、包括修改花盆属性、增加花盆、一键完成需求等\n"
+        "新增植物不睡觉功能，取代了超级铲子功能\n"
         "b0.56\n"
         "适配杂交版3.4\n"
         "完成更多模式会完成商店关卡\n"
@@ -1405,6 +1409,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     sun_value_entry.bind("<Return>", setSun)
+    sun_value_entry.bind("<FocusOut>", setSun)
     ttk.Label(
         resource_modify_frame, text="增加阳光:", bootstyle=WARNING, font=("宋体", 14)
     ).grid(row=2, column=0, sticky=E)
@@ -1425,6 +1430,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     sun_add_entry.bind("<Return>", addSun)
+    sun_add_entry.bind("<FocusOut>", addSun)
 
     ttk.Label(
         resource_modify_frame, text="当前银币:", bootstyle=SECONDARY, font=("宋体", 14)
@@ -1440,6 +1446,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     silver_value_entry.bind("<Return>", setSilver)
+    silver_value_entry.bind("<FocusOut>", setSilver)
     ttk.Label(
         resource_modify_frame, text="增加银币:", bootstyle=SECONDARY, font=("宋体", 14)
     ).grid(row=4, column=0, sticky=E)
@@ -1460,6 +1467,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     silver_add_entry.bind("<Return>", addSilver)
+    silver_add_entry.bind("<FocusOut>", addSilver)
 
     ttk.Label(
         resource_modify_frame, text="当前金币:", bootstyle=WARNING, font=("宋体", 14)
@@ -1475,6 +1483,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     gold_value_entry.bind("<Return>", setGold)
+    gold_value_entry.bind("<FocusOut>", setGold)
     ttk.Label(
         resource_modify_frame, text="增加金币:", bootstyle=WARNING, font=("宋体", 14)
     ).grid(row=6, column=0, sticky=E)
@@ -1495,6 +1504,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     gold_add_entry.bind("<Return>", addGold)
+    gold_add_entry.bind("<FocusOut>", addGold)
 
     ttk.Label(
         resource_modify_frame, text="当前钻石:", bootstyle=PRIMARY, font=("宋体", 14)
@@ -1510,6 +1520,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     diamond_value_entry.bind("<Return>", setDiamond)
+    diamond_value_entry.bind("<FocusOut>", setDiamond)
     ttk.Label(
         resource_modify_frame, text="增加钻石:", bootstyle=PRIMARY, font=("宋体", 14)
     ).grid(row=8, column=0, sticky=E)
@@ -1533,6 +1544,7 @@ def mainWindow():
         resource_modify_frame.focus_set()
 
     diamond_add_entry.bind("<Return>", addDiamond)
+    diamond_add_entry.bind("<FocusOut>", addDiamond)
 
     quick_start_frame = ttk.LabelFrame(common_page, text="快速使用", bootstyle=SUCCESS)
     quick_start_frame.place(x=0, y=0, relx=1, rely=0, anchor=NE)
@@ -1596,18 +1608,27 @@ def mainWindow():
         text="种植一个植物后在同一列的其他行种植相同的植物(可与自由放置配合使用)",
         bootstyle=(INFO, INVERSE),
     )
-    shovel_pro_status = ttk.BooleanVar(quick_start_frame)
-    shovel_pro_check = ttk.Checkbutton(
+    # shovel_pro_status = ttk.BooleanVar(quick_start_frame)
+    # shovel_pro_check = ttk.Checkbutton(
+    #     quick_start_frame,
+    #     text="超级铲子",
+    #     variable=shovel_pro_status,
+    #     bootstyle="success-round-toggle",
+    #     command=lambda: pvz.shovelpro(shovel_pro_status.get()),
+    # )
+    # shovel_pro_check.grid(row=5, column=0, sticky=W)
+    plant_waek_status = ttk.BooleanVar(quick_start_frame)
+    plant_waek_check = ttk.Checkbutton(
         quick_start_frame,
-        text="超级铲子",
-        variable=shovel_pro_status,
+        text="植物不睡",
+        variable=plant_waek_status,
         bootstyle="success-round-toggle",
-        command=lambda: pvz.shovelpro(shovel_pro_status.get()),
+        command=lambda: pvz.plantNoSleep(plant_waek_status.get()),
     )
-    shovel_pro_check.grid(row=5, column=0, sticky=W)
+    plant_waek_check.grid(row=5, column=0, sticky=W)
     ToolTip(
-        shovel_pro_check,
-        text="铲掉植物返还其阳光消耗并触发亡语效果",
+        plant_waek_check,
+        text="植物在任何情况下都不会睡觉",
         bootstyle=(INFO, INVERSE),
     )
     never_fail_status = ttk.BooleanVar(quick_start_frame)
@@ -2463,6 +2484,7 @@ def mainWindow():
         zombie_state_frame.focus_set()
 
     zombie_state_entry.bind("<Return>", setZombieState)
+    zombie_state_entry.bind("<FocusOut>", setZombieState)
     ttk.Label(zombie_state_frame, text="大小:").grid(row=1, column=3, sticky=W)
     zombie_size_value = ttk.DoubleVar(zombie_state_frame)
     zombie_size_entry = ttk.Entry(
@@ -2479,6 +2501,7 @@ def mainWindow():
         zombie_state_frame.focus_set()
 
     zombie_size_entry.bind("<Return>", setZombieSize)
+    zombie_size_entry.bind("<FocusOut>", setZombieSize)
     zombie_position_frame = ttk.LabelFrame(
         zombie_attribute_frame, text="位置", bootstyle=DANGER
     )
@@ -2502,6 +2525,7 @@ def mainWindow():
         zombie_position_frame.focus_set()
 
     zombie_x_entry.bind("<Return>", setZombieX)
+    zombie_x_entry.bind("<FocusOut>", setZombieX)
     ttk.Label(zombie_position_frame, text="y坐标:").grid(
         row=1, column=0, columnspan=3, sticky=W
     )
@@ -2520,6 +2544,7 @@ def mainWindow():
         zombie_position_frame.focus_set()
 
     zombie_y_entry.bind("<Return>", setZombieY)
+    zombie_y_entry.bind("<FocusOut>", setZombieY)
     ttk.Label(zombie_position_frame, text="第").grid(row=2, column=0, sticky=W)
     zombie_row_value = ttk.IntVar(zombie_position_frame)
     zombie_row_combobox = ttk.Combobox(
@@ -2560,6 +2585,7 @@ def mainWindow():
         zombie_hp_frame.focus_set()
 
     zombie_hp_entry.bind("<Return>", setZombieHP)
+    zombie_hp_entry.bind("<FocusOut>", setZombieHP)
     zombie_hatHP_label = ttk.Label(zombie_hp_frame, text="帽子:")
     zombie_hatHP_label.grid(row=1, column=0)
     zombie_hatHP_value = ttk.IntVar(zombie_hp_frame)
@@ -2577,6 +2603,7 @@ def mainWindow():
         zombie_hp_frame.focus_set()
 
     zombie_hatHP_entry.bind("<Return>", setZombieHatHP)
+    zombie_hatHP_entry.bind("<FocusOut>", setZombieHatHP)
     ttk.Label(zombie_hp_frame, text="铁门:").grid(row=2, column=0, padx=(2, 0))
     zombie_doorHP_value = ttk.IntVar(zombie_hp_frame)
     zombie_doorHP_entry = ttk.Entry(
@@ -2593,6 +2620,7 @@ def mainWindow():
         zombie_hp_frame.focus_set()
 
     zombie_doorHP_entry.bind("<Return>", setZombieDoorHP)
+    zombie_doorHP_entry.bind("<FocusOut>", setZombieDoorHP)
     zombie_control_frame = ttk.LabelFrame(
         zombie_attribute_frame, text="控制时间", bootstyle=DANGER
     )
@@ -2613,6 +2641,7 @@ def mainWindow():
         zombie_control_frame.focus_set()
 
     zombie_slow_entry.bind("<Return>", setZombieSlow)
+    zombie_slow_entry.bind("<FocusOut>", setZombieSlow)
     zombie_butter_label = ttk.Label(zombie_control_frame, text="黄油:")
     zombie_butter_label.grid(row=1, column=0)
     zombie_butter_value = ttk.IntVar(zombie_control_frame)
@@ -2630,6 +2659,7 @@ def mainWindow():
         zombie_control_frame.focus_set()
 
     zombie_butter_entry.bind("<Return>", setZombieButter)
+    zombie_butter_entry.bind("<FocusOut>", setZombieButter)
     ttk.Label(zombie_control_frame, text="冻结:").grid(row=2, column=0, padx=(2, 0))
     zombie_frozen_value = ttk.IntVar(zombie_control_frame)
     zombie_frozen_entry = ttk.Entry(
@@ -2646,6 +2676,7 @@ def mainWindow():
         zombie_control_frame.focus_set()
 
     zombie_frozen_entry.bind("<Return>", setZombieFrozen)
+    zombie_frozen_entry.bind("<FocusOut>", setZombieFrozen)
     zombie_flag_frame = ttk.LabelFrame(
         zombie_attribute_frame, text="状态标志", bootstyle=DANGER
     )
@@ -2867,6 +2898,7 @@ def mainWindow():
         zombie_characteristic_frame.focus_set()
 
     boss1_hp_entry.bind("<Return>", setboss1HP)
+    boss1_hp_entry.bind("<FocusOut>", setboss1HP)
 
     ttk.Label(zombie_characteristic_frame, text="冰霜巨人:").grid(row=1, column=0)
     boss2_hp_value = ttk.IntVar(zombie_characteristic_frame)
@@ -2884,6 +2916,7 @@ def mainWindow():
         zombie_characteristic_frame.focus_set()
 
     boss2_hp_entry.bind("<Return>", setboss2HP)
+    boss2_hp_entry.bind("<FocusOut>", setboss2HP)
 
     ttk.Label(zombie_characteristic_frame, text="埃德加二世:").grid(row=2, column=0)
     boss3_hp_value = ttk.IntVar(zombie_characteristic_frame)
@@ -2901,6 +2934,7 @@ def mainWindow():
         zombie_characteristic_frame.focus_set()
 
     boss3_hp_entry.bind("<Return>", setboss3HP)
+    boss3_hp_entry.bind("<FocusOut>", setboss3HP)
 
     def setBossHP():
         pvz.setBossHP(1, boss1_hp_value.get())
@@ -2937,6 +2971,7 @@ def mainWindow():
             "纸条",
             "植物卡片",
             "潜艇伟伟迷",
+            "花园盆栽",
         ],
         state=READONLY,
     )
@@ -2978,6 +3013,7 @@ def mainWindow():
             "纸条",
             "植物卡片",
             "潜艇伟伟迷",
+            "花园盆栽",
         ],
         state=READONLY,
     )
@@ -3019,6 +3055,7 @@ def mainWindow():
             "纸条",
             "植物卡片",
             "潜艇伟伟迷",
+            "花园盆栽",
         ],
         state=READONLY,
     )
@@ -3060,6 +3097,7 @@ def mainWindow():
             "纸条",
             "植物卡片",
             "潜艇伟伟迷",
+            "花园盆栽",
         ],
         state=READONLY,
     )
@@ -3409,6 +3447,7 @@ def mainWindow():
         plant_state_frame.focus_set()
 
     plant_state_entry.bind("<Return>", setPlantState)
+    plant_state_entry.bind("<FocusOut>", setPlantState)
     plant_position_frame = ttk.LabelFrame(
         plant_attribute_frame, text="位置", bootstyle=SUCCESS
     )
@@ -3432,6 +3471,7 @@ def mainWindow():
         plant_position_frame.focus_set()
 
     plant_x_entry.bind("<Return>", setPlantX)
+    plant_x_entry.bind("<FocusOut>", setPlantX)
     ttk.Label(plant_position_frame, text="y坐标:").grid(
         row=1, column=0, columnspan=3, sticky=W
     )
@@ -3450,6 +3490,7 @@ def mainWindow():
         plant_position_frame.focus_set()
 
     plant_y_entry.bind("<Return>", setPlantY)
+    plant_y_entry.bind("<FocusOut>", setPlantY)
     plant_row_value = ttk.IntVar(plant_position_frame)
     plant_row_combobox = ttk.Combobox(
         plant_position_frame,
@@ -3502,6 +3543,7 @@ def mainWindow():
         plant_state_frame.focus_set()
 
     plant_hp_entry.bind("<Return>", setPlantHP)
+    plant_hp_entry.bind("<FocusOut>", setPlantHP)
     plant_time_frame = ttk.LabelFrame(
         plant_attribute_frame, text="倒计时", bootstyle=SUCCESS
     )
@@ -3528,6 +3570,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_dietime_entry.bind("<Return>", setPlantDieTime)
+    plant_dietime_entry.bind("<FocusOut>", setPlantDieTime)
     plant_cindertime_label = ttk.Label(plant_time_frame, text="灰烬:")
     plant_cindertime_label.grid(row=1, column=0)
     ToolTip(
@@ -3550,6 +3593,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_cindertime_entry.bind("<Return>", setPlantCinderTime)
+    plant_cindertime_entry.bind("<FocusOut>", setPlantCinderTime)
     plant_effecttime_label = ttk.Label(plant_time_frame, text="效果:")
     plant_effecttime_label.grid(row=2, column=0, padx=(2, 0))
     ToolTip(
@@ -3572,6 +3616,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_effecttime_entry.bind("<Return>", setPlantEffectTime)
+    plant_effecttime_entry.bind("<FocusOut>", setPlantEffectTime)
     plant_producttime_label = ttk.Label(plant_time_frame, text="攻击:")
     plant_producttime_label.grid(row=3, column=0, padx=(2, 0))
     ToolTip(
@@ -3592,6 +3637,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_producttime_entry.bind("<Return>", setPlantProductTime)
+    plant_producttime_entry.bind("<FocusOut>", setPlantProductTime)
     plant_productinterval_label = ttk.Label(plant_time_frame, text="间隔:")
     plant_productinterval_label.grid(row=4, column=0, padx=(2, 0))
     ToolTip(
@@ -3612,6 +3658,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_productinterval_entry.bind("<Return>", setPlantProductInterval)
+    plant_productinterval_entry.bind("<FocusOut>", setPlantProductInterval)
     plant_attacktime_label = ttk.Label(plant_time_frame, text="射击:")
     plant_attacktime_label.grid(row=5, column=0, padx=(2, 0))
     ToolTip(
@@ -3632,6 +3679,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_attacktime_entry.bind("<Return>", setPlantAttackTime)
+    plant_attacktime_entry.bind("<FocusOut>", setPlantAttackTime)
     plant_suntime_label = ttk.Label(plant_time_frame, text="阳光:")
     plant_suntime_label.grid(row=6, column=0, padx=(2, 0))
     ToolTip(plant_suntime_label, text="女王产生阳光倒计时", bootstyle=(INFO, INVERSE))
@@ -3650,6 +3698,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_suntime_entry.bind("<Return>", setPlantSunTime)
+    plant_suntime_entry.bind("<FocusOut>", setPlantSunTime)
     plant_humtime_label = ttk.Label(plant_time_frame, text="阳光:")
     plant_humtime_label.grid(row=7, column=0, padx=(2, 0))
     ToolTip(plant_humtime_label, text="汉堡王产生阳光倒计时", bootstyle=(INFO, INVERSE))
@@ -3668,6 +3717,7 @@ def mainWindow():
         plant_time_frame.focus_set()
 
     plant_humtime_entry.bind("<Return>", setPlantHumTime)
+    plant_humtime_entry.bind("<FocusOut>", setPlantHumTime)
     plant_flag_frame = ttk.LabelFrame(
         plant_attribute_frame, text="状态标志", bootstyle=SUCCESS
     )
@@ -3910,6 +3960,7 @@ def mainWindow():
         plant_characteristic_frame.focus_set()
 
     plant_characteristic_sun_entry.bind("<Return>", setPlantCharacteristicSun)
+    plant_characteristic_sun_entry.bind("<FocusOut>", setPlantCharacteristicSun)
     plant_characteristic_cd_label = ttk.Label(plant_characteristic_frame, text="冷却:")
     plant_characteristic_cd_label.grid(row=2, column=0)
     plant_characteristic_cd_value = ttk.IntVar(plant_characteristic_frame)
@@ -3927,6 +3978,7 @@ def mainWindow():
         plant_characteristic_frame.focus_set()
 
     plant_characteristic_cd_entry.bind("<Return>", setPlantCharacteristicCd)
+    plant_characteristic_cd_entry.bind("<FocusOut>", setPlantCharacteristicCd)
     plant_characteristic_canAttack_flag = ttk.BooleanVar(plant_flag_frame)
 
     def change_plant_characteristic_canAttack():
@@ -4093,6 +4145,7 @@ def mainWindow():
         attack_speed_frame.focus_set()
 
     attack_speed_entry.bind("<Return>", setAttackSpeed)
+    attack_speed_entry.bind("<FocusOut>", setAttackSpeed)
 
     plant_bullet_frame = ttk.Labelframe(
         plant_page, text="植物子弹修改", bootstyle=SUCCESS
@@ -6019,6 +6072,7 @@ def mainWindow():
         zombie_sun_frame.focus_set()
 
     zombie_sun_sun_entry.bind("<Return>", setZombieCharacteristicSun)
+    zombie_sun_sun_entry.bind("<FocusOut>", setZombieCharacteristicSun)
 
     def get_zombie_type():
         global zombie_sun_type
@@ -6136,6 +6190,7 @@ def mainWindow():
                 slots_frame.focus_set()
 
         slot_elapsed_entry.bind("<Return>", set_slot_elapsed)
+        slot_elapsed_entry.bind("<FocusOut>", set_slot_elapsed)
 
         slot_cooldown_value = ttk.IntVar()
         slot_cooldown_values.append(slot_cooldown_value)
@@ -6154,6 +6209,7 @@ def mainWindow():
                 slots_frame.focus_set()
 
         slot_cooldown_entry.bind("<Return>", set_slot_cooldown)
+        slot_cooldown_entry.bind("<FocusOut>", set_slot_cooldown)
 
         slot_cooldown_label = ttk.Label(slots_frame, text="冷却进度")
         slot_cooldown_label.grid(row=slot_number - 1, column=3, padx=(2, 0))
@@ -7376,18 +7432,934 @@ def mainWindow():
     garden_page = ttk.Frame(page_tab)
     garden_page.pack()
     page_tab.add(garden_page, text="花园相关")
+
+    potted_list_frame = ttk.LabelFrame(garden_page, text="盆栽列表", bootstyle=SUCCESS)
+    potted_list_frame.place(x=0, y=0, anchor=NW, height=300, width=335)
+    potted_list_box_scrollbar = ttk.Scrollbar(potted_list_frame, bootstyle=SUCCESS)
+    potted_list_box = ttk.Treeview(
+        potted_list_frame,
+        show=TREE,
+        selectmode=BROWSE,
+        padding=0,
+        columns=("potted_list"),
+        yscrollcommand=potted_list_box_scrollbar.set,
+        bootstyle=SUCCESS,
+    )
+    potted_list_box_scrollbar.configure(command=potted_list_box.yview)
+    potted_list_box.place(x=0, y=0, anchor=NW, height=280, width=130)
+    potted_list_box_scrollbar.place(x=130, y=0, height=280, anchor=NW)
+    potted_list = list()
+
+    def refresh_potted_list():
+        potted_list.clear()
+        potted_list_box.delete(*potted_list_box.get_children())
+        try:
+            potted_num = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+                )
+                + 0x350
+            )
+        except:
+            return
+        i = 0
+        while i < potted_num:
+            potted_addresss = (
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+                )
+                + 0x30000
+                + PVZ_data.potted_size * i
+            )
+            potted_list.append(PVZ_data.potted(potted_addresss))
+            i = i + 1
+        n = 0
+        for k in range(potted_num):
+            potted_list_box.insert(
+                "",
+                END,
+                iid=n,
+                text=f"{potted_list[k].no}:{PVZ_data.plantsType[potted_list[k].type]}",
+            )
+            if potted_select is not None:
+                if potted_select.no == potted_list[k].no:
+                    potted_list_box.selection_set((str(n),))
+            n = n + 1
+
+    refresh_potted_list()
+    potted_attribute_frame = ttk.Frame(potted_list_frame)
+    potted_attribute_frame.place(x=150, y=0, height=280, width=175)
+    potted_state_frame = ttk.Frame(potted_attribute_frame)
+    potted_state_frame.grid(row=0, column=0, columnspan=12, sticky=W)
+    ttk.Label(potted_state_frame, text="盆栽类型:").grid(
+        row=0, column=0, columnspan=1, sticky=W, padx=2, pady=2
+    )
+    potted_type_combobox = ttk.Combobox(
+        potted_state_frame,
+        width=12,
+        values=PVZ_data.plantsType,
+        state=READONLY,
+        bootstyle=SECONDARY,
+    )
+    potted_type_combobox.grid(row=0, column=1, columnspan=5, sticky=W, padx=2, pady=2)
+
+    def wait_select_potted_plant(event, potted_type_combobox):
+        open_card_select_window(potted_type_combobox)
+        card_select_window.wait_window()
+        set_potted_type()
+
+        def closeCombobox(potted_type_combobox):
+            potted_type_combobox.event_generate("<Escape>")
+
+        potted_type_combobox.after(100, lambda: closeCombobox(potted_type_combobox))
+
+    potted_type_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_potted_plant(event, potted_type_combobox),
+    )
+
+    def set_potted_type():
+        potted_select.setType(potted_type_combobox.current())
+
+    ttk.Label(potted_state_frame, text="生长状态:").grid(
+        row=1, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_state_combobox = ttk.Combobox(
+        potted_state_frame,
+        values=["幼苗", "小", "中", "大"],
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    potted_state_combobox.grid(row=1, column=1, sticky=W, padx=2, pady=2)
+
+    def setPottedState(event):
+        potted_select.setState(potted_state_combobox.current())
+        potted_state_frame.focus_set()
+
+    potted_state_combobox.bind("<<ComboboxSelected>>", setPottedState)
+    potted_position_frame = ttk.LabelFrame(
+        potted_attribute_frame, text="位置", bootstyle=SUCCESS
+    )
+    potted_position_frame.grid(row=2, column=0, columnspan=12, sticky=W, padx=2, pady=2)
+
+    # 添加场景下拉框
+    ttk.Label(potted_position_frame, text="场景:").grid(
+        row=1, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_garden_combobox = ttk.Combobox(
+        potted_position_frame,
+        width=10,
+        values=[
+            "禅境花园",
+            "蘑菇园",
+            "手推车",
+            "水族馆",
+            "实验室花园",
+            "天空花园",
+            "花果山花园",
+            "温馨花园",
+            "魅惑蘑菇园",
+            "竞技花园",
+        ],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    potted_garden_combobox.grid(row=1, column=1, columnspan=8, sticky=W, padx=2, pady=2)
+
+    def setPottedGarden(event):
+        potted_select.setGarden(potted_garden_combobox.current())
+        potted_position_frame.focus_set()
+
+    potted_garden_combobox.bind("<<ComboboxSelected>>", setPottedGarden)
+    potted_row_value = ttk.IntVar(potted_position_frame)
+    potted_row_combobox = ttk.Combobox(
+        potted_position_frame,
+        textvariable=potted_row_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    potted_row_combobox.grid(row=2, column=1, columnspan=3, sticky=W, padx=2, pady=2)
+    ttk.Label(potted_position_frame, text="行").grid(
+        row=2, column=4, sticky=W, padx=2, pady=2
+    )
+
+    def setPottedRow(event):
+        potted_select.setRow(potted_row_value.get() - 1)
+        potted_position_frame.focus_set()
+
+    potted_row_combobox.bind("<<ComboboxSelected>>", setPottedRow)
+    potted_col_value = ttk.IntVar(potted_position_frame)
+    potted_col_combobox = ttk.Combobox(
+        potted_position_frame,
+        textvariable=potted_col_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    potted_col_combobox.grid(row=2, column=5, columnspan=3, sticky=W, padx=2, pady=2)
+    ttk.Label(potted_position_frame, text="列").grid(
+        row=2, column=8, sticky=W, padx=2, pady=2
+    )
+
+    def setPottedCol(event):
+        potted_select.setCol(potted_col_value.get() - 1)
+        potted_position_frame.focus_set()
+
+    potted_col_combobox.bind("<<ComboboxSelected>>", setPottedCol)
+    ttk.Label(potted_attribute_frame, text="方向:").grid(
+        row=3, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_direct_combobox = ttk.Combobox(
+        potted_attribute_frame,
+        values=["右", "左"],
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    potted_direct_combobox.grid(row=3, column=1, ipady=0, sticky=W, padx=2, pady=2)
+
+    def setPottedDirection(event):
+        potted_select.setDirection(potted_direct_combobox.current())
+        potted_attribute_frame.focus_set()
+
+    potted_direct_combobox.bind("<<ComboboxSelected>>", setPottedDirection)
+
+    # 添加颜色下拉框
+    ttk.Label(potted_attribute_frame, text="颜色:").grid(
+        row=4, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_color_combobox = ttk.Combobox(
+        potted_attribute_frame,
+        width=10,
+        values=[
+            "原始",
+            "模仿者",
+            "白色",
+            "品红",
+            "橙色",
+            "粉色",
+            "青色",
+            "红色",
+            "蓝色",
+            "紫色",
+            "薰衣草",
+            "黄色",
+            "淡绿色",
+        ],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    potted_color_combobox.grid(row=4, column=1, columnspan=8, sticky=W, padx=2, pady=2)
+
+    def setPottedColor(event):
+        potted_select.setColor(potted_color_combobox.current())
+        potted_attribute_frame.focus_set()
+
+    potted_color_combobox.bind("<<ComboboxSelected>>", setPottedColor)
+
+    # 添加已浇水次数输入框
+    ttk.Label(potted_attribute_frame, text="已浇水:").grid(
+        row=5, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_water_var = ttk.IntVar(potted_attribute_frame)
+    potted_water_spinbox = ttk.Spinbox(
+        potted_attribute_frame,
+        textvariable=potted_water_var,
+        width=3,
+        from_=0,
+        to=999,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    potted_water_spinbox.grid(row=5, column=1, columnspan=3, sticky=W, padx=2, pady=2)
+
+    def setPottedWater():
+        potted_select.setWater(potted_water_var.get())
+
+    potted_water_spinbox.configure(command=setPottedWater)
+    potted_water_spinbox.bind("<Return>", lambda event: setPottedWater())
+    potted_water_spinbox.bind("<FocusOut>", lambda event: setPottedWater())
+
+    # 添加需求浇水次数输入框
+    ttk.Label(potted_attribute_frame, text="需求浇水:").grid(
+        row=6, column=0, sticky=W, padx=2, pady=2
+    )
+    potted_water_max_var = ttk.IntVar(potted_attribute_frame)
+    potted_water_max_spinbox = ttk.Spinbox(
+        potted_attribute_frame,
+        textvariable=potted_water_max_var,
+        width=3,
+        from_=0,
+        to=999,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    potted_water_max_spinbox.grid(
+        row=6, column=1, columnspan=3, sticky=W, padx=2, pady=2
+    )
+
+    def setPottedWaterMax():
+        potted_select.setWaterMax(potted_water_max_var.get())
+
+    potted_water_max_spinbox.configure(command=setPottedWaterMax)
+    potted_water_max_spinbox.bind("<Return>", lambda event: setPottedWaterMax())
+    potted_water_max_spinbox.bind("<FocusOut>", lambda event: setPottedWaterMax())
+
+    def get_potted_select(event):
+        global potted_select
+        try:
+            index = int(potted_list_box.selection()[0])
+            potted_select = potted_list[index]
+        except:
+            return
+
+    def get_potted_attribute():
+        global potted_select
+        if potted_select is not None:
+            try:
+                potted_type_combobox.current(potted_select.type)
+                if potted_attribute_frame.focus_get() != potted_state_combobox:
+                    potted_state_combobox.current(potted_select.state)
+                potted_row_value.set(potted_select.row + 1)
+                potted_col_value.set(potted_select.col + 1)
+                if potted_attribute_frame.focus_get() != potted_garden_combobox:
+                    potted_garden_combobox.current(potted_select.garden)
+                potted_direct_combobox.current(potted_select.direction)
+                potted_color_combobox.current(potted_select.color)
+                if potted_attribute_frame.focus_get() != potted_water_spinbox:
+                    potted_water_var.set(potted_select.water)
+                if potted_attribute_frame.focus_get() != potted_water_max_spinbox:
+                    potted_water_max_var.set(potted_select.waterMax)
+            except:
+                pass
+
+        try:
+            if tree_frame.focus_get() != tree_height_entry:
+                tree_height.set(pvz.readTreeHeight())
+            if tree_frame.focus_get() != tree_fertilizer_entry:
+                tree_fertilizer.set(pvz.readTreeFertilizer())
+            if garden_item_frame.focus_get() != garden_item_fertilizer_entry:
+                garden_item_fertilizer.set(pvz.readGardenItemFertilizer())
+            if garden_item_frame.focus_get() != garden_item_pesticide_entry:
+                garden_item_pesticide.set(pvz.readGardenItemPesticide())
+            if garden_item_frame.focus_get() != garden_item_chocolate_entry:
+                garden_item_chocolate.set(pvz.readGardenItemChocolate())
+        except:
+            pass
+
+    potted_list_box.bind("<<TreeviewSelect>>", get_potted_select)
+
+    easy_add_potted_frame = ttk.LabelFrame(
+        garden_page, text="简易添加", bootstyle=PRIMARY
+    )
+    easy_add_potted_frame.place(x=0, y=305, anchor=NW)
+    ttk.Label(easy_add_potted_frame, text="盆栽类型:").grid(
+        row=0, column=0, columnspan=1, sticky=W, padx=2, pady=2
+    )
+    easy_add_potted_type_combobox = ttk.Combobox(
+        easy_add_potted_frame,
+        width=12,
+        values=PVZ_data.plantsType,
+        state=READONLY,
+        bootstyle=SECONDARY,
+    )
+    easy_add_potted_type_combobox.grid(
+        row=0, column=1, columnspan=5, sticky=W, padx=2, pady=2
+    )
+
+    def wait_select_easy_add_potted_plant(event, easy_add_potted_type_combobox):
+        open_card_select_window(easy_add_potted_type_combobox)
+        card_select_window.wait_window()
+
+        def closeCombobox(easy_add_potted_type_combobox):
+            easy_add_potted_type_combobox.event_generate("<Escape>")
+
+        easy_add_potted_type_combobox.after(
+            100, lambda: closeCombobox(easy_add_potted_type_combobox)
+        )
+
+    easy_add_potted_type_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_easy_add_potted_plant(
+            event, easy_add_potted_type_combobox
+        ),
+    )
+
+    # 添加颜色下拉框
+    ttk.Label(easy_add_potted_frame, text="颜色:").grid(
+        row=1, column=0, sticky=W, padx=2, pady=2
+    )
+    easy_add_potted_color_combobox = ttk.Combobox(
+        easy_add_potted_frame,
+        width=10,
+        values=[
+            "原始",
+            "模仿者",
+            "白色",
+            "品红",
+            "橙色",
+            "粉色",
+            "青色",
+            "红色",
+            "蓝色",
+            "紫色",
+            "薰衣草",
+            "黄色",
+            "淡绿色",
+        ],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    easy_add_potted_color_combobox.grid(
+        row=1, column=1, columnspan=8, sticky=W, padx=2, pady=2
+    )
+    easy_add_potted_button = ttk.Button(
+        easy_add_potted_frame,
+        text="添加",
+        command=lambda: easyAddPotted(),
+        bootstyle=PRIMARY,
+    )
+    easy_add_potted_button.grid(row=2, column=0, columnspan=6, sticky=E, padx=2, pady=2)
+
+    def easyAddPotted():
+        potted_list_check = []
+        potted_list_check.clear()
+        try:
+            potted_num_check = PVZ_data.PVZ_memory.read_int(
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+                )
+                + 0x350
+            )
+        except:
+            return
+        i = 0
+        while i < potted_num_check:
+            potted_addresss = (
+                PVZ_data.PVZ_memory.read_int(
+                    PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+                )
+                + 0x30000
+                + PVZ_data.potted_size * i
+            )
+            potted_list_check.append(PVZ_data.potted(potted_addresss))
+            i = i + 1
+        # 检查花园槽位：花园定义为location==0且row在0~7, col在0~3, 每个槽位中可能有多个盆栽，
+        # 使用集合记录已占用的独立槽位
+        occupied_slots = set()
+        total_slots = 8 * 4  # 32个槽位
+
+        for p in potted_list_check:
+            if p.garden == 0 and 0 <= p.col <= 7 and 0 <= p.row <= 3:
+                occupied_slots.add((p.row, p.col))
+
+        if len(occupied_slots) < total_slots:
+            pvz.easyAddPotted(
+                easy_add_potted_type_combobox.current(),
+                easy_add_potted_color_combobox.current(),
+            )
+        else:
+            Messagebox.show_error(
+                "禅境花园已满,请移动一些盆栽到其他花园", title="无法添加盆栽"
+            )
+
     tree_frame = ttk.LabelFrame(garden_page, text="智慧树")
-    tree_frame.pack(anchor=W)
-    tree_hight = ttk.IntVar(tree_frame)
-    tree_hight.set(0)
-    tree_hight_entry = ttk.Entry(tree_frame, width=8, textvariable=tree_hight)
-    tree_hight_entry.pack(side=LEFT, padx=5)
-    ttk.Button(
-        tree_frame,
-        text="设置高度",
-        command=lambda: pvz.treeHight(tree_hight.get()),
-    ).pack(side=LEFT)
-    tree_hight_entry.bind("<Return>", lambda x: pvz.treeHight(tree_hight.get()))
+    tree_frame.place(x=340, y=0, anchor=NW)
+    tree_height_label = ttk.Label(tree_frame, text="高度:")
+    tree_height_label.grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    tree_height = ttk.IntVar(tree_frame)
+    tree_height_entry = ttk.Entry(tree_frame, width=8, textvariable=tree_height)
+    tree_height_entry.grid(row=0, column=1, sticky=W, padx=5, pady=5)
+    tree_height_entry.bind("<Return>", lambda x: pvz.setTreeHeight(tree_height.get()))
+    tree_height_entry.bind("<FocusOut>", lambda x: pvz.setTreeHeight(tree_height.get()))
+    tree_fertilizer_label = ttk.Label(tree_frame, text="肥料:")
+    tree_fertilizer_label.grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    tree_fertilizer = ttk.IntVar(tree_frame)
+    tree_fertilizer_entry = ttk.Entry(tree_frame, width=8, textvariable=tree_fertilizer)
+    tree_fertilizer_entry.grid(row=1, column=1, sticky=W, padx=5, pady=5)
+    tree_fertilizer_entry.bind(
+        "<Return>", lambda x: pvz.setTreeFertilizer(tree_fertilizer.get())
+    )
+
+    garden_item_frame = ttk.LabelFrame(garden_page, text="花园物品")
+    garden_item_frame.place(x=340, y=105, anchor=NW)
+    garden_item_fertilizer_label = ttk.Label(garden_item_frame, text="肥料:")
+    garden_item_fertilizer_label.grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    garden_item_fertilizer = ttk.IntVar(garden_item_frame)
+    garden_item_fertilizer_entry = ttk.Entry(
+        garden_item_frame, width=8, textvariable=garden_item_fertilizer
+    )
+    garden_item_fertilizer_entry.grid(row=0, column=1, sticky=W, padx=5, pady=5)
+    garden_item_fertilizer_entry.bind(
+        "<Return>", lambda x: pvz.setGardenItemFertilizer(garden_item_fertilizer.get())
+    )
+    garden_item_fertilizer_entry.bind(
+        "<FocusOut>",
+        lambda x: pvz.setGardenItemFertilizer(garden_item_fertilizer.get()),
+    )
+    # 杀虫剂
+    garden_item_pesticide_label = ttk.Label(garden_item_frame, text="杀虫剂:")
+    garden_item_pesticide_label.grid(row=1, column=0, sticky=W, padx=5, pady=5)
+    garden_item_pesticide = ttk.IntVar(garden_item_frame)
+    garden_item_pesticide_entry = ttk.Entry(
+        garden_item_frame, width=8, textvariable=garden_item_pesticide
+    )
+    garden_item_pesticide_entry.grid(row=1, column=1, sticky=W, padx=5, pady=5)
+    garden_item_pesticide_entry.bind(
+        "<Return>", lambda x: pvz.setGardenItemPesticide(garden_item_pesticide.get())
+    )
+    garden_item_pesticide_entry.bind(
+        "<FocusOut>",
+        lambda x: pvz.setGardenItemPesticide(garden_item_pesticide.get()),
+    )
+    # 巧克力
+    garden_item_chocolate_label = ttk.Label(garden_item_frame, text="巧克力:")
+    garden_item_chocolate_label.grid(row=2, column=0, sticky=W, padx=5, pady=5)
+    garden_item_chocolate = ttk.IntVar(garden_item_frame)
+    garden_item_chocolate_entry = ttk.Entry(
+        garden_item_frame, width=8, textvariable=garden_item_chocolate
+    )
+    garden_item_chocolate_entry.grid(row=2, column=1, sticky=W, padx=5, pady=5)
+    garden_item_chocolate_entry.bind(
+        "<Return>", lambda x: pvz.setGardenItemChocolate(garden_item_chocolate.get())
+    )
+    garden_item_chocolate_entry.bind(
+        "<FocusOut>",
+        lambda x: pvz.setGardenItemChocolate(garden_item_chocolate.get()),
+    )
+
+    add_potted_frame = ttk.LabelFrame(garden_page, text="添加盆栽", bootstyle=PRIMARY)
+    add_potted_frame.place(x=340, y=250)
+    add_potted_state_frame = ttk.Frame(add_potted_frame)
+    add_potted_state_frame.grid(row=0, column=0, columnspan=12, sticky=W)
+    ttk.Label(add_potted_state_frame, text="盆栽类型:").grid(
+        row=0, column=0, columnspan=1, sticky=W, padx=2, pady=2
+    )
+    add_potted_type_combobox = ttk.Combobox(
+        add_potted_state_frame,
+        width=12,
+        values=PVZ_data.plantsType,
+        state=READONLY,
+        bootstyle=SECONDARY,
+    )
+    add_potted_type_combobox.grid(
+        row=0, column=1, columnspan=5, sticky=W, padx=2, pady=2
+    )
+
+    def wait_select_add_potted_plant(event, add_potted_type_combobox):
+        open_card_select_window(add_potted_type_combobox)
+        card_select_window.wait_window()
+
+        def closeCombobox(add_potted_type_combobox):
+            add_potted_type_combobox.event_generate("<Escape>")
+
+        add_potted_type_combobox.after(
+            100, lambda: closeCombobox(add_potted_type_combobox)
+        )
+
+    add_potted_type_combobox.bind(
+        "<Button-1>",
+        lambda event: wait_select_add_potted_plant(event, add_potted_type_combobox),
+    )
+
+    ttk.Label(add_potted_state_frame, text="生长状态:").grid(
+        row=1, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_state_combobox = ttk.Combobox(
+        add_potted_state_frame,
+        values=["幼苗", "小", "中", "大"],
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    add_potted_state_combobox.grid(row=1, column=1, sticky=W, padx=2, pady=2)
+
+    add_potted_position_frame = ttk.LabelFrame(
+        add_potted_frame, text="位置", bootstyle=SUCCESS
+    )
+    add_potted_position_frame.grid(
+        row=2, column=0, columnspan=12, sticky=W, padx=2, pady=2
+    )
+
+    # 添加场景下拉框
+    ttk.Label(add_potted_position_frame, text="场景:").grid(
+        row=1, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_garden_combobox = ttk.Combobox(
+        add_potted_position_frame,
+        width=10,
+        values=[
+            "禅境花园",
+            "蘑菇园",
+            "手推车",
+            "水族馆",
+            "实验室花园",
+            "天空花园",
+            "花果山花园",
+            "温馨花园",
+            "魅惑蘑菇园",
+            "竞技花园",
+        ],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    add_potted_garden_combobox.grid(
+        row=1, column=1, columnspan=8, sticky=W, padx=2, pady=2
+    )
+
+    add_potted_row_value = ttk.IntVar(add_potted_position_frame)
+    add_potted_row_combobox = ttk.Combobox(
+        add_potted_position_frame,
+        textvariable=add_potted_row_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    add_potted_row_combobox.grid(
+        row=2, column=1, columnspan=3, sticky=W, padx=2, pady=2
+    )
+    ttk.Label(add_potted_position_frame, text="行").grid(
+        row=2, column=4, sticky=W, padx=2, pady=2
+    )
+
+    add_potted_col_value = ttk.IntVar(add_potted_position_frame)
+    add_potted_col_combobox = ttk.Combobox(
+        add_potted_position_frame,
+        textvariable=add_potted_col_value,
+        width=2,
+        values=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    add_potted_col_combobox.grid(
+        row=2, column=5, columnspan=3, sticky=W, padx=2, pady=2
+    )
+    ttk.Label(add_potted_position_frame, text="列").grid(
+        row=2, column=8, sticky=W, padx=2, pady=2
+    )
+
+    ttk.Label(add_potted_frame, text="方向:").grid(
+        row=3, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_direct_combobox = ttk.Combobox(
+        add_potted_frame,
+        values=["右", "左"],
+        width=5,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    add_potted_direct_combobox.grid(row=3, column=1, ipady=0, sticky=W, padx=2, pady=2)
+
+    # 添加颜色下拉框
+    ttk.Label(add_potted_frame, text="颜色:").grid(
+        row=4, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_color_combobox = ttk.Combobox(
+        add_potted_frame,
+        width=10,
+        values=[
+            "原始",
+            "模仿者",
+            "白色",
+            "品红",
+            "橙色",
+            "粉色",
+            "青色",
+            "红色",
+            "蓝色",
+            "紫色",
+            "薰衣草",
+            "黄色",
+            "淡绿色",
+        ],
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+        state=READONLY,
+    )
+    add_potted_color_combobox.grid(
+        row=4, column=1, columnspan=8, sticky=W, padx=2, pady=2
+    )
+
+    # 添加已浇水次数输入框
+    ttk.Label(add_potted_frame, text="已浇水:").grid(
+        row=5, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_water_var = ttk.IntVar(add_potted_frame)
+    add_potted_water_spinbox = ttk.Spinbox(
+        add_potted_frame,
+        textvariable=add_potted_water_var,
+        width=3,
+        from_=0,
+        to=999,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    add_potted_water_spinbox.grid(
+        row=5, column=1, columnspan=3, sticky=W, padx=2, pady=2
+    )
+
+    # 添加需求浇水次数输入框
+    ttk.Label(add_potted_frame, text="需求浇水:").grid(
+        row=6, column=0, sticky=W, padx=2, pady=2
+    )
+    add_potted_water_max_var = ttk.IntVar(add_potted_frame)
+    add_potted_water_max_spinbox = ttk.Spinbox(
+        add_potted_frame,
+        textvariable=add_potted_water_max_var,
+        width=3,
+        from_=0,
+        to=999,
+        font=("黑体", 8),
+        bootstyle=SECONDARY,
+    )
+    add_potted_water_max_spinbox.grid(
+        row=6, column=1, columnspan=3, sticky=W, padx=2, pady=2
+    )
+    add_potted_button = ttk.Button(
+        add_potted_frame,
+        text="添加",
+        padding=2,
+        command=lambda: addPotted(),
+        bootstyle=SUCCESS,
+    )
+    add_potted_button.grid(row=7, column=0, columnspan=6, sticky=E, padx=2, pady=2)
+
+    def addPotted():
+        pvz.addPotted(
+            add_potted_type_combobox.current(),
+            add_potted_state_combobox.current(),
+            add_potted_garden_combobox.current(),
+            add_potted_row_value.get() - 1,
+            add_potted_col_value.get() - 1,
+            add_potted_direct_combobox.current(),
+            add_potted_color_combobox.current(),
+            add_potted_water_var.get(),
+            add_potted_water_max_var.get(),
+        )
+
+    garden_all_frame = ttk.LabelFrame(garden_page, text="一键满足", bootstyle=SUCCESS)
+    garden_all_frame.place(x=0, y=0, relx=1, rely=0, anchor=NE)
+    water_all_button = ttk.Button(
+        garden_all_frame,
+        text="一键浇水",
+        padding=2,
+        command=pvz.waterAll,
+        bootstyle=SUCCESS,
+    )
+    water_all_button.pack(padx=2, pady=2)
+    fertilize_all_button = ttk.Button(
+        garden_all_frame,
+        text="一键施肥",
+        padding=2,
+        command=pvz.fertilizeAll,
+        bootstyle=SUCCESS,
+    )
+    fertilize_all_button.pack(padx=2, pady=2)
+    pesticide_all_button = ttk.Button(
+        garden_all_frame,
+        text="一键虫乐",
+        padding=2,
+        command=pvz.pesticideAll,
+        bootstyle=SUCCESS,
+    )
+    pesticide_all_button.pack(padx=2, pady=2)
+    do_all_all_button = ttk.Button(
+        garden_all_frame,
+        text="一键全做",
+        padding=2,
+        command=pvz.doAllAll,
+        bootstyle=SUCCESS,
+    )
+    do_all_all_button.pack(padx=2, pady=2)
+
+    def open_tree_wisdom_dialog():
+        """打开智慧树对话窗口"""
+        wisdom_window = ttk.Toplevel()
+        wisdom_window.title("智慧树的话语")
+        wisdom_window.geometry("700x500")
+        wisdom_window.resizable(False, False)
+
+        # 创建主框架
+        main_frame = ttk.Frame(wisdom_window)
+        main_frame.pack(fill=BOTH, expand=TRUE, padx=10, pady=10)
+
+        # 创建顶部标题
+        title_frame = ttk.Frame(main_frame)
+        title_frame.pack(fill=X, pady=10)
+
+        ttk.Label(
+            title_frame,
+            text="智慧树的珍贵话语",
+            font=("黑体", 16, "bold"),
+            bootstyle=SUCCESS,
+        ).pack(pady=5)
+
+        ttk.Label(
+            title_frame,
+            text="随着智慧树的成长，它会分享越来越多的秘密",
+            font=("黑体", 10),
+            bootstyle=SECONDARY,
+        ).pack()
+
+        # 创建选项卡
+        notebook = ttk.Notebook(main_frame)
+        notebook.pack(fill=BOTH, expand=TRUE, pady=10)
+
+        # 创建对话选项卡
+        wisdom_frame = ttk.Frame(notebook)
+        notebook.add(wisdom_frame, text="智慧树话语")
+
+        # 创建奖励选项卡
+        reward_frame = ttk.Frame(notebook)
+        notebook.add(reward_frame, text="智慧树奖励")
+
+        # 创建对话列表的滚动视图
+        wisdom_scroll = ttk.Scrollbar(wisdom_frame)
+        wisdom_scroll.pack(side=RIGHT, fill=Y)
+
+        wisdom_canvas = ttk.Canvas(
+            wisdom_frame, yscrollcommand=wisdom_scroll.set, highlightthickness=0
+        )
+        wisdom_canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+
+        wisdom_scroll.config(command=wisdom_canvas.yview)
+
+        wisdom_content = ttk.Frame(wisdom_canvas)
+        wisdom_canvas.create_window((0, 0), window=wisdom_content, anchor=NW)
+
+        # 填充对话内容
+        for i, (height, message) in enumerate(PVZ_data.TREE_OF_WISDOM):
+            wisdom_item = ttk.LabelFrame(
+                wisdom_content, text=f"高度: {height}米", bootstyle=SUCCESS
+            )
+            wisdom_item.pack(fill=X, expand=TRUE, padx=10, pady=5)
+
+            msg_label = ttk.Label(
+                wisdom_item,
+                text=message,
+                wraplength=600,
+                justify=LEFT,
+                font=("黑体", 10),
+                padding=(10, 10),
+            )
+            msg_label.pack(fill=X, padx=5, pady=5)
+
+        # 创建奖励列表的滚动视图
+        reward_scroll = ttk.Scrollbar(reward_frame)
+        reward_scroll.pack(side=RIGHT, fill=Y)
+
+        reward_canvas = ttk.Canvas(
+            reward_frame, yscrollcommand=reward_scroll.set, highlightthickness=0
+        )
+        reward_canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
+
+        reward_scroll.config(command=reward_canvas.yview)
+
+        reward_content = ttk.Frame(reward_canvas)
+        reward_canvas.create_window((0, 0), window=reward_content, anchor=NW)
+
+        # 填充奖励内容
+        for i, (height, reward) in enumerate(PVZ_data.TREE_OF_WISDOM_REWARD):
+            reward_item = ttk.LabelFrame(
+                reward_content, text=f"高度: {height}米", bootstyle=WARNING
+            )
+            reward_item.pack(fill=X, expand=TRUE, padx=10, pady=5)
+
+            reward_label = ttk.Label(
+                reward_item,
+                text=reward,
+                wraplength=600,
+                justify=LEFT,
+                font=("黑体", 10, "bold"),
+                padding=(10, 10),
+            )
+            reward_label.pack(fill=X, padx=5, pady=5)
+
+        # 更新画布滚动区域
+        def update_scrollregion(event):
+            wisdom_canvas.configure(scrollregion=wisdom_canvas.bbox("all"))
+
+        def update_reward_scrollregion(event):
+            reward_canvas.configure(scrollregion=reward_canvas.bbox("all"))
+
+        wisdom_content.bind("<Configure>", update_scrollregion)
+        reward_content.bind("<Configure>", update_reward_scrollregion)
+
+        # 添加鼠标滚轮事件绑定
+        def _on_wisdom_mousewheel(event):
+            wisdom_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        def _on_reward_mousewheel(event):
+            reward_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        # 绑定鼠标滚轮事件到当前活动的标签页
+        def _bind_mousewheel_to_active_tab(event=None):
+            if notebook.index(notebook.select()) == 0:  # 智慧树话语标签页
+                # 解绑所有MouseWheel事件
+                try:
+                    wisdom_window.unbind_all("<MouseWheel>")
+                except:
+                    pass
+                # 绑定到智慧树话语标签页
+                wisdom_canvas.bind_all("<MouseWheel>", _on_wisdom_mousewheel)
+            else:  # 智慧树奖励标签页
+                # 解绑所有MouseWheel事件
+                try:
+                    wisdom_window.unbind_all("<MouseWheel>")
+                except:
+                    pass
+                # 绑定到智慧树奖励标签页
+                reward_canvas.bind_all("<MouseWheel>", _on_reward_mousewheel)
+
+        # 绑定标签页切换事件
+        notebook.bind("<<NotebookTabChanged>>", _bind_mousewheel_to_active_tab)
+
+        # 初始绑定当前活动标签页的鼠标滚轮事件
+        _bind_mousewheel_to_active_tab()
+
+        # 窗口关闭前解绑所有MouseWheel事件
+        def _on_closing():
+            try:
+                wisdom_window.unbind_all("<MouseWheel>")
+            except:
+                pass
+            wisdom_window.destroy()
+
+        wisdom_window.protocol("WM_DELETE_WINDOW", _on_closing)
+
+        # 关闭按钮
+        close_button = ttk.Button(
+            main_frame,
+            text="关闭",
+            command=wisdom_window.destroy,
+            width=15,
+            bootstyle=SECONDARY,
+        )
+        close_button.pack(pady=10)
+
+    # 在你的主界面添加一个按钮来调用这个窗口
+    tree_wisdom_button = ttk.Button(
+        garden_page,  # 请替换为你的主窗口容器名称
+        text="智慧树的话语",
+        command=open_tree_wisdom_dialog,
+        bootstyle=(INFO, OUTLINE),
+    )
+    tree_wisdom_button.place(
+        x=-5, y=-5, relx=1, rely=1, anchor=SE
+    )  # 请根据你的界面布局调整位置
 
     other_page = ttk.Frame(page_tab)
     other_page.pack()
@@ -7491,6 +8463,8 @@ def mainWindow():
         endless_frame.focus_set()
 
     endless_round_entry.bind("<Return>", setEndlessRound)
+    endless_round_entry.bind("<FocusOut>", setEndlessRound)
+    endless_round_entry.bind("<FocusOut>", setEndlessRound)
 
     jump_level_frame = ttk.Frame(other_page)
     jump_level_frame.pack(anchor=W)
@@ -7830,6 +8804,10 @@ def mainWindow():
                 refresh_slot_list()
                 get_slot_attribute()
         if page_tab.index("current") == 6:
+            if pvz.getMap() is not False:
+                refresh_potted_list()
+                get_potted_attribute()
+        if page_tab.index("current") == 7:
             try:
                 if main_window.focus_get() != endless_round_entry:
                     endless_round.set(pvz.getEndlessRound())

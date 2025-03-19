@@ -1712,6 +1712,8 @@ def spoils(spoils_config):
                 shellcode.push_byte(0x10)
             elif spoils_config[0]["type"] == 10:
                 shellcode.push_byte(0x12)
+            elif spoils_config[0]["type"] == 11:
+                shellcode.push_byte(0x11)
             if spoils_config[0]["card"] == -1:
                 shellcode.mov_dword_ptr_dword(0x00751EC0, 0)
             else:
@@ -1738,6 +1740,8 @@ def spoils(spoils_config):
                     shellcode.push_byte(0x10)
                 elif spoils_config[1]["type"] == 10:
                     shellcode.push_byte(0x12)
+                elif spoils_config[1]["type"] == 11:
+                    shellcode.push_byte(0x11)
                 if spoils_config[1]["card"] == -1:
                     shellcode.mov_dword_ptr_dword(0x00751EC0, 0)
                 else:
@@ -1766,6 +1770,8 @@ def spoils(spoils_config):
                         shellcode.push_byte(0x10)
                     elif spoils_config[2]["type"] == 10:
                         shellcode.push_byte(0x12)
+                    elif spoils_config[2]["type"] == 11:
+                        shellcode.push_byte(0x11)
                     if spoils_config[2]["card"] == -1:
                         shellcode.mov_dword_ptr_dword(0x00751EC0, 0)
                     else:
@@ -1795,6 +1801,8 @@ def spoils(spoils_config):
                             shellcode.push_byte(0x10)
                         elif spoils_config[3]["type"] == 10:
                             shellcode.push_byte(0x12)
+                        elif spoils_config[3]["type"] == 11:
+                            shellcode.push_byte(0x11)
                         if spoils_config[3]["card"] == -1:
                             shellcode.mov_dword_ptr_dword(0x00751EC0, 0)
                         else:
@@ -7676,7 +7684,17 @@ def more_hero(f):
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_more_hero)
 
 
-def treeHight(height):
+def readTreeHeight():
+    tree_hight_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0xF4
+    )
+    return PVZ_data.PVZ_memory.read_int(tree_hight_address)
+
+
+def setTreeHeight(height):
     tree_hight_address = (
         PVZ_data.PVZ_memory.read_int(
             PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
@@ -7684,3 +7702,337 @@ def treeHight(height):
         + 0xF4
     )
     PVZ_data.PVZ_memory.write_int(tree_hight_address, height)
+
+
+def readTreeFertilizer():
+    tree_fertilizer_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x230
+    )
+    return PVZ_data.PVZ_memory.read_int(tree_fertilizer_address) - 1000
+
+
+def setTreeFertilizer(fertilizer):
+    tree_fertilizer_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x230
+    )
+    PVZ_data.PVZ_memory.write_int(tree_fertilizer_address, fertilizer + 1000)
+
+
+def readGardenItemFertilizer():
+    garden_item_fertilizer_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1F8
+    )
+    return PVZ_data.PVZ_memory.read_int(garden_item_fertilizer_address) - 1000
+
+
+def setGardenItemFertilizer(fertilizer):
+    garden_item_fertilizer_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1F8
+    )
+    PVZ_data.PVZ_memory.write_int(garden_item_fertilizer_address, fertilizer + 1000)
+
+
+def readGardenItemPesticide():
+    garden_item_pesticide_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1FC
+    )
+    return PVZ_data.PVZ_memory.read_int(garden_item_pesticide_address) - 1000
+
+
+def setGardenItemPesticide(pesticide):
+    garden_item_pesticide_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x1FC
+    )
+    PVZ_data.PVZ_memory.write_int(garden_item_pesticide_address, pesticide + 1000)
+
+
+def readGardenItemChocolate():
+    garden_item_chocolate_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x228
+    )
+    return PVZ_data.PVZ_memory.read_int(garden_item_chocolate_address) - 1000
+
+
+def setGardenItemChocolate(chocolate):
+    garden_item_chocolate_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x228
+    )
+    PVZ_data.PVZ_memory.write_int(garden_item_chocolate_address, chocolate + 1000)
+
+
+def waterAll():
+    class WaterAll:
+        def __init__(self):
+            self.startAddress = None
+
+        def creat_asm(self, startAddress):
+            water_all_asm = asm.Asm(startAddress)
+            water_all_asm.sub_exx_byte(asm.ESP, 4)
+            water_all_asm.lea_exx_ptr_eyy(asm.ESI, asm.ESP)
+            water_all_asm.mov_ptr_exx_dword(asm.ESI, 0)
+            water_all_asm.mov_exx_dword_ptr(asm.EDX, 0x006A9EC0)
+            water_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
+            water_all_asm.create_label("xunhuan")
+            water_all_asm.call(0x0041C950)
+            water_all_asm.test_8(asm.AL, asm.AL)
+            water_all_asm.je_label("end")
+            water_all_asm.mov_exx_dword_ptr_eyy(asm.EBX, asm.ESI)
+            water_all_asm.pushad()
+            water_all_asm.cmp_dword_ptr_exx_add_byte_dword(asm.EBX, 0x24, 0x21)
+            water_all_asm.je_label("next")
+            water_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0x13C)
+            water_all_asm.mov_exx_dword_ptr_eyy(asm.ECX, asm.EBX)
+            water_all_asm.imul_exx_eyy_dword(asm.EAX, asm.EAX, 0x58)
+            water_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ECX, 0x82C)
+            water_all_asm.lea_exx_ptr_eyy_add_ezz_add_dword(
+                asm.ESI, asm.EAX, asm.EDX, 0x30000
+            )
+            water_all_asm.call(0x0051EA30)
+            water_all_asm.cmp_exx_dword(asm.EAX, 1)
+            water_all_asm.jne_label("next")
+            water_all_asm.push_exx(asm.EBX)
+            water_all_asm.mov_exx_dword_ptr(asm.EDI, 0x006A9EC0)
+            water_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.EDI, 0x81C)
+            water_all_asm.mov_exx_eyy(asm.ECX, asm.EDI)
+            water_all_asm.call(0x0051E3D0)
+            water_all_asm.create_label("next")
+            water_all_asm.popad()
+            water_all_asm.jmp_label("xunhuan")
+            water_all_asm.create_label("end")
+            water_all_asm.add_exx_byte(asm.ESP, 4)
+            return water_all_asm
+
+    asm.runThread(WaterAll())
+
+
+def fertilizeAll():
+    class FertilizeAll:
+        def __init__(self):
+            self.startAddress = None
+
+        def creat_asm(self, startAddress):
+            fertilize_all_asm = asm.Asm(startAddress)
+            fertilize_all_asm.sub_exx_byte(asm.ESP, 4)
+            fertilize_all_asm.lea_exx_ptr_eyy(asm.ESI, asm.ESP)
+            fertilize_all_asm.mov_ptr_exx_dword(asm.ESI, 0)
+            fertilize_all_asm.mov_exx_dword_ptr(asm.EDX, 0x006A9EC0)
+            fertilize_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
+            fertilize_all_asm.create_label("xunhuan")
+            fertilize_all_asm.call(0x0041C950)
+            fertilize_all_asm.test_8(asm.AL, asm.AL)
+            fertilize_all_asm.je_label("end")
+            fertilize_all_asm.mov_exx_dword_ptr_eyy(asm.EBX, asm.ESI)
+            fertilize_all_asm.pushad()
+            fertilize_all_asm.cmp_dword_ptr_exx_add_byte_dword(asm.EBX, 0x24, 0x21)
+            fertilize_all_asm.je_label("next")
+            fertilize_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0x13C)
+            fertilize_all_asm.mov_exx_dword_ptr_eyy(asm.ECX, asm.EBX)
+            fertilize_all_asm.imul_exx_eyy_dword(asm.EAX, asm.EAX, 0x58)
+            fertilize_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ECX, 0x82C)
+            fertilize_all_asm.lea_exx_ptr_eyy_add_ezz_add_dword(
+                asm.ESI, asm.EAX, asm.EDX, 0x30000
+            )
+            fertilize_all_asm.call(0x0051EA30)
+            fertilize_all_asm.cmp_exx_dword(asm.EAX, 2)
+            fertilize_all_asm.jne_label("next")
+            fertilize_all_asm.mov_exx_eyy(asm.ESI, asm.EBX)
+            fertilize_all_asm.mov_exx_dword_ptr(asm.EDI, 0x006A9EC0)
+            fertilize_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.EDI, 0x81C)
+            fertilize_all_asm.push_exx(asm.EDI)
+            fertilize_all_asm.call(0x0051DF40)
+            fertilize_all_asm.create_label("next")
+            fertilize_all_asm.popad()
+            fertilize_all_asm.jmp_label("xunhuan")
+            fertilize_all_asm.create_label("end")
+            fertilize_all_asm.add_exx_byte(asm.ESP, 4)
+            return fertilize_all_asm
+
+    asm.runThread(FertilizeAll())
+
+
+def pesticideAll():
+    class PesticideAll:
+        def __init__(self):
+            self.startAddress = None
+
+        def creat_asm(self, startAddress):
+            pesticide_all_asm = asm.Asm(startAddress)
+            pesticide_all_asm.sub_exx_byte(asm.ESP, 4)
+            pesticide_all_asm.lea_exx_ptr_eyy(asm.ESI, asm.ESP)
+            pesticide_all_asm.mov_ptr_exx_dword(asm.ESI, 0)
+            pesticide_all_asm.mov_exx_dword_ptr(asm.EDX, 0x006A9EC0)
+            pesticide_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.EDX, 0x768)
+            pesticide_all_asm.create_label("xunhuan")
+            pesticide_all_asm.call(0x0041C950)
+            pesticide_all_asm.test_8(asm.AL, asm.AL)
+            pesticide_all_asm.je_label("end")
+            pesticide_all_asm.mov_exx_dword_ptr_eyy(asm.EBX, asm.ESI)
+            pesticide_all_asm.pushad()
+            pesticide_all_asm.cmp_dword_ptr_exx_add_byte_dword(asm.EBX, 0x24, 0x21)
+            pesticide_all_asm.je_label("next")
+            pesticide_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EBX, 0x13C)
+            pesticide_all_asm.mov_exx_dword_ptr_eyy(asm.ECX, asm.EBX)
+            pesticide_all_asm.imul_exx_eyy_dword(asm.EAX, asm.EAX, 0x58)
+            pesticide_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDX, asm.ECX, 0x82C)
+            pesticide_all_asm.lea_exx_ptr_eyy_add_ezz_add_dword(
+                asm.ESI, asm.EAX, asm.EDX, 0x30000
+            )
+            pesticide_all_asm.call(0x0051EA30)
+            pesticide_all_asm.cmp_exx_dword(asm.EAX, 3)
+            pesticide_all_asm.je_label("pesticide")
+            pesticide_all_asm.cmp_exx_dword(asm.EAX, 4)
+            pesticide_all_asm.jne_label("next")
+            pesticide_all_asm.create_label("pesticide")
+            pesticide_all_asm.mov_exx_eyy(asm.ESI, asm.EBX)
+            pesticide_all_asm.mov_exx_dword_ptr(asm.EDI, 0x006A9EC0)
+            pesticide_all_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.EDI, 0x81C)
+            pesticide_all_asm.push_exx(asm.EDI)
+            pesticide_all_asm.call(0x0051E110)
+            pesticide_all_asm.create_label("next")
+            pesticide_all_asm.popad()
+            pesticide_all_asm.jmp_label("xunhuan")
+            pesticide_all_asm.create_label("end")
+            pesticide_all_asm.add_exx_byte(asm.ESP, 4)
+            return pesticide_all_asm
+
+    asm.runThread(PesticideAll())
+
+
+def doAllAll():
+    waterAll()
+    fertilizeAll()
+    pesticideAll()
+
+
+def easyAddPotted(type, color):
+    class EasyAddPotted:
+        def __init__(self, type, color):
+            self.type = type
+            self.color = color
+
+        def creat_asm(self, startAddress):
+            easy_add_potted_asm = asm.Asm(startAddress)
+            easy_add_potted_asm.mov_exx(asm.EDX, startAddress + 11)
+            easy_add_potted_asm.jmp_label("put")
+            easy_add_potted_asm.add_dword(self.type)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(color)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.add_dword(0)
+            easy_add_potted_asm.create_label("put")
+            easy_add_potted_asm.mov_exx_dword_ptr(asm.EDI, 0x006A9EC0)
+            easy_add_potted_asm.mov_exx_dword_ptr_eyy_add_dword(asm.EDI, asm.EDI, 0x81C)
+            easy_add_potted_asm.push_exx(asm.EDI)
+            easy_add_potted_asm.call(0x0051D8C0)
+            return easy_add_potted_asm
+
+    asm.runThread(EasyAddPotted(type, color))
+
+
+def addPotted(type, state, garden, row, col, direct, color, water, water_max):
+    potted_num = PVZ_data.PVZ_memory.read_int(
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x350
+    )
+    PVZ_data.PVZ_memory.write_int(
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x350,
+        potted_num + 1,
+    )
+    potted_addr = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x30000
+        + PVZ_data.potted_size * potted_num
+    )
+    new_potted = PVZ_data.potted(potted_addr)
+    new_potted.setType(type)
+    new_potted.setState(state)
+    new_potted.setGarden(garden)
+    new_potted.setRow(row)
+    new_potted.setCol(col)
+    new_potted.setDirection(direct)
+    new_potted.setColor(color)
+    new_potted.setWater(water)
+    new_potted.setWaterMax(water_max)
+
+
+newmem_plantnosleep = None
+
+
+def plantNoSleep(f):
+    if f:
+        newmem_plantnosleep = pymem.memory.allocate_memory(
+            PVZ_data.PVZ_memory.process_handle, 2048
+        )
+        shellcode = asm.Asm(newmem_plantnosleep)
+        shellcode.mov_ptr_exx_add_byte_dword(asm.ESP, 4, 0)
+        shellcode.sub_exx_byte(asm.ESP, 0xC)
+        shellcode.push_exx(asm.EBX)
+        shellcode.add_bytes(b"\x8a\x5c\x24\x14")
+        shellcode.jmp(0x0045E865)
+        PVZ_data.PVZ_memory.write_bytes(
+            newmem_plantnosleep,
+            bytes(shellcode.code[: shellcode.index]),
+            shellcode.index,
+        )
+        PVZ_data.PVZ_memory.write_bytes(
+            0x0045E860,
+            b"\xe9"
+            + calculate_call_address(newmem_plantnosleep - 0x0045E865)
+            + b"\x90\x90\x90",
+            8,
+        )
+    else:
+        PVZ_data.PVZ_memory.write_bytes(
+            0x0045E860, b"\x83\xec\x0c\x53\x8a\x5c\x24\x14", 4
+        )
+        pymem.memory.free_memory(
+            PVZ_data.PVZ_memory.process_handle, newmem_plantnosleep
+        )

@@ -463,6 +463,12 @@ class Asm:
         self.add_byte(eyy + ezz * 8 + times * 0x20)
         self.add_byte(val)
 
+    def lea_exx_ptr_eyy_add_ezz_add_dword(self, exx, eyy, ezz, val):
+        self.add_byte(0x8D)
+        self.add_byte(0x84 + exx * 8)
+        self.add_byte(eyy + ezz * 8)
+        self.add_dword(val)
+
     def lea_exx_dword_ptr(self, exx, val):
         self.add_byte(0x8D)
         self.add_byte(0x05 + exx * 8)
