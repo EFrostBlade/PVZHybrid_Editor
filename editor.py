@@ -53,7 +53,7 @@ from PIL import Image, ImageTk
 # from urllib.parse import urlencode
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.57"
+current_version = "0.58"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -357,6 +357,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.5" in window_name:
+                PVZ_data.update_PVZ_version(3.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -521,6 +529,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
@@ -643,12 +659,16 @@ def support():
     support_window.geometry(f"+{main_window_x + 100}+{main_window_y + 100}")
     ttk.Label(
         support_window, text="本软件完全免费", font=("黑体", 18), bootstyle=SUCCESS
-    ).pack(pady=10)
+    ).pack(pady=(10, 2))
+    ttk.Label(
+        support_window,
+        text="如果你是通过付费或付出点赞、关注\n或其他任何有可能使分享者获得利益\n的途径获取的本修改器\n则说明你已经上当受骗\n",
+        font=("黑体", 12),
+        bootstyle=SUCCESS,
+    ).pack(pady=(0, 10))
 
     def open_qq0():
-        webbrowser.open_new(
-            r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jtpHFKp2U6UF-jQWoD6bFBGvOe8-nU33&authKey=xGtPLe9Hus9NLhJ%2FTZZdLU0uzPIAM2OGTGI%2B9K8D1Onyujzgmm5t1RPIGWpSrLaz&noverify=0&group_code=978991455"
-        )
+        webbrowser.open_new(r"https://qm.qq.com/q/NvmebXBF6Y")
 
     qq0_frame = ttk.Frame(support_window)
     qq0_frame.pack()
@@ -657,7 +677,7 @@ def support():
     )
     ttk.Button(
         qq0_frame,
-        text="978991455",
+        text="970286809",
         padding=0,
         bootstyle=(PRIMARY, LINK),
         cursor="hand2",
@@ -677,6 +697,10 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.58\n"
+        "适配杂交版3.5\n"
+        "修复了简易添加盆栽植物类型错误的问题，增加了养成总数的修改\n"
+        "优化了植物选择和僵尸选择的界面，使其符合响应式设计要求\n"
         "b0.57\n"
         "增加大量花园相关修改、包括修改花盆属性、增加花盆、一键完成需求等\n"
         "新增植物不睡觉功能，取代了超级铲子功能\n"
@@ -923,47 +947,222 @@ def open_card_select_window(combobox):
     card_select_window.title("选择卡片")
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    card_select_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
+    # 设置初始窗口大小和位置
+    card_select_window.geometry(f"800x600+{main_window_x + 50}+{main_window_y + 50}")
+    # 允许窗口调整大小
+    card_select_window.resizable(True, True)
+
+    # 配置行和列的权重，使其能够随窗口大小调整
+    card_select_window.columnconfigure(0, weight=1)
+    card_select_window.rowconfigure(0, weight=1)
 
     notebook = ttk.Notebook(card_select_window)
-    notebook.pack(fill="both", expand=True)
+    notebook.grid(row=0, column=0, sticky="nsew")  # 使用grid而不是pack，并设置sticky
 
-    # Create a tab for plants
+    # --------------------- 植物标签页 ---------------------
     plant_tab = ttk.Frame(notebook)
     notebook.add(plant_tab, text="植物")
 
+    # 配置plant_tab的响应式布局
+    plant_tab.columnconfigure(0, weight=1)
+    plant_tab.rowconfigure(0, weight=1)
+
+    # 创建滚动区域
+    plant_canvas = tk.Canvas(plant_tab)
+    plant_scrollbar = ttk.Scrollbar(
+        plant_tab, orient="vertical", command=plant_canvas.yview
+    )
+    plant_canvas.configure(yscrollcommand=plant_scrollbar.set)
+    plant_canvas.grid(row=0, column=0, sticky="nsew")  # 使用grid而不是pack
+    plant_scrollbar.grid(row=0, column=1, sticky="ns")  # 使用grid而不是pack
+
+    plant_container = ttk.Frame(plant_canvas)
+    plant_canvas.create_window((0, 0), window=plant_container, anchor="nw")
+
+    # 配置滚动区域
+    def on_plant_configure(event):
+        plant_canvas.configure(scrollregion=plant_canvas.bbox("all"))
+
+    plant_container.bind("<Configure>", on_plant_configure)
+
+    # 绑定鼠标滚轮事件，仅在鼠标进入时绑定，离开时解绑
+    def _on_plant_mousewheel(event):
+        plant_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    plant_canvas.bind(
+        "<Enter>", lambda e: plant_canvas.bind_all("<MouseWheel>", _on_plant_mousewheel)
+    )
+    plant_canvas.bind("<Leave>", lambda e: plant_canvas.unbind_all("<MouseWheel>"))
+
+    # 创建用于延迟执行的变量
+    resize_timer_id = None
+
+    # 动态调整canvas大小和每行卡片数量
+    def on_plant_tab_configure(event):
+        plant_canvas.config(width=event.width, height=event.height)
+        # 使用延迟方式重新排列卡片
+        nonlocal resize_timer_id
+        if resize_timer_id:
+            plant_tab.after_cancel(resize_timer_id)
+        resize_timer_id = plant_tab.after(
+            150, lambda: rearrange_plant_cards(event.width)
+        )
+
+    plant_tab.bind("<Configure>", on_plant_tab_configure)
+
+    # 加载植物图片
     plant_images = os.listdir(resource_path("res/cards/pvzhe_plants"))
-    r = 0
+    plant_cards = []  # 存储所有卡片及其对应的标签
+
+    # 先创建所有卡片但不布局
     for i, image_file in enumerate(plant_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_plants/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(plant_tab, image=photo, text=str(i))
-        label.image = photo  # keep a reference to the image
+        label = tk.Label(plant_container, image=photo, text=str(i))
+        label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=i // 25, column=i % 25)
-        r = i // 25
+        plant_cards.append(label)
 
-    # Create a tab for zombies
+    # 记住上一次的列数，避免不必要的重新布局
+    last_cols = 0
+
+    # 动态计算每行显示的卡片数量并重新排列卡片
+    def rearrange_plant_cards(width):
+        nonlocal last_cols
+        # 假设每张卡片宽度为60像素(包括间距)
+        card_width = 60
+        cols = max(1, (width - 40) // card_width) + 1
+
+        # 如果列数没变，不需要重新布局
+        if cols == last_cols:
+            return
+
+        last_cols = cols
+
+        # 隐藏所有卡片
+        for label in plant_cards:
+            label.grid_forget()
+
+        # 重新布局卡片
+        for i, label in enumerate(plant_cards):
+            row = i // cols
+            col = i % cols
+            label.grid(row=row, column=col, padx=2, pady=2)
+
+    # --------------------- 僵尸标签页 ---------------------
     zombie_tab = ttk.Frame(notebook)
     notebook.add(zombie_tab, text="僵尸")
 
+    # 配置zombie_tab的响应式布局
+    zombie_tab.columnconfigure(0, weight=1)
+    zombie_tab.rowconfigure(0, weight=1)
+
+    zombie_canvas = tk.Canvas(zombie_tab)
+    zombie_scrollbar = ttk.Scrollbar(
+        zombie_tab, orient="vertical", command=zombie_canvas.yview
+    )
+    zombie_canvas.configure(yscrollcommand=zombie_scrollbar.set)
+    zombie_canvas.grid(row=0, column=0, sticky="nsew")  # 使用grid而不是pack
+    zombie_scrollbar.grid(row=0, column=1, sticky="ns")  # 使用grid而不是pack
+
+    zombie_container = ttk.Frame(zombie_canvas)
+    zombie_canvas.create_window((0, 0), window=zombie_container, anchor="nw")
+
+    def on_zombie_configure(event):
+        zombie_canvas.configure(scrollregion=zombie_canvas.bbox("all"))
+
+    zombie_container.bind("<Configure>", on_zombie_configure)
+
+    # 僵尸的延迟变量
+    zombie_resize_timer_id = None
+
+    # 动态调整canvas大小和每行卡片数量
+    def on_zombie_tab_configure(event):
+        zombie_canvas.config(width=event.width, height=event.height)
+
+        # 使用延迟方式重新排列僵尸卡片
+        nonlocal zombie_resize_timer_id
+        if zombie_resize_timer_id:
+            zombie_tab.after_cancel(zombie_resize_timer_id)
+        zombie_resize_timer_id = zombie_tab.after(
+            150, lambda: rearrange_zombie_cards(event.width)
+        )
+
+    zombie_tab.bind("<Configure>", on_zombie_tab_configure)
+
+    def _on_zombie_mousewheel(event):
+        zombie_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    zombie_canvas.bind(
+        "<Enter>",
+        lambda e: zombie_canvas.bind_all("<MouseWheel>", _on_zombie_mousewheel),
+    )
+    zombie_canvas.bind("<Leave>", lambda e: zombie_canvas.unbind_all("<MouseWheel>"))
+
     zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    zombie_cards = []  # 存储所有僵尸卡片及其对应的标签
+
+    # 先创建所有僵尸卡片但不布局
     for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
         if PVZ_data.PVZ_version < 3.4:
-            label = tk.Label(zombie_tab, image=photo, text=str(i + 256))
+            label = tk.Label(zombie_container, image=photo, text=str(i + 256))
         else:
-            label = tk.Label(zombie_tab, image=photo, text=str(i + 512))
-        label.image = photo  # keep a reference to the image
+            label = tk.Label(zombie_container, image=photo, text=str(i + 512))
+        label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
             lambda event: on_card_image_click(event, card_select_window, combobox),
         )
-        label.grid(row=r + 1 + i // 25, column=i % 25)
+        zombie_cards.append(label)
+
+    # 记住上一次僵尸的列数
+    last_zombie_cols = 0
+
+    # 动态计算每行显示的僵尸卡片数量并重新排列卡片
+    def rearrange_zombie_cards(width):
+        nonlocal last_zombie_cols
+        # 假设每张卡片宽度为60像素(包括间距)
+        card_width = 60
+        cols = max(1, (width - 40) // card_width) + 1
+
+        # 如果列数没变，不需要重新布局
+        if cols == last_zombie_cols:
+            return
+
+        last_zombie_cols = cols
+
+        # 隐藏所有卡片
+        for label in zombie_cards:
+            label.grid_forget()
+
+        # 重新布局卡片
+        for i, label in enumerate(zombie_cards):
+            row = i // cols
+            col = i % cols
+            label.grid(row=row, column=col, padx=2, pady=2)
+
+    # 初始布局 - 使用单次调用并延迟以确保窗口完全加载
+    def initialize_layout():
+        width_plant = plant_tab.winfo_width()
+        width_zombie = zombie_tab.winfo_width()
+
+        if width_plant > 10:  # 确保有一个有效的宽度
+            rearrange_plant_cards(width_plant)
+        else:
+            # 如果宽度还不可用，再等一会
+            card_select_window.after(50, initialize_layout)
+            return
+
+        if width_zombie > 10:
+            rearrange_zombie_cards(width_zombie)
+
+    # 延迟调用初始布局，让窗口有时间进行初始绘制
+    card_select_window.after(100, initialize_layout)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -983,24 +1182,123 @@ def open_zombie_select_window(combobox):
     zombie_select_window.title("选择僵尸")
     main_window_x = main_window.winfo_x()
     main_window_y = main_window.winfo_y()
-    zombie_select_window.geometry(f"+{main_window_x + 50}+{main_window_y + 50}")
+    # 设置初始窗口大小和位置
+    zombie_select_window.geometry(f"800x600+{main_window_x + 50}+{main_window_y + 50}")
+    # 允许窗口调整大小
+    zombie_select_window.resizable(True, True)
+
+    # 配置行和列的权重，使其能够随窗口大小调整
+    zombie_select_window.columnconfigure(0, weight=1)
+    zombie_select_window.rowconfigure(0, weight=1)
 
     notebook = ttk.Notebook(zombie_select_window)
-    notebook.pack(fill="both", expand=True)
+    notebook.grid(row=0, column=0, sticky="nsew")  # 使用grid而不是pack，并设置sticky
+
     zombie_tab = ttk.Frame(notebook)
     notebook.add(zombie_tab, text="僵尸")
 
+    # 配置zombie_tab的响应式布局
+    zombie_tab.columnconfigure(0, weight=1)
+    zombie_tab.rowconfigure(0, weight=1)
+
+    # 创建滚动区域
+    zombie_canvas = tk.Canvas(zombie_tab)
+    zombie_scrollbar = ttk.Scrollbar(
+        zombie_tab, orient="vertical", command=zombie_canvas.yview
+    )
+    zombie_canvas.configure(yscrollcommand=zombie_scrollbar.set)
+    zombie_canvas.grid(row=0, column=0, sticky="nsew")  # 使用grid而不是pack
+    zombie_scrollbar.grid(row=0, column=1, sticky="ns")  # 使用grid而不是pack
+
+    zombie_container = ttk.Frame(zombie_canvas)
+    zombie_canvas.create_window((0, 0), window=zombie_container, anchor="nw")
+
+    # 配置滚动区域
+    def on_zombie_configure(event):
+        zombie_canvas.configure(scrollregion=zombie_canvas.bbox("all"))
+
+    zombie_container.bind("<Configure>", on_zombie_configure)
+
+    # 僵尸的延迟变量
+    zombie_resize_timer_id = None
+
+    # 动态调整canvas大小和每行卡片数量
+    def on_zombie_tab_configure(event):
+        zombie_canvas.config(width=event.width, height=event.height)
+
+        # 使用延迟方式重新排列僵尸卡片
+        nonlocal zombie_resize_timer_id
+        if zombie_resize_timer_id:
+            zombie_tab.after_cancel(zombie_resize_timer_id)
+        zombie_resize_timer_id = zombie_tab.after(
+            150, lambda: rearrange_zombie_cards(event.width)
+        )
+
+    zombie_tab.bind("<Configure>", on_zombie_tab_configure)
+
+    def _on_zombie_mousewheel(event):
+        zombie_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+    zombie_canvas.bind(
+        "<Enter>",
+        lambda e: zombie_canvas.bind_all("<MouseWheel>", _on_zombie_mousewheel),
+    )
+    zombie_canvas.bind("<Leave>", lambda e: zombie_canvas.unbind_all("<MouseWheel>"))
+
     zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    zombie_cards = []  # 存储所有僵尸卡片及其对应的标签
+
+    # 先创建所有僵尸卡片但不布局
     for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(zombie_tab, image=photo, text=i)
-        label.image = photo  # keep a reference to the image
+        label = tk.Label(zombie_container, image=photo, text=str(i))
+        label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
             lambda event: on_zombie_image_click(event, zombie_select_window, combobox),
         )
-        label.grid(row=i // 25, column=i % 25)
+        zombie_cards.append(label)
+
+    # 记住上一次僵尸的列数
+    last_zombie_cols = 0
+
+    # 动态计算每行显示的僵尸卡片数量并重新排列卡片
+    def rearrange_zombie_cards(width):
+        nonlocal last_zombie_cols
+        # 假设每张卡片宽度为60像素(包括间距)
+        card_width = 60
+        cols = max(1, (width - 40) // card_width) + 1
+
+        # 如果列数没变，不需要重新布局
+        if cols == last_zombie_cols:
+            return
+
+        last_zombie_cols = cols
+
+        # 隐藏所有卡片
+        for label in zombie_cards:
+            label.grid_forget()
+
+        # 重新布局卡片
+        for i, label in enumerate(zombie_cards):
+            row = i // cols
+            col = i % cols
+            label.grid(row=row, column=col, padx=2, pady=2)
+
+    # 初始布局 - 使用单次调用并延迟以确保窗口完全加载
+    def initialize_layout():
+        width_zombie = zombie_tab.winfo_width()
+
+        if width_zombie > 10:  # 确保有一个有效的宽度
+            rearrange_zombie_cards(width_zombie)
+        else:
+            # 如果宽度还不可用，再等一会
+            zombie_select_window.after(50, initialize_layout)
+            return
+
+    # 延迟调用初始布局，让窗口有时间进行初始绘制
+    zombie_select_window.after(100, initialize_layout)
 
     def closeCombobox(combobox):
         combobox.event_generate("<Escape>")
@@ -1061,12 +1359,16 @@ def mainWindow():
         ).pack()
         ttk.Label(
             update_window, text="本软件完全免费", font=("黑体", 18), bootstyle=SUCCESS
-        ).pack(pady=10)
+        ).pack(pady=(10, 2))
+        ttk.Label(
+            update_window,
+            text="如果你是通过付费或付出点赞、关注\n或其他任何有可能使分享者获得利益\n的途径获取的本修改器\n则说明你已经上当受骗\n",
+            font=("黑体", 12),
+            bootstyle=SUCCESS,
+        ).pack(pady=(0, 10))
 
         def open_qq0():
-            webbrowser.open_new(
-                r"http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=jtpHFKp2U6UF-jQWoD6bFBGvOe8-nU33&authKey=xGtPLe9Hus9NLhJ%2FTZZdLU0uzPIAM2OGTGI%2B9K8D1Onyujzgmm5t1RPIGWpSrLaz&noverify=0&group_code=978991455"
-            )
+            webbrowser.open_new(r"https://qm.qq.com/q/NvmebXBF6Y")
 
         qq0_frame = ttk.Frame(update_window)
         qq0_frame.pack()
@@ -1075,7 +1377,7 @@ def mainWindow():
         )
         ttk.Button(
             qq0_frame,
-            text="978991455",
+            text="970286809",
             padding=0,
             bootstyle=(PRIMARY, LINK),
             cursor="hand2",
@@ -1340,6 +1642,14 @@ def mainWindow():
                 )
             elif "v3.4" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.4)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.5)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -7752,6 +8062,9 @@ def mainWindow():
                 garden_item_pesticide.set(pvz.readGardenItemPesticide())
             if garden_item_frame.focus_get() != garden_item_chocolate_entry:
                 garden_item_chocolate.set(pvz.readGardenItemChocolate())
+            if garden_item_frame.focus_get() != total_potted_num:
+                total_potted_num_value.set(pvz.getTotalPottedNum())
+
         except:
             pass
 
@@ -7871,6 +8184,26 @@ def mainWindow():
             Messagebox.show_error(
                 "禅境花园已满,请移动一些盆栽到其他花园", title="无法添加盆栽"
             )
+
+    total_potted_frame = ttk.Frame(garden_page)
+    total_potted_frame.place(x=0, y=450, anchor=NW)
+    total_potted_label = ttk.Label(total_potted_frame, text="最高养成数量:")
+    total_potted_label.grid(row=0, column=0, sticky=W, padx=5, pady=5)
+    total_potted_num_value = ttk.IntVar(total_potted_frame)
+    total_potted_num = ttk.Spinbox(
+        total_potted_frame,
+        textvariable=total_potted_num_value,
+        font=("黑体", 10),
+        width=8,
+        bootstyle=SUCCESS,
+    )
+    total_potted_num.grid(row=0, column=1, sticky=W, padx=5, pady=5)
+    total_potted_num.bind(
+        "<Return>", lambda x: pvz.setTotalPottedNum(total_potted_num_value.get())
+    )
+    total_potted_num.bind(
+        "<FocusOut>", lambda x: pvz.setTotalPottedNum(total_potted_num_value.get())
+    )
 
     tree_frame = ttk.LabelFrame(garden_page, text="智慧树")
     tree_frame.place(x=340, y=0, anchor=NW)
@@ -8451,6 +8784,15 @@ def mainWindow():
         command=lambda: pvz.more_hero(more_hero_status.get()),
     )
     more_hero_check.pack()
+    shovel_pro_status = ttk.BooleanVar(quick_start_frame)
+    shovel_pro_check = ttk.Checkbutton(
+        other_toggle_frame,
+        text="超级铲子",
+        variable=shovel_pro_status,
+        bootstyle="success-round-toggle",
+        command=lambda: pvz.shovelpro(shovel_pro_status.get()),
+    )
+    shovel_pro_check.pack()
     endless_frame = ttk.Frame(other_page)
     endless_frame.pack(anchor=W)
     ttk.Label(endless_frame, text="无尽轮数").pack(side=LEFT)
@@ -8804,9 +9146,8 @@ def mainWindow():
                 refresh_slot_list()
                 get_slot_attribute()
         if page_tab.index("current") == 6:
-            if pvz.getMap() is not False:
-                refresh_potted_list()
-                get_potted_attribute()
+            refresh_potted_list()
+            get_potted_attribute()
         if page_tab.index("current") == 7:
             try:
                 if main_window.focus_get() != endless_round_entry:

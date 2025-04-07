@@ -202,6 +202,8 @@ def get_zombie_num():
         zombie_num = 89
     elif PVZ_data.PVZ_version == 3.3 or PVZ_data.PVZ_version == 3.4:
         zombie_num = 95
+    elif PVZ_data.PVZ_version == 3.5:
+        zombie_num = 101
     return zombie_num
 
 
@@ -241,6 +243,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 88)
     elif PVZ_data.PVZ_version == 3.3 or PVZ_data.PVZ_version == 3.4:
         zombieType = random.randint(0, 94)
+    elif PVZ_data.PVZ_version == 3.5:
+        zombieType = random.randint(0, 101)
     if hasBoss is True:
         return zombieType
     else:
@@ -282,6 +286,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 218)
     elif PVZ_data.PVZ_version == 3.4:
         plantType = random.randint(0, 228)
+    elif PVZ_data.PVZ_version == 3.5:
+        plantType = random.randint(0, 241)
     if plantType >= 48:
         plantType = plantType + 27
     IllegalCards = [241, 249]
@@ -4155,6 +4161,35 @@ def globalSpawModify(f, zombieTypes):
                 6,
             )
             spawisModified()
+    elif PVZ_data.PVZ_version == 3.5:
+        if f:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 101):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+
+            shellcode.jmp(0x00425D1D)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0082405A,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x0082405F)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
         else:
             PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
             PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
@@ -4394,6 +4429,7 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 3.21
         or PVZ_data.PVZ_version == 3.3
         or PVZ_data.PVZ_version == 3.4
+        or PVZ_data.PVZ_version == 3.5
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -7649,6 +7685,7 @@ def setBossHP(no, hp):
         or PVZ_data.PVZ_version == 3.21
         or PVZ_data.PVZ_version == 3.3
         or PVZ_data.PVZ_version == 3.4
+        or PVZ_data.PVZ_version == 3.5
     ):
         if no == 1:
             PVZ_data.PVZ_memory.write_int(0x008D0F75, hp)
@@ -7782,6 +7819,26 @@ def setGardenItemChocolate(chocolate):
         + 0x228
     )
     PVZ_data.PVZ_memory.write_int(garden_item_chocolate_address, chocolate + 1000)
+
+
+def getTotalPottedNum():
+    total_potted_num_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x36C
+    )
+    return PVZ_data.PVZ_memory.read_int(total_potted_num_address)
+
+
+def setTotalPottedNum(num):
+    total_potted_num_address = (
+        PVZ_data.PVZ_memory.read_int(
+            PVZ_data.PVZ_memory.read_int(PVZ_data.baseAddress) + 0x82C
+        )
+        + 0x36C
+    )
+    PVZ_data.PVZ_memory.write_int(total_potted_num_address, num)
 
 
 def waterAll():
@@ -7935,8 +7992,9 @@ def easyAddPotted(type, color):
             self.color = color
 
         def creat_asm(self, startAddress):
+            print(f"EasyAddPotted: {self.type} {self.color}")
             easy_add_potted_asm = asm.Asm(startAddress)
-            easy_add_potted_asm.mov_exx(asm.EDX, startAddress + 11)
+            easy_add_potted_asm.mov_exx(asm.EDX, startAddress + 10)
             easy_add_potted_asm.jmp_label("put")
             easy_add_potted_asm.add_dword(self.type)
             easy_add_potted_asm.add_dword(0)
