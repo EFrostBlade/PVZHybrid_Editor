@@ -52,8 +52,10 @@ from PIL import Image, ImageTk
 # from Crypto.Cipher import PKCS1_v1_5
 # from urllib.parse import urlencode
 
+import traceback
+
 Image.CUBIC = Image.BICUBIC
-current_version = "0.58"
+current_version = "0.59"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -365,6 +367,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.6" in window_name:
+                PVZ_data.update_PVZ_version(3.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -537,6 +547,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.6" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             choose_process_window.quit()
@@ -649,7 +667,7 @@ def support():
     global main_window
     support_window = ttk.Toplevel(topmost=True)
     support_window.title("关于")
-    support_window.geometry("300x480")
+    support_window.geometry("300x560")
     support_window.iconphoto(
         False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
     )
@@ -664,7 +682,7 @@ def support():
         support_window,
         text="如果你是通过付费或付出点赞、关注\n或其他任何有可能使分享者获得利益\n的途径获取的本修改器\n则说明你已经上当受骗\n",
         font=("黑体", 12),
-        bootstyle=SUCCESS,
+        bootstyle=DANGER,
     ).pack(pady=(0, 10))
 
     def open_qq0():
@@ -689,7 +707,7 @@ def support():
     text = ttk.Text(support_window, width=50, height=8)
     scroll = ttk.Scrollbar(support_window)
     # 放到窗口的右侧, 填充Y竖直方向
-    scroll.place(x=0, y=155, relx=1, anchor=E, height=150)
+    scroll.place(x=0, y=240, relx=1, anchor=E, height=150)
 
     # 两个控件关联
     scroll.config(command=text.yview)
@@ -697,6 +715,8 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.59\n"
+        "适配杂交版3.6\n"
         "b0.58\n"
         "适配杂交版3.5\n"
         "修复了简易添加盆栽植物类型错误的问题，增加了养成总数的修改\n"
@@ -1343,7 +1363,7 @@ def mainWindow():
 
         update_window = ttk.Toplevel(topmost=True)
         update_window.title("有新版本")
-        update_window.geometry("320x520")
+        update_window.geometry("320x440")
         update_window.iconphoto(
             False, ttk.PhotoImage(file=resource_path((r"res\icon\info.png")))
         )
@@ -1364,7 +1384,7 @@ def mainWindow():
             update_window,
             text="如果你是通过付费或付出点赞、关注\n或其他任何有可能使分享者获得利益\n的途径获取的本修改器\n则说明你已经上当受骗\n",
             font=("黑体", 12),
-            bootstyle=SUCCESS,
+            bootstyle=DANGER,
         ).pack(pady=(0, 10))
 
         def open_qq0():
@@ -1650,6 +1670,14 @@ def mainWindow():
                 )
             elif "v3.5" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.6" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.6)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -2311,7 +2339,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 186):
+        for i in range(0, 512):
             pvz.completeAdvanture(i)
 
     adventure_complete_button = ttk.Button(
@@ -2327,7 +2355,7 @@ def mainWindow():
         # for i in range(
         #     adventure_start_level_value.get() - 1, adventure_end_level_value.get()
         # ):
-        for i in range(0, 186):
+        for i in range(0, 512):
             pvz.lockAdvanture(i)
 
     adventure_lock_button = ttk.Button(
@@ -2370,7 +2398,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 180):
+        for i in range(0, 512):
             pvz.completeChallenge(i)
 
     challenges_complete_button = ttk.Button(
@@ -2386,7 +2414,7 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 180):
+        for i in range(0, 512):
             pvz.lockChallenge(i)
 
     challenges_lock_button = ttk.Button(
@@ -2402,13 +2430,13 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 48):
+        for i in range(0, 128):
             pvz.completeMiniGame(i)
-        for i in range(0, 40):
+        for i in range(0, 128):
             pvz.completePuzzle(i)
-        for i in range(0, 20):
+        for i in range(0, 128):
             pvz.completeHero(i)
-        for i in range(0, 62):
+        for i in range(0, 128):
             pvz.completeStore(i)
 
     miniGame_complete_button = ttk.Button(
@@ -2424,13 +2452,13 @@ def mainWindow():
         # for i in range(
         #     challenge_start_level_value.get() - 1, challenge_end_level_value.get()
         # ):
-        for i in range(0, 42):
+        for i in range(0, 128):
             pvz.lockMiniGame(i)
-        for i in range(0, 40):
+        for i in range(0, 128):
             pvz.lockPuzzle(i)
-        for i in range(0, 20):
+        for i in range(0, 128):
             pvz.lockHero(i)
-        for i in range(0, 62):
+        for i in range(0, 128):
             pvz.lockStore(i)
 
     miniGame_lock_button = ttk.Button(
@@ -7871,6 +7899,7 @@ def mainWindow():
             "温馨花园",
             "魅惑蘑菇园",
             "竞技花园",
+            "始皇岛花园",
         ],
         font=("黑体", 8),
         bootstyle=SECONDARY,
@@ -8341,6 +8370,7 @@ def mainWindow():
             "温馨花园",
             "魅惑蘑菇园",
             "竞技花园",
+            "始皇岛花园",
         ],
         font=("黑体", 8),
         bootstyle=SECONDARY,
@@ -9021,6 +9051,7 @@ def mainWindow():
             entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
     except Exception as e:
         print(zombie_name, e)
+        traceback.print_exc()
         messagebox.showerror(
             "错误",
             f"游戏版本与修改器版本可能不匹配，部分功能可能无法使用，请更新游戏或修改器",

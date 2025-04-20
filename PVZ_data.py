@@ -137,6 +137,8 @@ zombiesType = [
     "武装雪橇僵尸队员",  # 99
     "吸血鬼僵尸",  # 100
     "跳棋僵尸",  # 101
+    "猴子僵尸",  # 102
+    "市场僵尸",  # 103
 ]
 zombieSpaw = zombiesType + [
     "绿帽概率",
@@ -451,6 +453,16 @@ plantsType = [
     "绷带坚果炮",  # 267
     "三叶大嘴花",  # 268
     "魔术盒子",  # 269
+    "火爆双发射手",  # 270
+    "迷你寒冰菇",  # 271
+    "缠绕水雷",  # 272
+    "南瓜垃圾桶",  # 273
+    "扫把咖啡豆",  # 274
+    "坚果南瓜头",  # 275
+    "刚刺南瓜头",  # 276
+    "旗帜僵尸豆",  # 277
+    "大蒜炸弹",  # 278
+    "大蒜毒气",  # 279
 ]
 for _ in range(len(plantsType), 512):
     plantsType.append("占位")
@@ -557,6 +569,8 @@ plantsType = plantsType + [
     "武装雪橇僵尸队员",  # 611
     "吸血鬼僵尸",  # 612
     "跳棋僵尸",  # 613
+    "猴子僵尸",  # 614
+    "市场僵尸",  # 615
 ]
 
 ExcludedPutCards = [
@@ -1218,6 +1232,8 @@ bulletType = [
     "金樱桃子弹",  # 94
     "钻樱桃子弹",  # 95
     "绷带坚果(无伤害)",  # 96
+    "火焰辣椒豌豆",  # 97
+    "香蕉皮(无伤害)",  # 98
 ]
 keyTpye = [
     "无",
@@ -1988,7 +2004,7 @@ class plantCharacteristic:
                     self.cd = 0
                     self.canAttack = True
                     self.attackInterval = 0
-                if PVZ_version == 3.5:
+                if PVZ_version == 3.5 or PVZ_version == 3.6:
                     self.addr = 0x0088B129 + (type - 512) * 0x4
                     self.sun = PVZ_memory.read_int(self.addr)
                     self.cd = 0
@@ -2182,6 +2198,20 @@ class zombieType:
             elif type == 104:
                 self.weight = PVZ_memory.read_uchar(0x008D0529)
             elif type == 105:
+                self.weight = PVZ_memory.read_uchar(0x008D066B)
+        elif PVZ_version == 3.6:
+            if type <= 103:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 104:
+                self.weight = PVZ_memory.read_uchar(0x008D0928)
+            elif type == 105:
+                self.weight = PVZ_memory.read_uchar(0x008D07C4)
+            elif type == 106:
+                self.weight = PVZ_memory.read_uchar(0x008D0529)
+            elif type == 107:
                 self.weight = PVZ_memory.read_uchar(0x008D066B)
 
     def setAnime(self, anime):
