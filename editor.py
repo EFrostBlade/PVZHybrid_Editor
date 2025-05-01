@@ -55,7 +55,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.59"
+current_version = "0.60"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -367,6 +367,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.6.5" in window_name:
+                PVZ_data.update_PVZ_version(3.65)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             elif "v3.6" in window_name:
                 PVZ_data.update_PVZ_version(3.6)
                 main_window.title(
@@ -547,6 +555,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.6.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.65)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             elif "v3.6" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.6)
                 main_window.title(
@@ -715,6 +731,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.60\n"
+        "适配杂交版3.6.5\n"
+        "僵尸掉落新增随机卡片\n"
         "b0.59\n"
         "适配杂交版3.6\n"
         "b0.58\n"
@@ -1670,6 +1689,14 @@ def mainWindow():
                 )
             elif "v3.5" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.5)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.6.5" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.65)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -3310,6 +3337,7 @@ def mainWindow():
             "植物卡片",
             "潜艇伟伟迷",
             "花园盆栽",
+            "随机植物卡片",
         ],
         state=READONLY,
     )
@@ -3352,6 +3380,7 @@ def mainWindow():
             "植物卡片",
             "潜艇伟伟迷",
             "花园盆栽",
+            "随机植物卡片",
         ],
         state=READONLY,
     )
@@ -3394,6 +3423,7 @@ def mainWindow():
             "植物卡片",
             "潜艇伟伟迷",
             "花园盆栽",
+            "随机植物卡片",
         ],
         state=READONLY,
     )
@@ -3436,6 +3466,7 @@ def mainWindow():
             "植物卡片",
             "潜艇伟伟迷",
             "花园盆栽",
+            "随机植物卡片",
         ],
         state=READONLY,
     )
