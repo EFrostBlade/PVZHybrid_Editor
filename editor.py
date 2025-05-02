@@ -55,7 +55,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.60"
+current_version = "0.61"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
