@@ -208,6 +208,8 @@ def get_zombie_num():
         zombie_num = 103
     elif PVZ_data.PVZ_version == 3.65:
         zombie_num = 106
+    elif PVZ_data.PVZ_version == 3.7:
+        zombie_num = 109
     return zombie_num
 
 
@@ -253,6 +255,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 103)
     elif PVZ_data.PVZ_version == 3.65:
         zombieType = random.randint(0, 106)
+    elif PVZ_data.PVZ_version == 3.7:
+        zombieType = random.randint(0, 109)
     if hasBoss is True:
         return zombieType
     else:
@@ -300,6 +304,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 251)
     elif PVZ_data.PVZ_version == 3.65:
         plantType = random.randint(0, 252)
+    elif PVZ_data.PVZ_version == 3.7:
+        plantType = random.randint(0, 265)
     if plantType >= 48:
         plantType = plantType + 27
     IllegalCards = [241, 249, 279]
@@ -4316,6 +4322,41 @@ def globalSpawModify(f, zombieTypes):
             pymem.memory.free_memory(
                 PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
             )
+    elif PVZ_data.PVZ_version == 3.7:
+        if f:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\xeb", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\x90\x90\x90\x90\x90", 5)
+            newmem_globalSpawModify = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 256
+            )
+            shellcode = asm.Asm(newmem_globalSpawModify)
+            for i in range(0, 110):
+                if str(i) in zombieTypes:
+                    print(i)
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 1)
+                else:
+                    shellcode.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + i, 0)
+            shellcode.jmp(0x00425D1D)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_globalSpawModify,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x0082405A,
+                b"\xe9"
+                + calculate_call_address(newmem_globalSpawModify - 0x0082405F)
+                + b"\x90",
+                6,
+            )
+            spawisModified()
+        else:
+            PVZ_data.PVZ_memory.write_bytes(0x00425855, b"\x7f", 1)
+            PVZ_data.PVZ_memory.write_bytes(0x0042584E, b"\xe9\xad\xaa\x48\x00", 5)
+            PVZ_data.PVZ_memory.write_bytes(0x0082405A, b"\x0f\x85\xc0\x00\x00\x00", 6)
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_globalSpawModify
+            )
 
 
 def changeZombieHead(f, zombieType):
@@ -4551,6 +4592,7 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 3.5
         or PVZ_data.PVZ_version == 3.6
         or PVZ_data.PVZ_version == 3.65
+        or PVZ_data.PVZ_version == 3.7
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -7815,7 +7857,7 @@ def setBossHP(no, hp):
             PVZ_data.PVZ_memory.write_int(0x008D29F1, hp)
         elif no == 3:
             PVZ_data.PVZ_memory.write_int(0x008D2A0F, hp)
-    elif PVZ_data.PVZ_version == 3.65:
+    elif PVZ_data.PVZ_version == 3.65 or PVZ_data.PVZ_version == 3.7:
         if no == 1:
             PVZ_data.PVZ_memory.write_int(0x008D0F7F, hp)
         elif no == 2:
@@ -7828,26 +7870,52 @@ newmem_more_hero = None
 
 
 def more_hero(f):
-    if f:
-        newmem_more_hero = pymem.memory.allocate_memory(
-            PVZ_data.PVZ_memory.process_handle, 2048
-        )
-        shellcode = asm.Asm(newmem_more_hero)
-        shellcode.mov_byte_ptr_exx_add_byte_byte(asm.EDI, 0x48, 1)
-        shellcode.jmp(0x009F108E)
-        PVZ_data.PVZ_memory.write_bytes(
-            newmem_more_hero,
-            bytes(shellcode.code[: shellcode.index]),
-            shellcode.index,
-        )
-        PVZ_data.PVZ_memory.write_bytes(
-            0x009F1057,
-            b"\xe9" + calculate_call_address(newmem_more_hero - 0x009F105C) + b"\x90",
-            6,
-        )
-    else:
-        PVZ_data.PVZ_memory.write_bytes(0x009F1057, b"\x56\x50\x51\x52\x6a\x00", 6)
-        pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_more_hero)
+    global newmem_more_hero
+    if PVZ_data.PVZ_version < 3.7:
+        if f:
+            newmem_more_hero = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 2048
+            )
+            shellcode = asm.Asm(newmem_more_hero)
+            shellcode.mov_byte_ptr_exx_add_byte_byte(asm.EDI, 0x48, 1)
+            shellcode.jmp(0x009F108E)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_more_hero,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x009F1057,
+                b"\xe9"
+                + calculate_call_address(newmem_more_hero - 0x009F105C)
+                + b"\x90",
+                6,
+            )
+        else:
+            PVZ_data.PVZ_memory.write_bytes(0x009F1057, b"\x56\x50\x51\x52\x6a\x00", 6)
+            pymem.memory.free_memory(
+                PVZ_data.PVZ_memory.process_handle, newmem_more_hero
+            )
+    elif PVZ_data.PVZ_version == 3.7:
+        if f:
+            newmem_more_hero = pymem.memory.allocate_memory(
+                PVZ_data.PVZ_memory.process_handle, 2048
+            )
+            shellcode = asm.Asm(newmem_more_hero)
+            shellcode.mov_byte_ptr_exx_add_byte_byte(asm.EDI, 0x48, 1)
+            shellcode.jmp(0x9F10DB)
+            PVZ_data.PVZ_memory.write_bytes(
+                newmem_more_hero,
+                bytes(shellcode.code[: shellcode.index]),
+                shellcode.index,
+            )
+            PVZ_data.PVZ_memory.write_bytes(
+                0x009F10A4,
+                b"\xe9"
+                + calculate_call_address(newmem_more_hero - 0x009F10A9)
+                + b"\x90",
+                6,
+            )
 
 
 def readTreeHeight():
