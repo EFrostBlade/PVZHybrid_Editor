@@ -482,6 +482,9 @@ plantsType = [
     "磁力玉米投手",  # 290
     "充能磁铁",  # 291
     "坚果保护伞",  # 292
+    "魅惑盒子",  # 293
+    "友望云霄洗地机",  # 294
+    "极寒冰菇",  # 295
 ]
 for _ in range(len(plantsType), 512):
     plantsType.append("占位")
@@ -2048,8 +2051,8 @@ class plantCharacteristic:
                     self.cd = 0
                     self.canAttack = True
                     self.attackInterval = 0
-                if PVZ_version == 3.7:
-                    self.addr = 0x0088B163 + (type - 512) * 0x4
+                if PVZ_version == 3.7 or PVZ_version == 3.75 or PVZ_version == 3.76:
+                    self.addr = 0x0088B16B + (type - 512) * 0x4
                     self.sun = PVZ_memory.read_int(self.addr)
                     self.cd = 0
                     self.canAttack = True
@@ -2271,7 +2274,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0529)
             elif type == 110:
                 self.weight = PVZ_memory.read_uchar(0x008D066B)
-        elif PVZ_version == 3.7:
+        elif PVZ_version == 3.7 or PVZ_version == 3.75 or PVZ_version == 3.76:
             if type <= 109:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
