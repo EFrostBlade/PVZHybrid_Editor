@@ -55,7 +55,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.63"
+current_version = "0.64"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -407,6 +407,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.8" in window_name:
+                PVZ_data.update_PVZ_version(3.8)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -613,6 +621,14 @@ def chooseGame():
                 )
             elif "v3.7" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.7)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.8" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.8)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1781,6 +1797,14 @@ def mainWindow():
                 )
             elif "v3.7" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.7)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.8" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.8)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
