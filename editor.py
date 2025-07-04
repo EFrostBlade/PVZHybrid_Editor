@@ -55,7 +55,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.64"
+current_version = "0.65"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -415,6 +415,14 @@ def chooseGame():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.9" in window_name:
+                PVZ_data.update_PVZ_version(3.9)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(
                 Pymem(int(re.search(r"(\d+)", process1).group(1)))
             )
@@ -629,6 +637,14 @@ def chooseGame():
                 )
             elif "v3.8" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.8)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.9" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.9)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -1811,6 +1827,14 @@ def mainWindow():
                     + "      游戏版本："
                     + str(PVZ_data.PVZ_version)
                 )
+            elif "v3.9" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.9)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
             PVZ_data.update_PVZ_memory(Pymem(pid[1]))
             PVZ_data.update_PVZ_pid(pid[1])
             process_label["text"] = (
@@ -2565,6 +2589,8 @@ def mainWindow():
             pvz.completeHero(i)
         for i in range(0, 128):
             pvz.completeStore(i)
+        for i in range(0, 128):
+            pvz.completePeak(i)
 
     miniGame_complete_button = ttk.Button(
         game_save_frame,
