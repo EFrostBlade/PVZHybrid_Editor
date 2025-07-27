@@ -511,6 +511,7 @@ plantsType = [
     "裂荚树桩",  # 314
     "巨大坚果保龄球",  # 315
     "爆炸坚果",  # 316
+    "拿铁游戏",  # 317
 ]
 for _ in range(len(plantsType), 512):
     plantsType.append("占位")
@@ -2095,6 +2096,12 @@ class plantCharacteristic:
                     self.cd = 0
                     self.canAttack = True
                     self.attackInterval = 0
+                elif PVZ_version == 3.99:
+                    self.addr = 0x0088B184 + (type - 512) * 0x4
+                    self.sun = PVZ_memory.read_int(self.addr)
+                    self.cd = 0
+                    self.canAttack = True
+                    self.attackInterval = 0
 
     def setSun(self, sun):
         PVZ_memory.write_int(self.addr, sun)
@@ -2341,6 +2348,20 @@ class zombieType:
             elif type == 115:
                 self.weight = PVZ_memory.read_uchar(0x008D066B)
         elif PVZ_version == 3.9:
+            if type <= 114:
+                self.addr = 0x007A6000 + type * 0x1C
+                self.anime = PVZ_memory.read_int(self.addr + 0x4)
+                self.level = PVZ_memory.read_int(self.addr + 0x8)
+                self.weight = PVZ_memory.read_int(self.addr + 0x14)
+            elif type == 115:
+                self.weight = PVZ_memory.read_uchar(0x008D0928)
+            elif type == 116:
+                self.weight = PVZ_memory.read_uchar(0x008D07C4)
+            elif type == 117:
+                self.weight = PVZ_memory.read_uchar(0x008D0529)
+            elif type == 118:
+                self.weight = PVZ_memory.read_uchar(0x008D066B)
+        elif PVZ_version == 3.99:
             if type <= 114:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_int(self.addr + 0x4)
