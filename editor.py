@@ -55,7 +55,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.71"
+current_version = "2"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -305,6 +305,14 @@ def chooseGame():
                 )
             elif "v3.0" in window_name:
                 PVZ_data.update_PVZ_version(3.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.16" in window_name:
+                PVZ_data.update_PVZ_version(3.16)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -573,6 +581,14 @@ def chooseGame():
                 )
             elif "v2.6" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(2.6)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.16" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.16)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -907,6 +923,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.72\n"
+        "适配杂交版3.16\n"
+        "新增3.16版本植物索敌修复功能\n"
         "b0.71\n"
         "适配杂交版3.15\n"
         "b0.70\n"
@@ -1826,6 +1845,14 @@ def mainWindow():
                 )
             elif "v3.0" in win32gui.GetWindowText(hwnd):
                 PVZ_data.update_PVZ_version(3.0)
+                main_window.title(
+                    "杂交版多功能修改器  "
+                    + str(current_version)
+                    + "      游戏版本："
+                    + str(PVZ_data.PVZ_version)
+                )
+            elif "v3.16" in win32gui.GetWindowText(hwnd):
+                PVZ_data.update_PVZ_version(3.16)
                 main_window.title(
                     "杂交版多功能修改器  "
                     + str(current_version)
@@ -2990,9 +3017,9 @@ def mainWindow():
             shortcut_entries[i].delete(0, END)
             shortcut_entries[i].insert(0, shortcut_info["key"])
             shortcut_buttons[i].config(
-                command=lambda i=i,
-                id=shortcut_id,
-                info=shortcut_info: open_change_window(id, info["key"], info["action"])
+                command=lambda i=i, id=shortcut_id, info=shortcut_info: (
+                    open_change_window(id, info["key"], info["action"])
+                )
             )
 
     shortcut_frame = ttk.Labelframe(common_page, text="快捷按键")
@@ -8062,7 +8089,17 @@ def mainWindow():
         bootstyle="danger-round-toggle",
         command=lambda: pvz.bossCorrect(boss_correct_status.get()),
     )
-    boss_correct_check.place(x=505, y=525, relx=0, anchor=NW)
+    boss_correct_check.place(x=505, y=515, relx=0, anchor=NW)
+
+    fix_find_target_status = ttk.BooleanVar(common_page)
+    fix_find_target_check = ttk.Checkbutton(
+        common_page,
+        text="3.16植物\n索敌修复",
+        variable=fix_find_target_status,
+        bootstyle="danger-round-toggle",
+        command=lambda: pvz.find_target_fix(fix_find_target_status.get()),
+    )
+    fix_find_target_check.place(x=505, y=550, relx=0, anchor=NW)
 
     # 定义一个函数来更新slot的属性
     def get_slot_attribute():
