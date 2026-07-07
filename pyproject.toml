@@ -7,3 +7,40 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+files = [
+  "editor_config.py",
+  "editor_ui_smoke.py",
+  "i18n.py",
+  "i18n_audit.py",
+  "editor_layout_audit.py",
+  "editor_runtime.py",
+  "release_package.py",
+  "responsive_tk.py",
+  "responsive_ui_smoke.py",
+]
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_return_any = true
+strict = true
+
+[tool.coverage.run]
+branch = true
+source = [
+  "editor_config",
+  "editor_ui_smoke",
+  "i18n",
+  "i18n_audit",
+  "editor_layout_audit",
+  "editor_runtime",
+  "release_package",
+  "responsive_tk",
+  "responsive_ui_smoke",
+]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true

@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -35,7 +35,13 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Lint i18n and tests
-        run: python -m ruff check i18n.py i18n_audit.py tests
+        run: python -m ruff check editor_config.py editor_ui_smoke.py i18n.py i18n_audit.py editor_layout_audit.py editor_runtime.py release_package.py responsive_tk.py responsive_ui_smoke.py tests
 
-      - name: Run tests
-        run: python -m pytest -q
+      - name: Type check typed core
+        run: python -m mypy
+
+      - name: Run tests with coverage
+        run: python -m coverage run -m pytest -q
+
+      - name: Enforce coverage
+        run: python -m coverage report

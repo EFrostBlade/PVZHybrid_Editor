@@ -7,7 +7,7 @@ import weakref
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 DEFAULT_LANGUAGE = "zh_CN"
 LANGUAGE_ORDER = ("zh_CN", "en", "es", "fr", "de", "ja", "ko", "ru")
@@ -38,7 +38,7 @@ _current_language = DEFAULT_LANGUAGE
 _widgets: weakref.WeakKeyDictionary[Any, dict[str, Any]] = weakref.WeakKeyDictionary()
 _notebooks: weakref.WeakKeyDictionary[Any, dict[Any, str]] = weakref.WeakKeyDictionary()
 _window_titles: weakref.WeakKeyDictionary[Any, str] = weakref.WeakKeyDictionary()
-_patched_modules: set[int] = set()
+_patched_modules: weakref.WeakSet[Any] = weakref.WeakSet()
 
 
 def supported_languages() -> list[Language]:
@@ -179,7 +179,7 @@ def refresh_widgets(root: Any | None = None) -> None:
 
 def install_tk_i18n(ttk_module: Any, tk_module: Any | None = None) -> None:
     for module in (ttk_module, tk_module):
-        if module is None or id(module) in _patched_modules:
+        if module is None or module in _patched_modules:
             continue
         for class_name in (
             "Button",
@@ -197,13 +197,13 @@ def install_tk_i18n(ttk_module: Any, tk_module: Any | None = None) -> None:
             "Tk",
         ):
             _patch_widget_factory(module, class_name)
-        _patched_modules.add(id(module))
+        _patched_modules.add(module)
 
 
 def _load_locale_payload(code: str) -> dict[str, Any]:
     path = LOCALES_DIR / f"{code}.json"
     with path.open("r", encoding="utf-8") as file:
-        payload = json.load(file)
+        payload = cast(dict[str, Any], json.load(file))
     if payload.get("code") != code:
         raise ValueError(f"Locale code mismatch in {path}")
     return payload
@@ -238,7 +238,7 @@ def _apply_widget_translation(widget: Any, metadata: dict[str, Any]) -> None:
     if "values" in metadata:
         selected_source = _get_selected_source(widget)
         updates["values"] = translate_values(metadata["values"])
-    if updates:
+    if updates:  # pragma: no branch
         widget.configure(**updates)
     if "values" in metadata and selected_source in metadata["values"]:
         _set_selected_source(widget, selected_source)

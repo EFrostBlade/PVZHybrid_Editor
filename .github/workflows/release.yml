@@ -1,0 +1,272 @@
+name: Build Windows Test EXE
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-standard-windows-exe:
+    name: Windows standard executable
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          architecture: "x64"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Resolve build version from current commit
+        id: build_version
+        shell: pwsh
+        run: |
+          $version = (git rev-parse HEAD).Trim()
+          if (-not $version) {
+            throw "commit version is empty"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          python -m PyInstaller `
+            --noconfirm `
+            --clean `
+            --onefile `
+            --windowed `
+            --name "PVZHybrid_Editor_b${{ steps.build_version.outputs.version }}" `
+            --icon res/icon/editor.ico `
+            --add-data "locales:locales" `
+            --add-data "res:res" `
+            --add-data "version.txt:." `
+            editor.py
+
+      - name: Write checksum and package manifest
+        id: package
+        shell: pwsh
+        run: |
+          python release_package.py `
+            --dist-dir dist `
+            --version "${{ steps.build_version.outputs.version }}" `
+            --no-platform-tag `
+            --github-output $env:GITHUB_OUTPUT
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.exe_name }}
+          path: ${{ steps.package.outputs.exe_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload checksum artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.sha_name }}
+          path: ${{ steps.package.outputs.sha_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload package manifest artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.manifest_name }}
+          path: ${{ steps.package.outputs.manifest_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+  build-win7-windows-exe:
+    name: Windows win7 x86 executable
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Python 3.8 win32
+        shell: pwsh
+        run: |
+          $pythonInstaller = Join-Path $env:RUNNER_TEMP "python-3.8.10.exe"
+          $pythonDir = Join-Path $env:RUNNER_TEMP "python-3.8.10-win32"
+          Invoke-WebRequest `
+            -Uri "https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe" `
+            -OutFile $pythonInstaller
+          Start-Process `
+            -FilePath $pythonInstaller `
+            -ArgumentList "/quiet InstallAllUsers=0 TargetDir=`"$pythonDir`" Include_pip=1 Include_test=0 PrependPath=0" `
+            -Wait
+
+          $python = Join-Path $pythonDir "python.exe"
+          @'
+          import platform
+          import sys
+
+          if platform.architecture()[0] != "32bit":
+              raise SystemExit(f"Expected 32bit Python, got {platform.architecture()[0]}")
+          if sys.version_info[:2] != (3, 8):
+              raise SystemExit(f"Expected Python 3.8, got {sys.version}")
+          '@ | & $python -
+          "PYTHON_EXE=$python" >> $env:GITHUB_ENV
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          $python = $env:PYTHON_EXE
+          & $python -m pip install --upgrade pip
+          & $python -m pip install -r requirements.txt
+          & $python -m pip install pyinstaller
+
+      - name: Resolve build version from current commit
+        id: build_version
+        shell: pwsh
+        run: |
+          $version = (git rev-parse HEAD).Trim()
+          if (-not $version) {
+            throw "commit version is empty"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          $python = $env:PYTHON_EXE
+          & $python -m PyInstaller `
+            --noconfirm `
+            --clean `
+            --onefile `
+            --windowed `
+            --name "win7_x86.PVZHybrid_Editor_b${{ steps.build_version.outputs.version }}" `
+            --icon res/icon/editor.ico `
+            --add-data "locales:locales" `
+            --add-data "res:res" `
+            --add-data "version.txt:." `
+            editor.py
+
+      - name: Write checksum and package manifest
+        id: package
+        shell: pwsh
+        run: |
+          $python = $env:PYTHON_EXE
+          & $python release_package.py `
+            --dist-dir dist `
+            --version "${{ steps.build_version.outputs.version }}" `
+            --platform-tag win7_x86 `
+            --github-output $env:GITHUB_OUTPUT
+
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.exe_name }}
+          path: ${{ steps.package.outputs.exe_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload checksum artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.sha_name }}
+          path: ${{ steps.package.outputs.sha_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload package manifest artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.package.outputs.manifest_name }}
+          path: ${{ steps.package.outputs.manifest_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+  responsive-ui-smoke:
+    name: Windows responsive UI smoke
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install screenshot dependency
+        run: python -m pip install Pillow
+
+      - name: Capture responsive UI screenshot
+        run: python responsive_ui_smoke.py --output-dir ui-smoke-artifacts
+
+      - name: Upload responsive UI screenshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: responsive-ui-smoke.png
+          path: ui-smoke-artifacts/responsive-ui-smoke.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload responsive UI audit
+        uses: actions/upload-artifact@v7
+        with:
+          name: responsive-ui-smoke.json
+          path: ui-smoke-artifacts/responsive-ui-smoke.json
+          if-no-files-found: error
+          retention-days: 30
+
+  actual-editor-ui-smoke:
+    name: Windows actual editor UI smoke
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install editor dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Capture actual editor UI screenshot
+        run: python editor_ui_smoke.py --output-dir editor-ui-smoke-artifacts
+
+      - name: Upload actual editor UI screenshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor-ui-smoke.png
+          path: editor-ui-smoke-artifacts/editor-ui-smoke.png
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload actual editor UI audit
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor-ui-smoke.json
+          path: editor-ui-smoke-artifacts/editor-ui-smoke.json
+          if-no-files-found: error
+          retention-days: 30
