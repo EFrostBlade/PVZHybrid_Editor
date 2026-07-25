@@ -7,7 +7,7 @@ import weakref
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 DEFAULT_LANGUAGE = "zh_CN"
 LANGUAGE_ORDER = ("zh_CN", "en", "es", "fr", "de", "ja", "ko", "ru")
@@ -203,7 +203,7 @@ def install_tk_i18n(ttk_module: Any, tk_module: Any | None = None) -> None:
 def _load_locale_payload(code: str) -> dict[str, Any]:
     path = LOCALES_DIR / f"{code}.json"
     with path.open("r", encoding="utf-8") as file:
-        payload = cast(dict[str, Any], json.load(file))
+        payload = json.load(file)
     if payload.get("code") != code:
         raise ValueError(f"Locale code mismatch in {path}")
     return payload

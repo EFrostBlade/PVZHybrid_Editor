@@ -9,4 +9,4 @@ psutil
 pywin32
 wmi
 pyperclip
-ttkbootstrap
+ttkbootstrap==1.17.0

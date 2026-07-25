@@ -60,6 +60,7 @@ jobs:
             --add-data "locales:locales" `
             --add-data "res:res" `
             --add-data "version.txt:." `
+            --hidden-import ttkbootstrap.tooltip `
             --collect-all ttkbootstrap `
             editor.py
 
@@ -167,6 +168,7 @@ jobs:
             --add-data "locales;locales" `
             --add-data "res;res" `
             --add-data "version.txt;." `
+            --hidden-import ttkbootstrap.tooltip `
             --collect-all ttkbootstrap `
             editor.py
 
