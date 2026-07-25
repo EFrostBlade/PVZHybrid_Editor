@@ -12,7 +12,7 @@ from typing import Any, Optional, Union
 PathInput = Union[str, Path]
 DEFAULT_GAME_VERSION = "Game not found"
 BLOCKED_UPDATE_RESPONSE = "The content may contain violation information"
-LEGACY_UPDATE_VERSION = "0.74"
+LEGACY_UPDATE_VERSION = "0.75"
 GAME_VERSION_MARKERS = (
     ("v3.13.2", 3.132),
     ("v3.9.9", 3.99),
@@ -25,6 +25,7 @@ GAME_VERSION_MARKERS = (
     ("v2.3.7", 2.37),
     ("v2.3.6", 2.36),
     ("v2.3.5", 2.35),
+    ("v3.18", 3.18),
     ("v3.17", 3.17),
     ("v3.16", 3.16),
     ("v3.15", 3.151),
@@ -128,9 +129,7 @@ def evaluate_update_response(*, current_version: str, response_text: str) -> Upd
         latest_version=latest_version,
         is_blocked=is_blocked,
         should_open_update_window=(
-            False
-            if is_blocked
-            else should_open_update_window(current_version, latest_version)
+            False if is_blocked else should_open_update_window(current_version, latest_version)
         ),
     )
 

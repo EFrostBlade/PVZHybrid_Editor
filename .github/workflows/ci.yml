@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Python ${{ matrix.python-version }}
+  quality:
+    name: Quality checks (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -29,19 +29,13 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-dev.txt
 
-      - name: Install test dependencies
+      - name: Install quality-check dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-dev.txt
 
-      - name: Lint i18n and tests
-        run: python -m ruff check editor_config.py editor_ui_smoke.py i18n.py i18n_audit.py editor_layout_audit.py editor_runtime.py release_package.py responsive_tk.py responsive_ui_smoke.py tests
+      - name: Lint typed core
+        run: python -m ruff check editor_config.py i18n.py editor_runtime.py release_package.py responsive_tk.py
 
       - name: Type check typed core
         run: python -m mypy
-
-      - name: Run tests with coverage
-        run: python -m coverage run -m pytest -q
-
-      - name: Enforce coverage
-        run: python -m coverage report

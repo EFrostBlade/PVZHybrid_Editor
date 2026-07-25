@@ -576,6 +576,16 @@ plantsType = [
     "狂野狙击射手",  # 355
     "超级向日葵机枪射手",  # 356
     "坚果仙人",  # 357
+    "喷火树桩",  # 358
+    "火炬树桩（加强版）",  # 359
+    '"火"炬树桩',  # 360
+    '"仙人"掌',  # 361
+    "未来科技-激光炮",  # 362
+    "激光炮装备",  # 363
+    "菠萝战车",  # 364
+    "豌豆制冰机",  # 365
+    "狗尾草",  # 366
+    "狐尾草",  # 367
 ]
 if isinstance(PVZ_version, (int, float)) and PVZ_version < 3.4:
     for _ in range(len(plantsType), 256):
@@ -1415,6 +1425,12 @@ bulletType = [
     "阳光火球",  # 125
     "仙人刺近防炮",  # 126
     "阳光射手子弹",  # 127
+    "激光",  # 128
+    "菠萝",  # 129
+    "菠萝片",  # 130
+    "炸游戏(豌豆爆弹)",  # 131
+    "冰豌豆爆弹",  # 132
+    "毛刺",  # 133
 ]
 keyTpye = [
     "无",
@@ -2109,7 +2125,7 @@ class slot:
 class plantCharacteristic:
     def __init__(self, type):
         self.type = type
-        if PVZ_version == 3.16 or PVZ_version == 3.17:
+        if PVZ_version == 3.16 or PVZ_version == 3.17 or PVZ_version == 3.18:
             if type < 512:
                 self.addr = 0x00EF4010 + type * 0x24
                 self.sun = PVZ_memory.read_uint(self.addr)
@@ -2390,12 +2406,7 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0528)
             elif type == 87:
                 self.weight = PVZ_memory.read_uchar(0x008D061B)
-        elif (
-            PVZ_version == 3.1
-            or PVZ_version == 3.15
-            or PVZ_version == 3.2
-            or PVZ_version == 3.21
-        ):
+        elif PVZ_version == 3.1 or PVZ_version == 3.15 or PVZ_version == 3.2 or PVZ_version == 3.21:
             if type <= 89:
                 self.addr = 0x007A6000 + type * 0x1C
                 self.anime = PVZ_memory.read_uint(self.addr + 0x4)
@@ -2592,6 +2603,20 @@ class zombieType:
                 self.weight = PVZ_memory.read_uchar(0x008D0529)
             elif type == 142:
                 self.weight = PVZ_memory.read_uchar(0x008D066B)
+        elif PVZ_version == 3.18:
+            if type <= 148:
+                self.addr = 0x007A8000 + type * 0x1C
+                self.anime = PVZ_memory.read_uint(self.addr + 0x4)
+                self.level = PVZ_memory.read_uint(self.addr + 0x8)
+                self.weight = PVZ_memory.read_uint(self.addr + 0x14)
+            elif type == 149:
+                self.weight = PVZ_memory.read_uchar(0x008D0928)
+            elif type == 150:
+                self.weight = PVZ_memory.read_uchar(0x008D07C4)
+            elif type == 151:
+                self.weight = PVZ_memory.read_uchar(0x008D0529)
+            elif type == 152:
+                self.weight = PVZ_memory.read_uchar(0x008D066B)
 
     def setAnime(self, anime):
         PVZ_memory.write_int(self.addr + 0x4, anime)
@@ -2676,12 +2701,7 @@ class potted:
     def __init__(self, addr):
         self.addr = addr
         self.no = (int)(
-            (
-                addr
-                - 0x30000
-                - PVZ_memory.read_uint(PVZ_memory.read_uint(0x6A9EC0) + 0x82C)
-            )
-            / 0x58
+            (addr - 0x30000 - PVZ_memory.read_uint(PVZ_memory.read_uint(0x6A9EC0) + 0x82C)) / 0x58
         )
         self.type = PVZ_memory.read_uint(self.addr)
         self.garden = PVZ_memory.read_uint(self.addr + 0x4)
