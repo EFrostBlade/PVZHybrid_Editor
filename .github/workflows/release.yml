@@ -135,7 +135,7 @@ jobs:
           $python = $env:PYTHON_EXE
           & $python -m pip install --upgrade pip
           & $python -m pip install -r requirements.txt
-          & $python -m pip install pyinstaller
+          & $python -m pip install "pyinstaller==4.10"
 
       - name: Resolve release version
         id: build_version
@@ -161,9 +161,9 @@ jobs:
             --windowed `
             --name "win7_x86.PVZHybrid_Editor_b${{ steps.build_version.outputs.version }}" `
             --icon res/icon/editor.ico `
-            --add-data "locales:locales" `
-            --add-data "res:res" `
-            --add-data "version.txt:." `
+            --add-data "locales;locales" `
+            --add-data "res;res" `
+            --add-data "version.txt;." `
             editor.py
 
       - name: Write checksum and package manifest
