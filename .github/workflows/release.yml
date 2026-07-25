@@ -136,7 +136,9 @@ jobs:
           $python = $env:PYTHON_EXE
           & $python -m pip install --upgrade pip
           & $python -m pip install -r requirements.txt
-          & $python -m pip install "pyinstaller==4.10"
+          # PyInstaller 4.x does not work with the latest contrib hooks.  Keep
+          # this pairing pinned so the Windows 7 build remains reproducible.
+          & $python -m pip install "pyinstaller==4.10" "pyinstaller-hooks-contrib==2024.4"
 
       - name: Resolve release version
         id: build_version
