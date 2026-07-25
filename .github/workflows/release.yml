@@ -60,6 +60,7 @@ jobs:
             --add-data "locales:locales" `
             --add-data "res:res" `
             --add-data "version.txt:." `
+            --collect-all ttkbootstrap `
             editor.py
 
       - name: Write checksum and package manifest
@@ -164,6 +165,7 @@ jobs:
             --add-data "locales;locales" `
             --add-data "res;res" `
             --add-data "version.txt;." `
+            --collect-all ttkbootstrap `
             editor.py
 
       - name: Write checksum and package manifest

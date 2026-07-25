@@ -1,17 +1,17 @@
 """Typed configuration helpers for the PVZ Hybrid editor."""
-# ruff: noqa: UP007,UP045
+# ruff: noqa: UP006,UP007,UP035,UP045
 
 from __future__ import annotations
 
 import copy
 import json
 from pathlib import Path
-from typing import Any, Optional, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
 import i18n
 
 APP_NAME = "PVZHybrid_Editor"
-Config = dict[str, Any]
+Config = Dict[str, Any]
 PathInput = Union[str, Path]
 
 _DEFAULT_CONFIG: Config = {
