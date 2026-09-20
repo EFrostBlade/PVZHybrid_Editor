@@ -181,6 +181,39 @@ def process_queue(root):
     root.after(100, process_queue, root)
 
 
+def set_game_version(version):
+    old_lists = [tuple(PVZ_data.plantsType), tuple(PVZ_data.zombiesType), tuple(PVZ_data.bulletType)]
+    PVZ_data.update_PVZ_version(version)
+    new_lists = [PVZ_data.plantsType, PVZ_data.zombiesType, PVZ_data.bulletType]
+
+    def refresh(widget):
+        original = getattr(widget, "_i18n_original_values", None)
+        if original is not None and tuple(original) in old_lists:
+            values = new_lists[old_lists.index(tuple(original))]
+            selected = widget.current()
+            widget._i18n_original_values = list(values)
+            i18n.register_widget(widget, values=values)
+            if 0 <= selected < len(values):
+                widget.current(selected)
+            else:
+                widget.set("")
+        for child in widget.winfo_children():
+            refresh(child)
+
+    refresh(main_window)
+    main_window.after_idle(lambda: main_window.event_generate("<<GameVersionChanged>>"))
+
+
+def available_card_images(kind):
+    directory = resource_path(f"res/cards/pvzhe_{kind}")
+    limit = (371 if PVZ_data.PVZ_version == 3.19 else 368) if kind == "plants" else len(PVZ_data.zombiesType)
+    return sorted(
+        (name for name in os.listdir(directory)
+         if name.lower().endswith(".png") and name[:-4].isdecimal() and int(name[:-4]) < limit),
+        key=lambda name: int(name[:-4]),
+    )
+
+
 def chooseGame():
     global main_window
 
@@ -190,7 +223,7 @@ def chooseGame():
             window_name = match.group(1) if match else process1
             detected_version = editor_runtime.detect_game_version(window_name)
             if detected_version is not None:
-                PVZ_data.update_PVZ_version(detected_version)
+                set_game_version(detected_version)
                 main_window.title(
                     editor_runtime.main_window_title(current_version, PVZ_data.PVZ_version)
                 )
@@ -219,7 +252,7 @@ def chooseGame():
                 get_process_name=lambda process_id: "",
             )
             if game_process.detected_version is not None:
-                PVZ_data.update_PVZ_version(game_process.detected_version)
+                set_game_version(game_process.detected_version)
                 main_window.title(
                     editor_runtime.main_window_title(current_version, PVZ_data.PVZ_version)
                 )
@@ -716,14 +749,14 @@ def open_card_select_window(combobox):
     plant_tab.bind("<Configure>", on_plant_tab_configure)
 
     # 加载植物图片
-    plant_images = os.listdir(resource_path("res/cards/pvzhe_plants"))
+    plant_images = available_card_images("plants")
     plant_cards = []  # 存储所有卡片及其对应的标签
 
     # 先创建所有卡片但不布局
     for i, image_file in enumerate(plant_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_plants/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(plant_container, image=photo, text=str(i))
+        label = tk.Label(plant_container, image=photo, text=image_file[:-4])
         label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
@@ -803,17 +836,15 @@ def open_card_select_window(combobox):
     )
     zombie_canvas.bind("<Leave>", lambda e: zombie_canvas.unbind_all("<MouseWheel>"))
 
-    zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    zombie_images = available_card_images("zombies")
     zombie_cards = []  # 存储所有僵尸卡片及其对应的标签
 
     # 先创建所有僵尸卡片但不布局
     for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        if PVZ_data.PVZ_version < 3.4:
-            label = tk.Label(zombie_container, image=photo, text=str(i + 256))
-        else:
-            label = tk.Label(zombie_container, image=photo, text=str(i + 512))
+        card_id = int(image_file[:-4]) + PVZ_data.zombie_card_offset()
+        label = tk.Label(zombie_container, image=photo, text=str(card_id))
         label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
@@ -942,14 +973,14 @@ def open_zombie_select_window(combobox):
     )
     zombie_canvas.bind("<Leave>", lambda e: zombie_canvas.unbind_all("<MouseWheel>"))
 
-    zombie_images = os.listdir(resource_path("res/cards/pvzhe_zombies"))
+    zombie_images = available_card_images("zombies")
     zombie_cards = []  # 存储所有僵尸卡片及其对应的标签
 
     # 先创建所有僵尸卡片但不布局
     for i, image_file in enumerate(zombie_images):
         image = Image.open(resource_path(f"res/cards/pvzhe_zombies/{image_file}"))
         photo = ImageTk.PhotoImage(image)
-        label = tk.Label(zombie_container, image=photo, text=str(i))
+        label = tk.Label(zombie_container, image=photo, text=image_file[:-4])
         label.image = photo  # 保持对图片的引用
         label.bind(
             "<Button-1>",
@@ -1037,7 +1068,6 @@ def mainWindow():
         global main_window
 
         def close():
-            update_window.quit()
             update_window.destroy()
 
         update_window = ttk.Toplevel(topmost=True)
@@ -1150,6 +1180,7 @@ def mainWindow():
         AliPay_image.grid(row=0, column=0, padx=10)
         WeChatPay_image = ttk.Label(image_frame, image=WeChatPay)
         WeChatPay_image.grid(row=0, column=1, padx=10)
+        update_window.payment_images = (AliPay, WeChatPay)
         ttk.Label(image_frame, text="支付宝", bootstyle=PRIMARY, font=("黑体", 12)).grid(
             row=1, column=0, pady=5
         )
@@ -1157,34 +1188,45 @@ def mainWindow():
             row=1, column=1, pady=5
         )
         update_window.protocol("WM_DELETE_WINDOW", lambda: close())
-        update_window.mainloop()
-
-    try:
-        # 从服务器获取最新版本号
-        response = requests.get(version_url)
-        update_decision = editor_runtime.evaluate_update_response(
-            current_version=current_version,
-            response_text=response.text,
-        )
-        print(update_decision.latest_version)
-        if update_decision.is_blocked:
-            Messagebox.show_error(
-                "版本号被屏蔽",
-                title="更新检测失败",
-            )
-        elif update_decision.should_open_update_window:
-            # 如果发现新版本，提示用户
-            open_update_window(update_decision.latest_version)
-    except Exception:
-        Messagebox.show_error(
-            "无法检查更新，请检查您的网络连接。",
-            title="更新检测失败",
-        )
 
     # style=ttk.Style()
     # style.configure('small.TButton',font=("黑体",8),padding=(0,0,0,0))
     bottom_bar = ttk.Frame(main_window)
     bottom_bar.pack(side=BOTTOM, fill=X, padx=3, pady=(0, 3))
+    update_status = ttk.Label(main_window, text="", font=("黑体", 8), bootstyle=SECONDARY)
+    update_status.pack(side=BOTTOM, anchor=W, padx=5)
+
+    def fetch_update():
+        response = requests.get(version_url, timeout=(2, 3))
+        response.raise_for_status()
+        return response.text
+
+    def show_update_result(result):
+        decision = result.decision
+        if result.error is not None:
+            text = "无法检查更新，请检查您的网络连接。"
+        elif decision is not None and decision.is_blocked:
+            text = "更新检测失败"
+        elif decision is not None and decision.should_open_update_window:
+            text = "检测到新版本{}".format(decision.latest_version)
+            open_update_window(decision.latest_version)
+        else:
+            text = ""
+        i18n.register_widget(update_status, text=text)
+
+    update_check = editor_runtime.BackgroundUpdateCheck(
+        current_version=current_version,
+        fetch=fetch_update,
+        schedule=main_window.after,
+        cancel=main_window.after_cancel,
+        on_result=show_update_result,
+    )
+
+    def close_update_check(event):
+        if event.widget is main_window:
+            update_check.close()
+
+    main_window.bind("<Destroy>", close_update_check, add="+")
 
     process_frame = ttk.Frame(bottom_bar)
     process_frame.pack(side=RIGHT, padx=(6, 0))
@@ -1214,7 +1256,7 @@ def mainWindow():
                 get_process_name=lambda process_id: psutil.Process(process_id).name(),
             )
             if game_process.detected_version is not None:
-                PVZ_data.update_PVZ_version(game_process.detected_version)
+                set_game_version(game_process.detected_version)
                 main_window.title(
                     editor_runtime.main_window_title(current_version, PVZ_data.PVZ_version)
                 )
@@ -5820,10 +5862,9 @@ def mainWindow():
 
     def get_zombie_type():
         global zombie_sun_type
-        if PVZ_data.PVZ_version < 3.4:
-            zombie_sun_type = PVZ_data.plantCharacteristic(zombie_type_combobox.current() + 256)
-        else:
-            zombie_sun_type = PVZ_data.plantCharacteristic(zombie_type_combobox.current() + 512)
+        zombie_sun_type = PVZ_data.plantCharacteristic(
+            zombie_type_combobox.current() + PVZ_data.zombie_card_offset()
+        )
         print(hex(zombie_sun_type.addr))
         zombie_sun_sun_value.set(zombie_sun_type.sun)
         zombie_sun_frame.focus_set()
@@ -8272,7 +8313,7 @@ def mainWindow():
 
     def update_weights():
         for zombie_name in PVZ_data.zombieSpaw:
-            if checkboxes[zombie_name].get():
+            if checkboxes[zombie_name].get() and zombie_name in zombies:
                 weight_var = weight_vars[zombie_name]
                 weight = weight_var.get()
                 try:
@@ -8283,35 +8324,48 @@ def mainWindow():
         selected_ids = [
             str(idx)
             for idx, zombie_name in enumerate(PVZ_data.zombieSpaw)
-            if checkboxes[zombie_name].get()
+            if checkboxes[zombie_name].get() and idx < pvz.get_zombie_num()
         ]
         print(selected_ids)
         pvz.globalSpawModify(1, selected_ids)
         messagebox.showinfo("成功", "配置应用成功")
 
-    try:
-        # 创建界面元素
+    spawn_widgets = []
+
+    def refresh_spawn_types(event=None):
+        previous = {name: (var.get(), weight_vars[name].get())
+                    for name, var in checkboxes.items() if name in weight_vars}
+        for widget in spawn_widgets:
+            widget.destroy()
+        spawn_widgets.clear()
+        checkboxes.clear()
+        weight_vars.clear()
+        zombies.clear()
         for idx, zombie_name in enumerate(PVZ_data.zombieSpaw):
             row = idx // 4
             col = idx % 4
-            var = ttk.IntVar()
+            selected, previous_weight = previous.get(zombie_name, (0, None))
+            var = ttk.IntVar(value=selected)
             chk = ttk.Checkbutton(spaw_type_frame, text=zombie_name + ":", variable=var)
             chk.grid(row=row, column=col * 2, sticky=W)
             checkboxes[zombie_name] = var
-
-            zombie = PVZ_data.zombieType(idx)
-            zombies[zombie_name] = zombie
-            weight_var = ttk.IntVar(value=zombie.weight)
+            try:
+                zombie = PVZ_data.zombieType(idx)
+                weight = zombie.weight
+                zombies[zombie_name] = zombie
+            except Exception:
+                weight = 0
+                chk.configure(state="disabled")
+                var.set(0)
+            weight_var = ttk.IntVar(value=weight if previous_weight is None else previous_weight)
             weight_vars[zombie_name] = weight_var
             entry = ttk.Entry(spaw_type_frame, textvariable=weight_var, width=5)
             entry.grid(row=row, column=col * 2 + 1, padx=(0, 10))
-    except Exception as e:
-        print(zombie_name, e)
-        traceback.print_exc()
-        messagebox.showerror(
-            "错误",
-            f"游戏版本与修改器版本可能不匹配，部分功能可能无法使用，请更新游戏或修改器",
-        )
+            if zombie_name not in zombies:
+                entry.configure(state="disabled")
+            spawn_widgets.extend((chk, entry))
+        for widget in (update_btn, combobox, create_btn, modify_btn):
+            widget.grid_configure(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1)
 
     # 读取配置方案
     def load_configurations():
@@ -8380,6 +8434,9 @@ def mainWindow():
 
     modify_btn = ttk.Button(spaw_type_frame, text="保存配置", command=modify_current_configuration)
     modify_btn.grid(row=(len(PVZ_data.zombieSpaw) - 1) // 4 + 1, column=3)
+
+    main_window.bind("<<GameVersionChanged>>", refresh_spawn_types, add="+")
+    refresh_spawn_types()
 
     # 初始化下拉框选项
     update_combobox_options()
@@ -8580,6 +8637,7 @@ def mainWindow():
     main_window.after(100, refreshData)
 
     def exit_editor(file_path, window, section="main_window_position"):
+        update_check.close()
         config = load_config(file_path)
         if "plungins" not in config:
             config["plungins"] = {}
@@ -8618,6 +8676,7 @@ def mainWindow():
         os._exit(0)
 
     main_window.protocol("WM_DELETE_WINDOW", lambda: exit_editor(config_file_path, main_window))
+    main_window.after_idle(update_check.start)
     main_window.mainloop()
 
 

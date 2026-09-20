@@ -39,3 +39,20 @@ jobs:
 
       - name: Type check typed core
         run: python -m mypy
+
+      - name: Startup logic regressions
+        run: python -m unittest discover -s tests -p "test_*startup.py"
+
+  windows-startup:
+    name: Windows Tk startup regressions
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install runtime dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run regressions with the packaged Tk dependency
+        run: python -m unittest discover -s tests

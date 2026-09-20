@@ -9,6 +9,7 @@ import random
 import time
 import os
 import struct
+import psutil
 
 import PVZ_asm as asm
 import PVZ_data
@@ -225,6 +226,8 @@ def get_zombie_num():
         zombie_num = 139
     elif PVZ_data.PVZ_version == 3.18:
         zombie_num = 139
+    elif PVZ_data.PVZ_version == 3.19:
+        zombie_num = 142
     return zombie_num
 
 
@@ -293,6 +296,8 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 138)
     elif PVZ_data.PVZ_version == 3.18:
         zombieType = random.randint(0, 138)
+    elif PVZ_data.PVZ_version == 3.19:
+        zombieType = random.randint(0, 141)
     if hasBoss is True:
         return zombieType
     else:
@@ -362,6 +367,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 328)
     elif PVZ_data.PVZ_version == 3.18:
         plantType = random.randint(0, 338)
+    elif PVZ_data.PVZ_version == 3.19:
+        plantType = random.randint(0, 343)
 
     if plantType >= 48:
         plantType = plantType + 27
@@ -704,6 +711,7 @@ def autoCollect(f):
 
 
 def changeSlot(n, type):
+    PVZ_data.require_supported_entity("card", type)
     slotAddr = (
         PVZ_data.PVZ_memory.read_uint(PVZ_data.PVZ_memory.read_uint(PVZ_data.baseAddress) + 0x768)
         + 0x144
@@ -873,7 +881,7 @@ def randomSlots_operstion(randomSlots_event, haszombie):
                 PVZ_data.PVZ_memory.write_int(
                     PVZ_data.PVZ_memory.read_uint(plant1addr) + 0x5C + 0x50 * i, plant
                 )
-        elif PVZ_data.PVZ_version < 3.4:
+        elif PVZ_data.zombie_card_offset() == 256:
             for i in range(0, 16):
                 if haszombie is False:
                     plant = getRandomPlant(False)
@@ -1416,6 +1424,7 @@ def putLadder(row, col):
 
 
 def putZombie(row, col, type):
+    PVZ_data.require_supported_entity("zombie", type)
     class zombiePut:
         def __init__(self, row, col, type):
             self.row = row
@@ -1425,7 +1434,7 @@ def putZombie(row, col, type):
         def creat_asm(self, startAddress):
             zombiePut_asm = asm.Asm(startAddress)
             zombiePut_asm.push_byte(self.col)
-            zombiePut_asm.push_byte(self.type)
+            zombiePut_asm.push_dword(self.type)
             zombiePut_asm.mov_exx(asm.EAX, self.row)
             zombiePut_asm.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
             zombiePut_asm.mov_exx_dword_ptr_eyy_add_dword(asm.ECX, asm.ECX, 0x768)
@@ -1455,6 +1464,7 @@ def putBoss():
 
 
 def putPlant(row, col, type):
+    PVZ_data.require_supported_entity("plant", type)
     class plautPut:
         def __init__(self, row, col, type):
             self.row = row
@@ -1477,6 +1487,7 @@ def putPlant(row, col, type):
 
 
 def putcard(row, col, type):
+    PVZ_data.require_supported_entity("card", type)
     address = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 100)
     shellcode = (
         b"\x60"
@@ -1547,6 +1558,7 @@ def creatCaption(str, time, type):
 
 
 def selectCard(type):
+    PVZ_data.require_supported_entity("card", type)
     class cardSelect:
         def __init__(self, type):
             self.type = type
@@ -2599,11 +2611,16 @@ def setAllBullet(f, type):
             b"\xe9" + calculate_call_address(newmem_setAllBullet - 0x0046C76E),
             5,
         )
-        PVZ_data.PVZ_memory.write_bytes(0x0088CE91, b"\x90\x90\x90\x90\x90", 5)
+        PVZ_data.PVZ_memory.write_bytes(
+            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91, b"\x90" * 5, 5
+        )
     else:
         PVZ_data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_setAllBullet)
-        PVZ_data.PVZ_memory.write_bytes(0x0088CE91, b"\xe8\x1a\x1e\xbe\xff", 5)
+        PVZ_data.PVZ_memory.write_bytes(
+            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91,
+            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version == 3.19 else b"\xe8\x1a\x1e\xbe\xff", 5
+        )
 
 
 def setOneBullet(f, type1, type2):
@@ -2611,7 +2628,7 @@ def setOneBullet(f, type1, type2):
     if f:
         newmem_setOneBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 64)
         shellcode = asm.Asm(newmem_setOneBullet)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x5C, type1)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ESI, 0x5C, type1)
         shellcode.jne_long_offset(7)
         shellcode.mov_ptr_exx_add_byte_dword(asm.ESI, 0x5C, type2)
         shellcode.add_byte(0xDA)
@@ -2641,7 +2658,7 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
         newmem_randomBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 2048)
         shellcode = asm.Asm(newmem_randomBullet)
         shellcode.create_label("start")
-        shellcode.mov_exx(asm.EAX, 39)
+        shellcode.mov_exx(asm.EAX, 135 if PVZ_data.PVZ_version == 3.19 else 39)
         shellcode.call(0x005AF400)
         if not hasDoom:
             shellcode.cmp_exx_byte(asm.EAX, 11)
@@ -2665,11 +2682,16 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
             b"\xe9" + calculate_call_address(newmem_randomBullet - 0x0046C76E),
             5,
         )
-        PVZ_data.PVZ_memory.write_bytes(0x0088CE91, b"\x90\x90\x90\x90\x90", 5)
+        PVZ_data.PVZ_memory.write_bytes(
+            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91, b"\x90" * 5, 5
+        )
     else:
         PVZ_data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_randomBullet)
-        PVZ_data.PVZ_memory.write_bytes(0x0088CE91, b"\xe8\x1a\x1e\xbe\xff", 5)
+        PVZ_data.PVZ_memory.write_bytes(
+            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91,
+            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version == 3.19 else b"\xe8\x1a\x1e\xbe\xff", 5
+        )
 
 
 newmem_setAttackSpeed = None
@@ -2891,7 +2913,7 @@ def setPlantBullet(f, plantType, bulletType, mode):
     if f:
         newmem_setPlantBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 64)
         shellcode = asm.Asm(newmem_setPlantBullet)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBP, 0x24, plantType)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBP, 0x24, plantType)
         shellcode.jne_short_offset(0xE)
         shellcode.mov_ptr_exx_add_byte_dword(asm.EAX, 0x5C, bulletType)
         shellcode.mov_ptr_exx_add_byte_dword(asm.EAX, 0x58, mode)
@@ -3703,7 +3725,74 @@ def modifySpawMultiplier(f, mult):
             )
 
 
+_spawn_patch_319 = None
+
+
+def _game_process_identity():
+    pid = PVZ_data.PVZ_pid
+    return (pid, psutil.Process(pid).create_time()) if pid else (0, None)
+
+
+def _global_spawn_319(enabled, zombie_types):
+    global _spawn_patch_319
+    memory = PVZ_data.PVZ_memory
+    process = _game_process_identity()
+    originals = {0x425855: b"\x7f", 0x42584E: bytes.fromhex("e9 ad f7 60 00"),
+                 0x8230C1: bytes.fromhex("0f 85 0c 00 00 00"),
+                 0x5A9A47: bytes.fromhex("f7 74 24 04 8b c2"),
+                 0x41C078: b"\x74", 0x40D91F: b"\x74"}
+    if _spawn_patch_319 is not None and _spawn_patch_319[0] != process:
+        _spawn_patch_319 = None
+    if _spawn_patch_319 is not None:
+        # Restore before rebuilding so repeated Apply does not leak allocations.
+        _, address, patches = _spawn_patch_319
+        for site, expected in patches.items():
+            if memory.read_bytes(site, len(expected)) not in (expected, originals[site]):
+                raise ValueError(f"出怪指令已被其它功能修改：{site:#x}")
+        for site, original in originals.items():
+            memory.write_bytes(site, original, len(original))
+        pymem.memory.free_memory(memory.process_handle, address)
+        _spawn_patch_319 = None
+    if not enabled:
+        return
+    for site, original in originals.items():
+        if memory.read_bytes(site, len(original)) != original:
+            raise ValueError(f"出怪指令不匹配：{site:#x}")
+    address = pymem.memory.allocate_memory(memory.process_handle, 2048)
+    code = asm.Asm(address)
+    selected = {str(value) for value in zombie_types}
+    for entity_id in range(142):
+        code.mov_byte_ptr_exx_add_dword_byte(asm.EDX, 0x57D4 + entity_id,
+                                           int(str(entity_id) in selected))
+    code.jmp(0x425D1D)
+    division = asm.Asm(address + 1400)
+    division.cmp_dword_ptr_exx_add_byte_byte(asm.ESP, 4, 0)
+    division.jne_label("divide")
+    division.mov_ptr_exx_add_byte_dword(asm.ESP, 4, 1)
+    division.create_label("divide")
+    division.add_bytes(bytes.fromhex("f7 74 24 04 8b c2"))
+    division.jmp(0x5A9A4D)
+    patches = {0x8230C1: b"\xe9" + calculate_call_address(address - 0x8230C6) + b"\x90",
+               0x42584E: b"\x90" * 5, 0x425855: b"\xeb",
+               0x5A9A47: b"\xe9" + calculate_call_address(address + 1400 - 0x5A9A4C) + b"\x90",
+               0x41C078: b"\xeb", 0x40D91F: b"\xeb"}
+    try:
+        memory.write_bytes(address, bytes(code.code[:code.index]), code.index)
+        memory.write_bytes(address + 1400, bytes(division.code[:division.index]), division.index)
+        for site, replacement in patches.items():
+            memory.write_bytes(site, replacement, len(replacement))
+    except Exception:
+        for site, original in originals.items():
+            memory.write_bytes(site, original, len(original))
+        pymem.memory.free_memory(memory.process_handle, address)
+        raise
+    _spawn_patch_319 = (process, address, patches)
+
+
 def globalSpawModify(f, zombieTypes):
+    if PVZ_data.PVZ_version == 3.19:
+        _global_spawn_319(f, zombieTypes)
+        return
     divzero(1)
     unlimitedMonsterSpawning(1)
     global newmem_globalSpawModify
@@ -4399,7 +4488,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+            shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ESI, 0x24, zombieType)
             shellcode.jne_long_offset(0x4E)
             shellcode.pushad()
             shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
@@ -4447,7 +4536,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+            shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ESI, 0x24, zombieType)
             shellcode.jne_long_offset(0x4E)
             shellcode.pushad()
             shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
@@ -4490,7 +4579,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
-            shellcode2.cmp_exx_byte(asm.EAX, zombieType)
+            shellcode2.cmp_exx_dword(asm.EAX, zombieType)
             shellcode2.jne_long_offset(0xB)
             shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
             shellcode2.jmp(0x00529D07)
@@ -4522,7 +4611,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+            shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ESI, 0x24, zombieType)
             shellcode.jne_long_offset(0x4E)
             shellcode.pushad()
             shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
@@ -4565,7 +4654,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
-            shellcode2.cmp_exx_byte(asm.EAX, zombieType)
+            shellcode2.cmp_exx_dword(asm.EAX, zombieType)
             shellcode2.jne_long_offset(0xB)
             shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
             shellcode2.jmp(0x00529D07)
@@ -4620,13 +4709,14 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
+        or PVZ_data.PVZ_version == 3.19
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode = asm.Asm(newmem_changeZombieHead)
-            shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.ESI, 0x24, zombieType)
+            shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.ESI, 0x24, zombieType)
             shellcode.jne_long_offset(0x4E)
             shellcode.pushad()
             shellcode.mov_exx_eyy(asm.EAX, asm.ESI)
@@ -4669,7 +4759,7 @@ def changeZombieHead(f, zombieType):
                 PVZ_data.PVZ_memory.process_handle, 256
             )
             shellcode2 = asm.Asm(newmem_changeZombieDeadHead)
-            shellcode2.cmp_exx_byte(asm.EAX, zombieType)
+            shellcode2.cmp_exx_dword(asm.EAX, zombieType)
             shellcode2.jne_long_offset(0xB)
             shellcode2.mov_exx_dword_ptr(asm.ESI, 0x006A7A08)
             shellcode2.jmp(0x00529D07)
@@ -4704,8 +4794,8 @@ def deathrattleCallZombie(f, deadZombieType):
             PVZ_data.PVZ_memory.process_handle, 256
         )
         shellcode = asm.Asm(newmem_deathrattleCallZombie)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBP, 0x24, deadZombieType)
-        shellcode.jne_long_offset(0xB0)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBP, 0x24, deadZombieType)
+        shellcode.jne_label("original")
         shellcode.pushad()
         shellcode.push_byte(0x47)
         shellcode.push_dword(0x00061A80)
@@ -4728,13 +4818,15 @@ def deathrattleCallZombie(f, deadZombieType):
         shellcode.mov_exx_eyy(asm.EDI, asm.EBP)
         shellcode.mov_exx_dword_ptr(asm.EAX, 0x006A9EC0)
         shellcode.cmp_dword_ptr_exx_add_dword_byte(asm.EAX, 0x7FC, 3)
-        shellcode.jne_long_offset(0x4C)
+        shellcode.jne_label("end_spawn")
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
         shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.EAX, 0x164, 1)
-        shellcode.je_offset(0x39)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EDI, 0x24, deadZombieType)
-        shellcode.jne_long_offset(0x2F)
-        if PVZ_data.PVZ_version == 2.0:
+        shellcode.je_label("end_spawn")
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EDI, 0x24, deadZombieType)
+        shellcode.jne_label("end_spawn")
+        if PVZ_data.PVZ_version == 3.19:
+            shellcode.mov_exx(asm.EAX, 142)
+        elif PVZ_data.PVZ_version == 2.0:
             shellcode.mov_exx(asm.EAX, 42)
         else:
             shellcode.mov_exx(asm.EAX, 45)
@@ -4748,7 +4840,9 @@ def deathrattleCallZombie(f, deadZombieType):
         shellcode.fld_dword_ptr_exx_add_byte(asm.EDI, 0x2C)
         shellcode.fstp_dword_ptr_exx_add_byte(asm.EAX, 0x2C)
         shellcode.mov_ptr_exx_add_dword_dword(asm.EAX, 0x1B0, 1)
+        shellcode.create_label("end_spawn")
         shellcode.popad()
+        shellcode.create_label("original")
         shellcode.mov_ptr_exx_add_byte_dword(asm.EBP, 0x28, 3)
         shellcode.push_exx(asm.EBP)
         shellcode.mov_exx_eyy(asm.EBP, asm.ESP)
@@ -4867,7 +4961,7 @@ def zombieDeadZombie(f, deadZombieType, bossWeight, bosshp):
             PVZ_data.PVZ_memory.process_handle, 256
         )
         shellcode = asm.Asm(newmem_zombieDeadZombie)
-        shellcode.cmp_byte_ptr_exx_add_byte_byte(asm.EBP, 0x24, deadZombieType)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBP, 0x24, deadZombieType)
         shellcode.jne_label("originalcode")
         shellcode.pushad()
         shellcode.push_byte(0x47)
@@ -4895,7 +4989,7 @@ def zombieDeadZombie(f, deadZombieType, bossWeight, bosshp):
         shellcode.mov_exx_dword_ptr_eyy_add_dword(asm.EAX, asm.EAX, 0x768)
         shellcode.cmp_byte_ptr_exx_add_dword_byte(asm.EAX, 0x164, 1)
         shellcode.je_label("end")
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EDI, 0x24, deadZombieType)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EDI, 0x24, deadZombieType)
         shellcode.jne_label("end")
         shellcode.create_label("RZ")
         shellcode.mov_exx(asm.EAX, 999)
@@ -5014,6 +5108,9 @@ def reserveMaterialDropAllCard(f, zombieWeight, lmpWeight):
 
 
 def creatBullet(bullets_list):
+    for bullet_type, *_ in bullets_list:
+        PVZ_data.require_supported_entity("bullet", bullet_type)
+
     class bulletCreat:
         def __init__(self, bullets_list):
             pass
@@ -5024,7 +5121,7 @@ def creatBullet(bullets_list):
                 # 提取子弹的参数
                 bullet_type, x, y, v_x, v_y = bullet_params
                 bulletCreat_asm.pushad()
-                bulletCreat_asm.push_byte(bullet_type)
+                bulletCreat_asm.push_dword(bullet_type)
                 bulletCreat_asm.push_byte(0)
                 bulletCreat_asm.push_dword(400000)
                 bulletCreat_asm.push_dword(y)
@@ -6376,7 +6473,7 @@ def zombieTypeHitDeadDropSun(f, type):
         shellcode = asm.Asm(newmem_zombieTypeHitDeadDropSun)
         shellcode.pushad()
         shellcode.mov_exx_eyy(asm.EBX, asm.EAX)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x24, type)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBX, 0x24, type)
         shellcode.jne_long_offset(0xCC)
         shellcode.pushad()
         shellcode.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
@@ -6558,7 +6655,7 @@ def zombieTypeBomeDeadDropSun(f, type):
         shellcode = asm.Asm(newmem_zombieTypeBomeDeadDropSun)
         shellcode.pushad()
         shellcode.mov_exx_eyy(asm.EBX, asm.EAX)
-        shellcode.cmp_dword_ptr_exx_add_byte_byte(asm.EBX, 0x24, type)
+        shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EBX, 0x24, type)
         shellcode.jne_long_offset(0xCC)
         shellcode.pushad()
         shellcode.mov_exx_dword_ptr(asm.ECX, 0x006A9EC0)
@@ -6874,6 +6971,7 @@ def overPlant(f):
             and PVZ_data.PVZ_version != 3.16
             and PVZ_data.PVZ_version != 3.17
             and PVZ_data.PVZ_version != 3.18
+            and PVZ_data.PVZ_version != 3.19
         ):
             PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\xeb\x2d", 2)
     else:
@@ -6913,6 +7011,7 @@ def overPlant(f):
             and PVZ_data.PVZ_version != 3.16
             and PVZ_data.PVZ_version != 3.17
             and PVZ_data.PVZ_version != 3.18
+            and PVZ_data.PVZ_version != 3.19
         ):
             PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\x75\x2d", 2)
 
@@ -7722,10 +7821,7 @@ def randomZombieSlots_operstion(
         )
         for i in range(start_slot - 1, end_slot):
             slot = getRandomZombie(False)
-            if PVZ_data.PVZ_version < 3.4:
-                slot = slot + 256
-            else:
-                slot = slot + 512
+            slot += PVZ_data.zombie_card_offset()
             PVZ_data.PVZ_memory.write_int(
                 PVZ_data.PVZ_memory.read_uint(plant1addr) + 0x5C + 0x50 * i, slot
             )
@@ -7807,6 +7903,7 @@ def setBossHP(no, hp):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
+        or PVZ_data.PVZ_version == 3.19
     ):
         if no == 1:
             PVZ_data.PVZ_memory.write_int(0x008D0F7F, hp)
@@ -7817,9 +7914,46 @@ def setBossHP(no, hp):
 
 
 newmem_more_hero = None
+_more_hero_319_process = None
+
+
+def _more_hero_319(enabled):
+    global newmem_more_hero, _more_hero_319_process
+    memory = PVZ_data.PVZ_memory
+    process = _game_process_identity()
+    if process != _more_hero_319_process:
+        newmem_more_hero = None
+        _more_hero_319_process = process
+    original = bytes.fromhex("56 50 51 52 6a 00")
+    if enabled:
+        if newmem_more_hero is not None:
+            return
+        if memory.read_bytes(0x009F10A4, 6) != original:
+            raise ValueError("英雄植物上限指令不匹配")
+        address = pymem.memory.allocate_memory(memory.process_handle, 2048)
+        code = asm.Asm(address)
+        code.mov_byte_ptr_exx_add_byte_byte(asm.EDI, 0x48, 1)
+        code.jmp(0x009F10DB)
+        try:
+            memory.write_bytes(address, bytes(code.code[:code.index]), code.index)
+            memory.write_bytes(0x009F10A4, b"\xe9" + calculate_call_address(address - 0x009F10A9) + b"\x90", 6)
+        except Exception:
+            pymem.memory.free_memory(memory.process_handle, address)
+            raise
+        newmem_more_hero = address
+    elif newmem_more_hero is not None:
+        expected = b"\xe9" + calculate_call_address(newmem_more_hero - 0x009F10A9) + b"\x90"
+        if memory.read_bytes(0x009F10A4, 6) not in (expected, original):
+            raise ValueError("英雄植物上限指令已被其它功能修改")
+        memory.write_bytes(0x009F10A4, original, 6)
+        pymem.memory.free_memory(memory.process_handle, newmem_more_hero)
+        newmem_more_hero = None
 
 
 def more_hero(f):
+    if PVZ_data.PVZ_version == 3.19:
+        _more_hero_319(f)
+        return
     global newmem_more_hero
     if PVZ_data.PVZ_version < 3.7:
         if f:
@@ -7857,6 +7991,7 @@ def more_hero(f):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
+        or PVZ_data.PVZ_version == 3.19
     ):
         if f:
             newmem_more_hero = pymem.memory.allocate_memory(

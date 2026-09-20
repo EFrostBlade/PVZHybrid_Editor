@@ -6,6 +6,7 @@ import json
 import weakref
 from collections.abc import Iterable
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -98,16 +99,19 @@ def get_language() -> str:
 
 def translate(text: str, language: str | None = None, **kwargs: Any) -> str:
     code = normalize_language(language or _current_language)
-    catalog = _load_catalog(code)
-    translated = catalog.get(text)
-    if translated is None:
-        translated = _translate_segments(text, catalog)
+    translated = _translate_template(code, text)
     if kwargs:
         try:
             return translated.format(**kwargs)
         except (KeyError, IndexError, ValueError):
             return translated
     return translated
+
+
+@lru_cache(maxsize=8192)
+def _translate_template(code: str, text: str) -> str:
+    translated = _load_catalog(code).get(text)
+    return translated if translated is not None else _translate_segments(text, code)
 
 
 def translate_values(values: Iterable[Any], language: str | None = None) -> list[Any]:
@@ -204,6 +208,8 @@ def _load_locale_payload(code: str) -> dict[str, Any]:
     path = LOCALES_DIR / f"{code}.json"
     with path.open("r", encoding="utf-8") as file:
         payload = json.load(file)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Invalid locale payload in {path}")
     if payload.get("code") != code:
         raise ValueError(f"Locale code mismatch in {path}")
     return payload
@@ -221,11 +227,20 @@ def _load_catalog(code: str) -> dict[str, str]:
     return _catalog_cache[code]
 
 
-def _translate_segments(text: str, catalog: dict[str, str]) -> str:
+@lru_cache(maxsize=len(LANGUAGE_ORDER))
+def _segment_rules(code: str) -> tuple[tuple[str, str], ...]:
+    return tuple(
+        (source, target)
+        for source, target in sorted(
+            _load_catalog(code).items(), key=lambda item: len(item[0]), reverse=True
+        )
+        if source != target and "{" not in source and "}" not in source
+    )
+
+
+def _translate_segments(text: str, code: str) -> str:
     translated = text
-    for source, target in sorted(catalog.items(), key=lambda item: len(item[0]), reverse=True):
-        if source == target or "{" in source or "}" in source:
-            continue
+    for source, target in _segment_rules(code):
         if source in translated:
             translated = translated.replace(source, target)
     return translated
@@ -236,12 +251,23 @@ def _apply_widget_translation(widget: Any, metadata: dict[str, Any]) -> None:
     if "text" in metadata:
         updates["text"] = translate(metadata["text"])
     if "values" in metadata:
+        selected_index = _selected_index(widget)
         selected_source = _get_selected_source(widget)
+        _patch_value_selection_methods(widget, metadata["values"])
         updates["values"] = translate_values(metadata["values"])
     if updates:  # pragma: no branch
         widget.configure(**updates)
     if "values" in metadata and selected_source in metadata["values"]:
-        _set_selected_source(widget, selected_source)
+        if hasattr(widget, "current"):
+            values = metadata["values"]
+            index = (
+                selected_index
+                if 0 <= selected_index < len(values) and values[selected_index] == selected_source
+                else values.index(selected_source)
+            )
+            widget.current(index)
+        else:
+            _set_selected_source(widget, selected_source)
 
 
 def _apply_notebook_translation(notebook: Any, tab_id: Any, text: str) -> None:
@@ -267,16 +293,30 @@ def _patch_widget_factory(module: Any, class_name: str) -> None:
         if isinstance(original_text, str):
             kwargs["text"] = translate(original_text)
         if original_values is not None:
+            original_values = list(original_values)
             kwargs["values"] = translate_values(original_values)
 
         widget = original(*args, **kwargs)
         if original_values is not None:
             _patch_value_selection_methods(widget, list(original_values))
-        register_widget(
-            widget,
-            text=original_text if isinstance(original_text, str) else None,
-            values=original_values,
-        )
+            # A textvariable may already contain a source-language selection.
+            # Restore only that selection without configuring all values again.
+            selected_source = _get_selected_source(widget)
+            if (
+                selected_source not in (None, "")
+                and _selected_index(widget) < 0
+                and selected_source in original_values
+            ):
+                _set_selected_source(widget, selected_source)
+        # Constructor values are already translated. Only remember their sources;
+        # applying them again also reverse-translates the initial empty selection.
+        metadata: dict[str, Any] = {}
+        if isinstance(original_text, str):
+            metadata["text"] = original_text
+        if original_values is not None:
+            metadata["values"] = original_values
+        if metadata:
+            _widgets[widget] = metadata
         if class_name == "Notebook":
             _patch_notebook_instance(widget)
         if class_name in {"Tk", "Toplevel", "Window"}:
@@ -372,9 +412,14 @@ def _display_for_source(widget: Any, value: Any) -> Any:
 
 
 def _source_for_display(widget: Any, value: Any) -> Any:
-    if not isinstance(value, str):
+    if not isinstance(value, str) or value == "":
         return value
-    for source in getattr(widget, "_i18n_original_values", []):
+    sources = getattr(widget, "_i18n_original_values", [])
+    index = _selected_index(widget)
+    if 0 <= index < len(sources):
+        source = sources[index]
+        return source if isinstance(source, str) else value
+    for source in sources:
         if not isinstance(source, str):
             continue
         if value == source:
@@ -383,3 +428,11 @@ def _source_for_display(widget: Any, value: Any) -> Any:
             if value == translate(source, language=language):
                 return source
     return value
+
+
+def _selected_index(widget: Any) -> int:
+    try:
+        index = widget.current()
+        return index if isinstance(index, int) else -1
+    except Exception:
+        return -1

@@ -7,6 +7,8 @@ import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from queue import Empty, Queue
+from threading import Event, Thread
 from typing import Any, Optional, Union
 
 PathInput = Union[str, Path]
@@ -25,6 +27,7 @@ GAME_VERSION_MARKERS = (
     ("v2.3.7", 2.37),
     ("v2.3.6", 2.36),
     ("v2.3.5", 2.35),
+    ("v3.19", 3.19),
     ("v3.18", 3.18),
     ("v3.17", 3.17),
     ("v3.16", 3.16),
@@ -67,6 +70,69 @@ class UpdateDecision:
     latest_version: str
     is_blocked: bool
     should_open_update_window: bool
+
+
+@dataclass(frozen=True)
+class UpdateCheckResult:
+    decision: Optional[UpdateDecision] = None
+    error: Optional[str] = None
+
+
+class BackgroundUpdateCheck:
+    """Fetch off-thread; start, polling and close belong to the UI thread."""
+
+    def __init__(
+        self,
+        *,
+        current_version: str,
+        fetch: Callable[[], str],
+        schedule: Callable[[int, Callable[[], None]], str],
+        cancel: Callable[[str], None],
+        on_result: Callable[[UpdateCheckResult], None],
+    ) -> None:
+        self._current_version = current_version
+        self._fetch = fetch
+        self._schedule = schedule
+        self._cancel = cancel
+        self._on_result = on_result
+        self._results: Queue[UpdateCheckResult] = Queue()
+        self._closed = Event()
+        self._started = False
+        self._poll_id: Optional[str] = None
+
+    def start(self) -> None:
+        if self._started or self._closed.is_set():
+            return
+        self._started = True
+        Thread(target=self._fetch_result, name="editor-update-check", daemon=True).start()
+        self._poll_id = self._schedule(100, self._poll)
+
+    def close(self) -> None:
+        self._closed.set()
+        if self._poll_id is not None:
+            self._cancel(self._poll_id)
+            self._poll_id = None
+
+    def _fetch_result(self) -> None:
+        try:
+            result = UpdateCheckResult(decision=evaluate_update_response(
+                current_version=self._current_version, response_text=self._fetch(),
+            ))
+        except Exception as error:
+            result = UpdateCheckResult(error=str(error))
+        if not self._closed.is_set():
+            self._results.put(result)
+
+    def _poll(self) -> None:
+        self._poll_id = None
+        if self._closed.is_set():
+            return
+        try:
+            result = self._results.get_nowait()
+        except Empty:
+            self._poll_id = self._schedule(100, self._poll)
+            return
+        self._on_result(result)
 
 
 class GameProcessNotFound(LookupError):

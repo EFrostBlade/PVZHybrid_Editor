@@ -28,6 +28,15 @@ def update_PVZ_version(version):
     global PVZ_version
     global zombies_HP_addresses
     PVZ_version = version
+    zombiesType[:] = _legacy_zombies
+    plantsType[:] = _legacy_plants
+    bulletType[:] = _legacy_bullets
+    if version == 3.19:
+        zombiesType.extend(HYBRID_319_ZOMBIES)
+        plantsType[368:371] = HYBRID_319_PLANTS
+        plantsType.extend(HYBRID_319_ZOMBIES)
+        bulletType.append("全息仙人掌子弹")
+    zombieSpaw[:] = zombiesType + _spawn_probability_names
     zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
     print(PVZ_version)
 
@@ -1432,6 +1441,31 @@ bulletType = [
     "冰豌豆爆弹",  # 132
     "毛刺",  # 133
 ]
+HYBRID_319_PLANTS = ("全息激光坚果", "全息仙人掌", "基因寒冰菇")
+HYBRID_319_ZOMBIES = ("外星僵尸飞船", "外星僵尸", "读报伽刚特尔")
+_legacy_plants = tuple(plantsType)
+_legacy_zombies = tuple(zombiesType)
+_legacy_bullets = tuple(bulletType)
+_spawn_probability_names = zombieSpaw[-4:]
+SPAWN_PROBABILITY_ADDRESSES_319 = (0x8D0928, 0x8D07C4, 0x8D0529, 0x8D066B)
+
+
+def zombie_card_offset():
+    modern_versions = (3.11, 3.12, 3.132, 3.14, 3.151, 3.16, 3.17, 3.18, 3.19)
+    if isinstance(PVZ_version, (int, float)) and PVZ_version < 3.4:
+        if PVZ_version not in modern_versions:
+            return 256
+    return 512
+
+
+def require_supported_entity(kind, entity_id):
+    """Keep newly introduced IDs out of older game layouts."""
+    new_ids = {"plant": range(368, 371), "zombie": range(139, 142),
+               "card": (*range(368, 371), *range(651, 654)), "bullet": (134,)}
+    if PVZ_version != 3.19 and entity_id in new_ids[kind]:
+        raise ValueError(f"当前游戏版本不支持{kind} ID {entity_id}")
+
+
 keyTpye = [
     "无",
     "0",
@@ -2104,6 +2138,7 @@ class slot:
         PVZ_memory.write_bool(self.addr + 0x48, canUse)
 
     def setType(self, type):
+        require_supported_entity("card", type)
         PVZ_memory.write_int(self.addr + 0x34, type)
 
     def setImitaterType(self, imitaterType):
@@ -2124,8 +2159,9 @@ class slot:
 
 class plantCharacteristic:
     def __init__(self, type):
+        require_supported_entity("card", type)
         self.type = type
-        if PVZ_version == 3.16 or PVZ_version == 3.17 or PVZ_version == 3.18:
+        if PVZ_version in (3.16, 3.17, 3.18, 3.19):
             if type < 512:
                 self.addr = 0x00EF4010 + type * 0x24
                 self.sun = PVZ_memory.read_uint(self.addr)
@@ -2282,6 +2318,17 @@ class plantCharacteristic:
 class zombieType:
     def __init__(self, type):
         self.type = type
+        if PVZ_version == 3.19:
+            if 0 <= type < 142:
+                self.addr = 0x007A8000 + type * 0x1C
+                self.anime = PVZ_memory.read_uint(self.addr + 0x4)
+                self.level = PVZ_memory.read_uint(self.addr + 0x8)
+                self.weight = PVZ_memory.read_uint(self.addr + 0x14)
+            elif 142 <= type < 146:
+                self.weight = PVZ_memory.read_uchar(SPAWN_PROBABILITY_ADDRESSES_319[type - 142])
+            else:
+                raise ValueError(f"无效的出怪类型：{type}")
+            return
         if PVZ_version < 2.3:
             if type <= 54:
                 self.addr = 0x007A6000 + type * 0x1C
@@ -2622,9 +2669,15 @@ class zombieType:
         PVZ_memory.write_int(self.addr + 0x4, anime)
 
     def setLevel(self, level):
-        PVZ_memory.write_int(self.addr + 0x4, level)
+        PVZ_memory.write_int(self.addr + 0x8, level)
 
     def setWeight(self, weight):
+        if PVZ_version == 3.19:
+            if self.type < 142:
+                PVZ_memory.write_int(self.addr + 0x14, weight)
+            else:
+                PVZ_memory.write_uchar(SPAWN_PROBABILITY_ADDRESSES_319[self.type - 142], weight)
+            return
         if PVZ_version < 2.3:
             if self.type <= 50:
                 PVZ_memory.write_int(self.addr + 0x14, weight)
