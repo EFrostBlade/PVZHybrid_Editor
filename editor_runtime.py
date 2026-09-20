@@ -14,7 +14,6 @@ from typing import Any, Optional, Union
 PathInput = Union[str, Path]
 DEFAULT_GAME_VERSION = "Game not found"
 BLOCKED_UPDATE_RESPONSE = "The content may contain violation information"
-LEGACY_UPDATE_VERSION = "0.75"
 GAME_VERSION_MARKERS = (
     ("v3.13.2", 3.132),
     ("v3.9.9", 3.99),
@@ -201,9 +200,6 @@ def evaluate_update_response(*, current_version: str, response_text: str) -> Upd
 
 
 def should_open_update_window(current_version: str, latest_version: str) -> bool:
-    if latest_version == LEGACY_UPDATE_VERSION:
-        return True
-
     current_parts = _parse_numeric_release(current_version)
     latest_parts = _parse_numeric_release(latest_version)
     if current_parts is None or latest_parts is None:

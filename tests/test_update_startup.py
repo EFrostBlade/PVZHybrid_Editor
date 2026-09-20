@@ -42,6 +42,23 @@ class Scheduler:
 
 
 class UpdateTests(unittest.TestCase):
+    def test_release_comparison_only_prompts_for_newer_versions(self):
+        for current, latest, expected in (
+            ("0.75", "0.75", False),
+            ("0.75", " 0.75\r\n", False),
+            ("0.75", "0.75.0", False),
+            ("0.76", "0.75", False),
+            ("0.75", "0.74", False),
+            ("0.74", "0.75", True),
+            ("0.75", "0.76", True),
+            ("0.75", "0.75.1", True),
+        ):
+            with self.subTest(current=current, latest=latest):
+                decision = runtime.evaluate_update_response(
+                    current_version=current, response_text=latest,
+                )
+                self.assertEqual(decision.should_open_update_window, expected)
+
     def create(self, fetch):
         scheduler = Scheduler()
         results = []
