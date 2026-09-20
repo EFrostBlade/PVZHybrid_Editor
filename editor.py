@@ -206,10 +206,9 @@ def set_game_version(version):
 
 def available_card_images(kind):
     directory = resource_path(f"res/cards/pvzhe_{kind}")
-    limit = (371 if PVZ_data.PVZ_version == 3.19 else 368) if kind == "plants" else len(PVZ_data.zombiesType)
     return sorted(
         (name for name in os.listdir(directory)
-         if name.lower().endswith(".png") and name[:-4].isdecimal() and int(name[:-4]) < limit),
+         if name.lower().endswith(".png") and name[:-4].isdecimal()),
         key=lambda name: int(name[:-4]),
     )
 

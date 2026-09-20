@@ -75,9 +75,10 @@ class Hybrid319Tests(unittest.TestCase):
         self.assertEqual(len(data.bulletType), 135)
         self.assertEqual(len(data.zombieSpaw), 146)
         data.update_PVZ_version(3.18)
-        self.assertEqual(plants[368:371], ["占位"] * 3)
-        self.assertEqual(len(data.zombiesType), 139)
-        self.assertEqual(len(data.bulletType), 134)
+        self.assertEqual(plants[368:371], list(data.HYBRID_319_PLANTS))
+        self.assertEqual(len(data.zombiesType), 142)
+        self.assertEqual(len(data.bulletType), 135)
+        self.assertEqual(len(data.zombieSpaw), 143)
         data.update_PVZ_version(3.19)
         self.assertIs(plants, data.plantsType)
         self.assertEqual(len(plants), 654)
@@ -226,7 +227,7 @@ class Hybrid319Tests(unittest.TestCase):
             free.assert_not_called()
         self.assertEqual(memory.writes, [])
 
-    def test_card_images_filter_and_decode(self):
+    def test_card_images_complete_and_decode(self):
         from PIL import Image
         images = ui_function("available_card_images", resource_path=lambda p: str(ROOT / p))
         self.assertIn("370.png", images("plants"))
@@ -237,8 +238,11 @@ class Hybrid319Tests(unittest.TestCase):
                     self.assertEqual(card.size, (50, 70))
                     card.verify()
         data.update_PVZ_version(3.18)
-        self.assertNotIn("370.png", images("plants"))
-        self.assertNotIn("141.png", images("zombies"))
+        self.assertIn("370.png", images("plants"))
+        self.assertIn("141.png", images("zombies"))
+        with patch.object(data, "PVZ_version", "未找到游戏"):
+            self.assertIn("370.png", images("plants"))
+            self.assertIn("141.png", images("zombies"))
 
     def test_tk_reconnect_keeps_translations_and_selection(self):
         import tkinter as tk
@@ -258,8 +262,8 @@ class Hybrid319Tests(unittest.TestCase):
         combo.current(141)
         self.assertEqual(combo.get(), "读报伽刚特尔")
         update(3.18)
-        self.assertEqual(len(combo["values"]), 139)
-        self.assertEqual(combo.get(), "")
+        self.assertEqual(len(combo["values"]), 142)
+        self.assertEqual(combo.get(), "读报伽刚特尔")
 
 
 if __name__ == "__main__":

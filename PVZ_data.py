@@ -28,15 +28,8 @@ def update_PVZ_version(version):
     global PVZ_version
     global zombies_HP_addresses
     PVZ_version = version
-    zombiesType[:] = _legacy_zombies
-    plantsType[:] = _legacy_plants
-    bulletType[:] = _legacy_bullets
-    if version == 3.19:
-        zombiesType.extend(HYBRID_319_ZOMBIES)
-        plantsType[368:371] = HYBRID_319_PLANTS
-        plantsType.extend(HYBRID_319_ZOMBIES)
-        bulletType.append("全息仙人掌子弹")
-    zombieSpaw[:] = zombiesType + _spawn_probability_names
+    # Spawn probabilities follow the connected game's memory-table layout.
+    zombieSpaw[:] = list(zombiesType if version == 3.19 else _legacy_zombies) + _spawn_probability_names
     zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
     print(PVZ_version)
 
@@ -1443,10 +1436,12 @@ bulletType = [
 ]
 HYBRID_319_PLANTS = ("全息激光坚果", "全息仙人掌", "基因寒冰菇")
 HYBRID_319_ZOMBIES = ("外星僵尸飞船", "外星僵尸", "读报伽刚特尔")
-_legacy_plants = tuple(plantsType)
 _legacy_zombies = tuple(zombiesType)
-_legacy_bullets = tuple(bulletType)
 _spawn_probability_names = zombieSpaw[-4:]
+zombiesType.extend(HYBRID_319_ZOMBIES)
+plantsType[368:371] = HYBRID_319_PLANTS
+plantsType.extend(HYBRID_319_ZOMBIES)
+bulletType.append("全息仙人掌子弹")
 SPAWN_PROBABILITY_ADDRESSES_319 = (0x8D0928, 0x8D07C4, 0x8D0529, 0x8D066B)
 
 
