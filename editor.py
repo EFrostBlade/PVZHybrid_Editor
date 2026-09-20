@@ -59,7 +59,7 @@ from PIL import Image, ImageTk
 import traceback
 
 Image.CUBIC = Image.BICUBIC
-current_version = "0.74"
+current_version = "0.75"
 version_url = "https://gitee.com/EFrostBlade/PVZHybrid_Editor/raw/main/version.txt"
 main_window = None
 PVZ_data.update_PVZ_memory(1)
@@ -408,6 +408,9 @@ def support():
 
     text.pack()
     str1 = (
+        "b0.75\n"
+        "适配杂交版3.19，补全植物卡面\n"
+        "优化界面启动速度，更新检查改为后台执行\n"
         "b0.74\n"
         "适配杂交版3.18\n"
         "增加i18n和响应式设计\n"

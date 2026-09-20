@@ -231,7 +231,7 @@ class Hybrid319Tests(unittest.TestCase):
         images = ui_function("available_card_images", resource_path=lambda p: str(ROOT / p))
         self.assertIn("370.png", images("plants"))
         self.assertIn("141.png", images("zombies"))
-        for kind, ids in [("plants", range(368, 371)), ("zombies", range(139, 142))]:
+        for kind, ids in [("plants", range(366, 371)), ("zombies", range(139, 142))]:
             for entity_id in ids:
                 with Image.open(ROOT / f"res/cards/pvzhe_{kind}/{entity_id}.png") as card:
                     self.assertEqual(card.size, (50, 70))
