@@ -1923,6 +1923,7 @@ class plant:
         PVZ_memory.write_int(self.addr + 0x28, col)
 
     def setType(self, type):
+        require_supported_entity("plant", type)
         PVZ_memory.write_int(self.addr + 0x24, type)
 
     def setState(self, state):
@@ -2144,6 +2145,7 @@ class slot:
         PVZ_memory.write_int(self.addr + 0x34, type)
 
     def setImitaterType(self, imitaterType):
+        require_supported_entity("card", imitaterType)
         PVZ_memory.write_int(self.addr + 0x34, imitaterType)
 
     def setCooldown(self, cooldown):
@@ -2769,6 +2771,7 @@ class potted:
         self.waterMax = PVZ_memory.read_uint(self.addr + 0x2C)
 
     def setType(self, type):
+        require_supported_entity("plant", type)
         PVZ_memory.write_int(self.addr, type)
 
     def setGarden(self, garden):

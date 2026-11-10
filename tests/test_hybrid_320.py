@@ -38,3 +38,26 @@ class Hybrid320Tests(unittest.TestCase):
                 with Image.open(root / f"res/cards/pvzhe_plants/{identifier}.png") as image:
                     self.assertEqual(image.size, (50, 70))
                     image.verify()
+
+    def test_all_new_entity_write_paths_guard_before_side_effects(self):
+        for version in (3.19, 3.920):
+            data.update_PVZ_version(version)
+            memory = Memory()
+            with patch.object(data, "PVZ_memory", memory), patch.object(pvz.asm, "runThread") as run:
+                for cls, method in ((data.plant, "setType"), (data.potted, "setType"), (data.slot, "setImitaterType")):
+                    entity = object.__new__(cls)
+                    entity.addr = 0x100000
+                    if version == 3.19:
+                        with self.assertRaises(ValueError): getattr(entity, method)(371)
+                        self.assertEqual(memory.writes, [])
+                    else:
+                        getattr(entity, method)(371)
+                if version == 3.19:
+                    with self.assertRaises(ValueError): pvz.put_vase(4, 1, 371, 0, 0, 0, 0)
+                    run.assert_not_called()
+                else:
+                    pvz.put_vase(4, 1, 371, 0, 0, 0, 0)
+                    run.assert_called_once()
+                run.reset_mock()
+                pvz.put_vase(3, 0, 371, 0, 0, 0, 0)
+                run.assert_called_once()

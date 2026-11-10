@@ -7662,6 +7662,10 @@ def fix_nut_gargantuar(f):
 
 
 def put_vase(skin, type, plant_type, zombie_type, sun, row, column):
+    if type == 1:
+        PVZ_data.require_supported_entity("plant", plant_type)
+    elif type == 2:
+        PVZ_data.require_supported_entity("zombie", zombie_type)
     class VasePut:
         def __init__(self, skin, type, plant_type, zombie_type, sun, row, column):
             self.skin = skin  # 3问号 4植物 5僵尸 6隐形
