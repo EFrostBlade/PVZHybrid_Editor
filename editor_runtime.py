@@ -26,6 +26,7 @@ GAME_VERSION_MARKERS = (
     ("v2.3.7", 2.37),
     ("v2.3.6", 2.36),
     ("v2.3.5", 2.35),
+    ("v3.20", 3.920),
     ("v3.19", 3.19),
     ("v3.18", 3.18),
     ("v3.17", 3.17),
@@ -154,6 +155,8 @@ def resource_path(
 
 def main_window_title(editor_version: object, game_version: object = DEFAULT_GAME_VERSION) -> str:
     resolved_game_version = DEFAULT_GAME_VERSION if game_version is None else game_version
+    if resolved_game_version == 3.920:
+        resolved_game_version = "3.20"
     return f"杂交版多功能修改器  {editor_version}      游戏版本：{resolved_game_version}"
 
 

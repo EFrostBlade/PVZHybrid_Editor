@@ -51,7 +51,7 @@ def main():
             assert kwargs["timeout"] == (2, 3)
             entered.set()
             assert release.wait(10), "UI did not release the slow update request"
-            return SimpleNamespace(text="0.76", raise_for_status=lambda: None)
+            return SimpleNamespace(text="0.77", raise_for_status=lambda: None)
 
         def widgets(root):
             yield root

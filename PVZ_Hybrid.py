@@ -226,7 +226,7 @@ def get_zombie_num():
         zombie_num = 139
     elif PVZ_data.PVZ_version == 3.18:
         zombie_num = 139
-    elif PVZ_data.PVZ_version == 3.19:
+    elif PVZ_data.PVZ_version in (3.19, 3.920):
         zombie_num = 142
     return zombie_num
 
@@ -296,7 +296,7 @@ def getRandomZombie(hasBoss=False):
         zombieType = random.randint(0, 138)
     elif PVZ_data.PVZ_version == 3.18:
         zombieType = random.randint(0, 138)
-    elif PVZ_data.PVZ_version == 3.19:
+    elif PVZ_data.PVZ_version in (3.19, 3.920):
         zombieType = random.randint(0, 141)
     if hasBoss is True:
         return zombieType
@@ -367,8 +367,8 @@ def getRandomPlant(isPut=False):
         plantType = random.randint(0, 328)
     elif PVZ_data.PVZ_version == 3.18:
         plantType = random.randint(0, 338)
-    elif PVZ_data.PVZ_version == 3.19:
-        plantType = random.randint(0, 343)
+    elif PVZ_data.PVZ_version in (3.19, 3.920):
+        plantType = random.randint(0, 351 if PVZ_data.PVZ_version == 3.920 else 343)
 
     if plantType >= 48:
         plantType = plantType + 27
@@ -2565,6 +2565,9 @@ def slotKey(slot_key_list):
 
 
 def setAllBullet(f, type):
+    if f:
+        PVZ_data.require_supported_entity("bullet", type)
+
     global newmem_setAllBullet
     # [ENABLE]
     # //code from here to '[DISABLE]' will be used to enable the cheat
@@ -2612,18 +2615,22 @@ def setAllBullet(f, type):
             5,
         )
         PVZ_data.PVZ_memory.write_bytes(
-            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91, b"\x90" * 5, 5
+            0x9815F6 if PVZ_data.PVZ_version in (3.19, 3.920) else 0x88CE91, b"\x90" * 5, 5
         )
     else:
         PVZ_data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_setAllBullet)
         PVZ_data.PVZ_memory.write_bytes(
-            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91,
-            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version == 3.19 else b"\xe8\x1a\x1e\xbe\xff", 5
+            0x9815F6 if PVZ_data.PVZ_version in (3.19, 3.920) else 0x88CE91,
+            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version in (3.19, 3.920) else b"\xe8\x1a\x1e\xbe\xff", 5
         )
 
 
 def setOneBullet(f, type1, type2):
+    if f:
+        PVZ_data.require_supported_entity("bullet", type1)
+        PVZ_data.require_supported_entity("bullet", type2)
+
     global newmem_setOneBullet
     if f:
         newmem_setOneBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 64)
@@ -2658,7 +2665,7 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
         newmem_randomBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 2048)
         shellcode = asm.Asm(newmem_randomBullet)
         shellcode.create_label("start")
-        shellcode.mov_exx(asm.EAX, 135 if PVZ_data.PVZ_version == 3.19 else 39)
+        shellcode.mov_exx(asm.EAX, 142 if PVZ_data.PVZ_version == 3.920 else (135 if PVZ_data.PVZ_version == 3.19 else 39))
         shellcode.call(0x005AF400)
         if not hasDoom:
             shellcode.cmp_exx_byte(asm.EAX, 11)
@@ -2683,14 +2690,14 @@ def randomBullet(f, hasDoom, hasMine, hasPepper):
             5,
         )
         PVZ_data.PVZ_memory.write_bytes(
-            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91, b"\x90" * 5, 5
+            0x9815F6 if PVZ_data.PVZ_version in (3.19, 3.920) else 0x88CE91, b"\x90" * 5, 5
         )
     else:
         PVZ_data.PVZ_memory.write_bytes(0x0046C769, b"\x89\x45\x5c\x8b\xc6", 5)
         pymem.memory.free_memory(PVZ_data.PVZ_memory.process_handle, newmem_randomBullet)
         PVZ_data.PVZ_memory.write_bytes(
-            0x9815F6 if PVZ_data.PVZ_version == 3.19 else 0x88CE91,
-            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version == 3.19 else b"\xe8\x1a\x1e\xbe\xff", 5
+            0x9815F6 if PVZ_data.PVZ_version in (3.19, 3.920) else 0x88CE91,
+            b"\xe8\xb5\xd6\xae\xff" if PVZ_data.PVZ_version in (3.19, 3.920) else b"\xe8\x1a\x1e\xbe\xff", 5
         )
 
 
@@ -2909,6 +2916,10 @@ def setBulletSize(f, size):
 
 
 def setPlantBullet(f, plantType, bulletType, mode):
+    if f:
+        PVZ_data.require_supported_entity("plant", plantType)
+        PVZ_data.require_supported_entity("bullet", bulletType)
+
     global newmem_setPlantBullet
     if f:
         newmem_setPlantBullet = pymem.memory.allocate_memory(PVZ_data.PVZ_memory.process_handle, 64)
@@ -3790,7 +3801,7 @@ def _global_spawn_319(enabled, zombie_types):
 
 
 def globalSpawModify(f, zombieTypes):
-    if PVZ_data.PVZ_version == 3.19:
+    if PVZ_data.PVZ_version in (3.19, 3.920):
         _global_spawn_319(f, zombieTypes)
         return
     divzero(1)
@@ -4709,7 +4720,7 @@ def changeZombieHead(f, zombieType):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
-        or PVZ_data.PVZ_version == 3.19
+        or PVZ_data.PVZ_version in (3.19, 3.920)
     ):
         if f:
             newmem_changeZombieHead = pymem.memory.allocate_memory(
@@ -4824,7 +4835,7 @@ def deathrattleCallZombie(f, deadZombieType):
         shellcode.je_label("end_spawn")
         shellcode.cmp_dword_ptr_exx_add_byte_dword(asm.EDI, 0x24, deadZombieType)
         shellcode.jne_label("end_spawn")
-        if PVZ_data.PVZ_version == 3.19:
+        if PVZ_data.PVZ_version in (3.19, 3.920):
             shellcode.mov_exx(asm.EAX, 142)
         elif PVZ_data.PVZ_version == 2.0:
             shellcode.mov_exx(asm.EAX, 42)
@@ -6971,7 +6982,7 @@ def overPlant(f):
             and PVZ_data.PVZ_version != 3.16
             and PVZ_data.PVZ_version != 3.17
             and PVZ_data.PVZ_version != 3.18
-            and PVZ_data.PVZ_version != 3.19
+            and PVZ_data.PVZ_version not in (3.19, 3.920)
         ):
             PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\xeb\x2d", 2)
     else:
@@ -7011,7 +7022,7 @@ def overPlant(f):
             and PVZ_data.PVZ_version != 3.16
             and PVZ_data.PVZ_version != 3.17
             and PVZ_data.PVZ_version != 3.18
-            and PVZ_data.PVZ_version != 3.19
+            and PVZ_data.PVZ_version not in (3.19, 3.920)
         ):
             PVZ_data.PVZ_memory.write_bytes(0x004109A5, b"\x75\x2d", 2)
 
@@ -7903,7 +7914,7 @@ def setBossHP(no, hp):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
-        or PVZ_data.PVZ_version == 3.19
+        or PVZ_data.PVZ_version in (3.19, 3.920)
     ):
         if no == 1:
             PVZ_data.PVZ_memory.write_int(0x008D0F7F, hp)
@@ -7951,7 +7962,7 @@ def _more_hero_319(enabled):
 
 
 def more_hero(f):
-    if PVZ_data.PVZ_version == 3.19:
+    if PVZ_data.PVZ_version in (3.19, 3.920):
         _more_hero_319(f)
         return
     global newmem_more_hero
@@ -7991,7 +8002,7 @@ def more_hero(f):
         or PVZ_data.PVZ_version == 3.16
         or PVZ_data.PVZ_version == 3.17
         or PVZ_data.PVZ_version == 3.18
-        or PVZ_data.PVZ_version == 3.19
+        or PVZ_data.PVZ_version in (3.19, 3.920)
     ):
         if f:
             newmem_more_hero = pymem.memory.allocate_memory(

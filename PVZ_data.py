@@ -29,7 +29,7 @@ def update_PVZ_version(version):
     global zombies_HP_addresses
     PVZ_version = version
     # Spawn probabilities follow the connected game's memory-table layout.
-    zombieSpaw[:] = list(zombiesType if version == 3.19 else _legacy_zombies) + _spawn_probability_names
+    zombieSpaw[:] = list(zombiesType if version in (3.19, 3.920) else _legacy_zombies) + _spawn_probability_names
     zombies_HP_addresses = get_zombies_HP_addresses(PVZ_version)
     print(PVZ_version)
 
@@ -1442,11 +1442,15 @@ zombiesType.extend(HYBRID_319_ZOMBIES)
 plantsType[368:371] = HYBRID_319_PLANTS
 plantsType.extend(HYBRID_319_ZOMBIES)
 bulletType.append("全息仙人掌子弹")
+HYBRID_320_PLANTS = ("基因玉米投手", "普通盒子", "狂热星", "魔法豌豆射手", "僵尸猫尾草", "科技骰子炸弹", "魔方盒子", "伪装的大脑")
+HYBRID_320_BULLETS = ("基因玉米粒", "基因黄油", "魔法豌豆", "魔法火焰豌豆", "魔法蓝火豌豆", "魔法巨型火焰豌豆", "僵尸猫尾草子弹")
+plantsType[371:379] = HYBRID_320_PLANTS
+bulletType.extend(HYBRID_320_BULLETS)
 SPAWN_PROBABILITY_ADDRESSES_319 = (0x8D0928, 0x8D07C4, 0x8D0529, 0x8D066B)
 
 
 def zombie_card_offset():
-    modern_versions = (3.11, 3.12, 3.132, 3.14, 3.151, 3.16, 3.17, 3.18, 3.19)
+    modern_versions = (3.11, 3.12, 3.132, 3.14, 3.151, 3.16, 3.17, 3.18, 3.19, 3.920)
     if isinstance(PVZ_version, (int, float)) and PVZ_version < 3.4:
         if PVZ_version not in modern_versions:
             return 256
@@ -1455,9 +1459,12 @@ def zombie_card_offset():
 
 def require_supported_entity(kind, entity_id):
     """Keep newly introduced IDs out of older game layouts."""
+    ids_320 = {"plant": range(371, 379), "card": range(371, 379), "zombie": (), "bullet": range(135, 142)}
+    if PVZ_version != 3.920 and entity_id in ids_320[kind]:
+        raise ValueError(f"当前游戏版本不支持{kind} ID {entity_id}")
     new_ids = {"plant": range(368, 371), "zombie": range(139, 142),
                "card": (*range(368, 371), *range(651, 654)), "bullet": (134,)}
-    if PVZ_version != 3.19 and entity_id in new_ids[kind]:
+    if PVZ_version not in (3.19, 3.920) and entity_id in new_ids[kind]:
         raise ValueError(f"当前游戏版本不支持{kind} ID {entity_id}")
 
 
@@ -2156,7 +2163,7 @@ class plantCharacteristic:
     def __init__(self, type):
         require_supported_entity("card", type)
         self.type = type
-        if PVZ_version in (3.16, 3.17, 3.18, 3.19):
+        if PVZ_version in (3.16, 3.17, 3.18, 3.19, 3.920):
             if type < 512:
                 self.addr = 0x00EF4010 + type * 0x24
                 self.sun = PVZ_memory.read_uint(self.addr)
@@ -2313,7 +2320,7 @@ class plantCharacteristic:
 class zombieType:
     def __init__(self, type):
         self.type = type
-        if PVZ_version == 3.19:
+        if PVZ_version in (3.19, 3.920):
             if 0 <= type < 142:
                 self.addr = 0x007A8000 + type * 0x1C
                 self.anime = PVZ_memory.read_uint(self.addr + 0x4)
@@ -2667,7 +2674,7 @@ class zombieType:
         PVZ_memory.write_int(self.addr + 0x8, level)
 
     def setWeight(self, weight):
-        if PVZ_version == 3.19:
+        if PVZ_version in (3.19, 3.920):
             if self.type < 142:
                 PVZ_memory.write_int(self.addr + 0x14, weight)
             else:
