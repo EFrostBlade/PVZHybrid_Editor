@@ -61,3 +61,15 @@ class Hybrid320Tests(unittest.TestCase):
                 run.reset_mock()
                 pvz.put_vase(3, 0, 371, 0, 0, 0, 0)
                 run.assert_called_once()
+
+
+import test_hybrid_319
+
+class Hybrid320HookTests(test_hybrid_319.Hybrid319Tests):
+    def setUp(self):
+        super().setUp()
+        data.update_PVZ_version(3.920)
+
+    # Version-specific catalogue tests remain covered above and by the 3.19 suite.
+    test_entities_and_reconnect = None
+    test_random_endpoints = None
